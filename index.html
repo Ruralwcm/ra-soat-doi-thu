@@ -61,8 +61,6 @@ input:focus,select:focus,textarea:focus{
 }
 .row{display:flex;gap:8px;}
 .row > div{flex:1;min-width:0;}
-.row3{display:flex;gap:8px;}
-.row3 > div{flex:1;min-width:0;}
 .row5{display:flex;gap:5px;}
 .row5 > div{flex:1;min-width:0;}
 .row5 label{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -72,25 +70,21 @@ input:focus,select:focus,textarea:focus{
 .err{color:var(--red);font-size:11px;margin-top:3px;display:none;}
 input.invalid{border-color:var(--red);}
 
-/* info pills */
 .pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
 .pill{font-size:12px;padding:4px 10px;border-radius:20px;background:#eef2f7;color:#374151;font-weight:500;}
 .pill b{color:var(--blue);}
 
-/* location */
-.loc-box{display:flex;flex-direction:column;gap:8px;}
 .loc-input{position:relative;}
-.loc-input input{padding-right:96px;}
+.loc-input input{padding-right:48px;}
 .loc-input .gps-btn{
   position:absolute;right:6px;top:50%;transform:translateY(-50%);
   background:var(--blue);color:#fff;border:none;border-radius:7px;padding:7px 10px;
-  font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;
+  font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;
 }
 .loc-input .gps-btn:disabled{opacity:.5;cursor:not-allowed;}
 
 .dist-result{margin-top:10px;padding:10px 12px;border-radius:9px;font-size:14px;font-weight:600;display:none;}
 .dist-result.ok{display:block;background:#ecfdf5;color:#065f46;}
-.dist-result.warn{display:block;background:#fef3c7;color:#92400e;}
 .dist-result.bad{display:block;background:#fee2e2;color:#991b1b;}
 
 .btn{
@@ -102,27 +96,27 @@ input.invalid{border-color:var(--red);}
 .btn-primary{background:var(--red);color:#fff;}
 .btn-blue{background:var(--blue);color:#fff;}
 .btn-ghost{background:#fff;color:var(--blue);border:1.5px solid var(--blue);}
-.btn-block{width:100%;margin-top:14px;}
+.btn-block{width:100%;margin-top:12px;}
 .btn:disabled{opacity:.5;cursor:not-allowed;}
 
 /* competitor list */
-.comp-empty{text-align:center;color:var(--muted);font-size:14px;padding:18px 10px;}
+.comp-empty{text-align:center;color:var(--muted);font-size:14px;padding:16px 10px;}
 .comp-item{
   border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-top:8px;
   display:flex;align-items:flex-start;gap:10px;background:#fafbfc;
 }
+.comp-item.existing{background:#f0f7ff;border-color:#dbeafe;}
 .comp-item .idx{
   background:var(--blue);color:#fff;border-radius:50%;width:24px;height:24px;min-width:24px;
   display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin-top:2px;
 }
+.comp-item.existing .idx{background:#64748b;}
 .comp-item .body{flex:1;min-width:0;}
 .comp-item .t{font-weight:700;font-size:14px;}
+.comp-item .t .badge{font-size:10px;font-weight:600;background:#dbeafe;color:#1d4ed8;border-radius:20px;padding:1px 7px;margin-left:6px;vertical-align:middle;}
 .comp-item .s{font-size:12px;color:var(--muted);margin-top:2px;word-break:break-word;}
-.comp-item .del{
-  background:none;border:none;color:var(--red);font-size:18px;cursor:pointer;padding:2px 6px;
-}
+.comp-item .del{background:none;border:none;color:var(--red);font-size:18px;cursor:pointer;padding:2px 6px;}
 
-/* submit bar */
 .submit-bar{
   position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--border);
   padding:10px 14px;display:flex;gap:10px;z-index:100;max-width:640px;margin:0 auto;
@@ -144,7 +138,7 @@ input.invalid{border-color:var(--red);}
   <div class="brand">WINMART+ · RURAL</div>
   <h1>🔍 Rà Soát Đối Thủ</h1>
   <div class="sub">Khai báo & cập nhật đối thủ quanh cửa hàng (nhiều đối thủ / CH)</div>
-  <div class="ver">v1.5-draft · MsT ✨</div>
+  <div class="ver">v1.6-draft · MsT ✨</div>
 </div>
 
 <div class="wrap">
@@ -153,7 +147,7 @@ input.invalid{border-color:var(--red);}
   <div class="card">
     <div class="card-head"><span class="dot"></span>① Cửa hàng khảo sát</div>
     <div class="card-body">
-      <div class="row3">
+      <div class="row" style="gap:6px;">
         <div>
           <label>Miền <span class="req-star">*</span></label>
           <select id="selMien"><option value="">— Miền —</option></select>
@@ -181,13 +175,14 @@ input.invalid{border-color:var(--red);}
   <div class="card">
     <div class="card-head"><span class="dot"></span>② Danh sách đối thủ <span class="tag" id="tagCount">0 đối thủ</span></div>
     <div class="card-body">
-      <div id="compList"><div class="comp-empty">Chưa có đối thủ nào. Thêm bên dưới 👇</div></div>
+      <div id="compList"><div class="comp-empty">Chọn cửa hàng để xem đối thủ đã có.</div></div>
+      <button class="btn btn-ghost btn-block" id="btnAdd" onclick="toggleAddForm()" disabled>➕ Thêm đối thủ</button>
     </div>
   </div>
 
-  <!-- ===== Thêm đối thủ ===== -->
-  <div class="card">
-    <div class="card-head opt"><span class="dot"></span>③ Thêm đối thủ <span class="tag req">BẮT BUỘC</span></div>
+  <!-- ===== Thêm đối thủ (form) ===== -->
+  <div class="card" id="addCard" style="display:none;">
+    <div class="card-head opt"><span class="dot"></span>③ Thêm đối thủ</div>
     <div class="card-body">
       <label>Nhóm đối thủ <span class="req-star">*</span></label>
       <select id="nhom">
@@ -262,7 +257,7 @@ input.invalid{border-color:var(--red);}
 </div>
 
 <div class="submit-bar">
-  <button class="btn btn-primary" id="btnSubmit" onclick="submitAll()">✅ Lưu tất cả (<span id="btnCount">0</span> đối thủ)</button>
+  <button class="btn btn-primary" id="btnSubmit" onclick="submitAll()" disabled>✅ Lưu tất cả (<span id="btnCount">0</span> mới)</button>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -271,12 +266,14 @@ input.invalid{border-color:var(--red);}
 // ===== CẤU HÌNH =====
 const GAS_URL = ''; // Điền URL Google Apps Script Web App khi deploy
 const STORELIST_CSV = 'https://docs.google.com/spreadsheets/d/1fMmEm1GC9aei_3oeu2vcadPVsUM9ms9eVhm99d7pF8A/gviz/tq?tqx=out:csv&gid=900581387';
+const DATA_CSV = 'https://docs.google.com/spreadsheets/d/1UMtB9MOxGOaZvxN5VAUGAS1bPaAL2tVVFEViGANd4Tk/gviz/tq?tqx=out:csv&gid=320821145';
 const MAX_DIST_KM = 2;
 
 let stores = [];
+let existingData = []; // dữ liệu đối thủ đã lưu (từ sheet)
 let selectedStore = null;
-let competitorList = []; // đối thủ đã thêm (chưa lưu)
-let curLat = null, curLng = null; // toạ độ đối thủ đang nhập
+let competitorList = []; // đối thủ MỚI thêm trong phiên (chưa lưu)
+let curLat = null, curLng = null;
 
 // ===== TOAST =====
 let toastTimer;
@@ -301,11 +298,31 @@ async function loadStorelist(){
         lng: parseFloat((r['Kinh độ']||'').replace(',','.'))
       }));
     buildMienDropdown();
-    console.log('Storelist loaded:', stores.length);
-  }catch(e){
-    console.warn('Không load được Storelist:', e);
-    toast('⚠️ Chưa tải được dữ liệu cửa hàng');
-  }
+  }catch(e){ console.warn('Không load được Storelist:', e); toast('⚠️ Chưa tải được dữ liệu cửa hàng'); }
+}
+
+// ===== LOAD DATA ĐỐI THỦ ĐÃ LƯU =====
+async function loadExistingData(){
+  try{
+    const res = await fetch(DATA_CSV);
+    const text = await res.text();
+    const rows = parseCSV(text);
+    existingData = rows.filter(r => (r['Mã CH']||'').trim() !== '').map(r => ({
+      ma_ch: (r['Mã CH']||'').trim(),
+      nhom: r['Nhóm đối thủ'] || '',
+      ten: r['Tên đối thủ'] || '',
+      diaChi: r['Địa chỉ'] || '',
+      kc: r['KC (km)'] || '',
+      ngay: r['Ngày khai trương'] || '',
+      doanhSo: r['Doanh số TB/ngày (trđ)'] || '',
+      luongKhach: r['Khách TB/ngày'] || '',
+      mt: r['MT (m)'] || '',
+      giaThue: r['Giá thuê (tr/th)'] || '',
+      dienTich: r['Diện tích (m²)'] || ''
+    }));
+    renderList();
+    console.log('Existing data loaded:', existingData.length);
+  }catch(e){ console.warn('Không load được data đối thủ:', e); }
 }
 
 function parseCSV(text){
@@ -338,14 +355,7 @@ function buildMienDropdown(){
   const miens = [...new Set(stores.map(s=>s.mien).filter(Boolean))].sort();
   fill(selMien, miens, '— Miền —', m=>m, m=>m);
 }
-selMien.addEventListener('change', ()=>{
-  const m = selMien.value;
-  const gdvs = [...new Set(stores.filter(s=>s.mien===m).map(s=>s.gdv).filter(Boolean))].sort();
-  fill(selGdv, gdvs, '— GĐV —', g=>g, g=>g);
-  selQlkv.innerHTML='<option value="">— QLKV —</option>';
-  selCh.innerHTML='<option value="">— Chọn Cửa hàng —</option>';
-  clearStoreInfo();
-});
+selMien.addEventListener('change', ()=>{ resetLower(); });
 selGdv.addEventListener('change', ()=>{
   const m = selMien.value, g = selGdv.value;
   const qlkvs = [...new Set(stores.filter(s=>s.mien===m && s.gdv===g).map(s=>s.qlkv).filter(Boolean))].sort();
@@ -368,12 +378,23 @@ selCh.addEventListener('change', ()=>{
     document.getElementById('pHuyen').textContent = selectedStore.huyen||'-';
     document.getElementById('pGdv').textContent = selectedStore.gdv||'-';
     document.getElementById('chInfo').style.display='flex';
+    document.getElementById('btnAdd').disabled = false;
   }
+  competitorList = []; // reset đối thủ mới khi đổi CH
+  document.getElementById('addCard').style.display = 'none';
   validateDistance();
+  renderList();
 });
+function resetLower(){
+  selGdv.innerHTML='<option value="">— GĐV —</option>';
+  selQlkv.innerHTML='<option value="">— QLKV —</option>';
+  selCh.innerHTML='<option value="">— Chọn Cửa hàng —</option>';
+  clearStoreInfo();
+}
 function clearStoreInfo(){
   selectedStore = null;
   document.getElementById('chInfo').style.display='none';
+  document.getElementById('btnAdd').disabled = true;
   validateDistance();
 }
 
@@ -397,15 +418,15 @@ document.getElementById('locInput').addEventListener('input', ()=>{
 function getLocation(){
   const btn = document.getElementById('btnLoc');
   if(!navigator.geolocation){ toast('Thiết bị không hỗ trợ định vị'); return; }
-  btn.disabled = true; btn.textContent='⏳...';
+  btn.disabled = true; btn.textContent='⏳';
   navigator.geolocation.getCurrentPosition(
     pos=>{
       curLat = pos.coords.latitude; curLng = pos.coords.longitude;
       document.getElementById('locInput').value = curLat.toFixed(6)+', '+curLng.toFixed(6);
-      btn.disabled=false; btn.textContent='📍 GPS';
+      btn.disabled=false; btn.textContent='📍';
       validateDistance(); toast('✅ Đã lấy định vị');
     },
-    err=>{ btn.disabled=false; btn.textContent='📍 GPS'; toast('⚠️ Không lấy được GPS, dán link/toạ độ nhé'); },
+    err=>{ btn.disabled=false; btn.textContent='📍'; toast('⚠️ Không lấy được GPS, dán link/toạ độ nhé'); },
     { enableHighAccuracy:true, timeout:12000, maximumAge:30000 }
   );
 }
@@ -421,7 +442,65 @@ function validateDistance(){
   const km = haversine(curLat, curLng, selectedStore.lat, selectedStore.lng);
   el.style.display='block';
   if(km <= MAX_DIST_KM){ el.className='dist-result ok'; el.textContent = `✅ Khoảng cách tới CH: ${km.toFixed(2)} km — hợp lệ`; }
-  else { el.className='dist-result bad'; el.textContent = `⚠️ Khoảng cách tới CH: ${km.toFixed(2)} km — vượt ${MAX_DIST_KM}km, kiểm tra lại vị trí!`; }
+  else { el.className='dist-result bad'; el.textContent = `⚠️ Khoảng cách tới CH: ${km.toFixed(2)} km — vượt ${MAX_DIST_KM}km, kiểm tra lại!`; }
+}
+
+// ===== TOGGLE FORM THÊM =====
+function toggleAddForm(){
+  const card = document.getElementById('addCard');
+  const show = card.style.display === 'none';
+  card.style.display = show ? 'block' : 'none';
+  if(show) card.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+// ===== RENDER DANH SÁCH (đã có + mới) =====
+function fmtParams(c){
+  const parts = [];
+  if(c.doanhSo) parts.push(`DS ${c.doanhSo}tr`);
+  if(c.luongKhach) parts.push(`${c.luongKhach} khách`);
+  if(c.mt) parts.push(`MT ${c.mt}m`);
+  if(c.giaThue) parts.push(`Giá ${c.giaThue}tr`);
+  if(c.dienTich) parts.push(`${c.dienTich}m²`);
+  return parts.join(' · ');
+}
+function itemHTML(c, i, isExisting){
+  const sub = [`Ngày KT: ${c.ngay||'-'}`];
+  if(c.kc) sub.push(`KC ${c.kc}km`);
+  const p = fmtParams(c);
+  if(p) sub.push(p);
+  const badge = isExisting ? '<span class="badge">đã có</span>' : '';
+  return `<div class="comp-item ${isExisting?'existing':''}">
+    <div class="idx">${i}</div>
+    <div class="body">
+      <div class="t">${c.nhom?c.nhom+' — ':''}${c.ten}${badge}</div>
+      <div class="s">${sub.join(' · ')}</div>
+    </div>
+    ${isExisting?'':`<button class="del" onclick="removeCompetitor(${i})" title="Xoá">✕</button>`}
+  </div>`;
+}
+function renderList(){
+  const wrap = document.getElementById('compList');
+  let html = '';
+  let total = 0;
+  if(selectedStore){
+    const ex = existingData.filter(c => c.ma_ch === selectedStore.ma);
+    total = ex.length + competitorList.length;
+    ex.forEach((c,i)=> html += itemHTML(c, i+1, true));
+    competitorList.forEach((c,i)=> html += itemHTML(c, ex.length+i+1, false));
+  }
+  if(total === 0){
+    html = selectedStore
+      ? '<div class="comp-empty">Chưa có đối thủ nào cho CH này. Bấm "➕ Thêm đối thủ".</div>'
+      : '<div class="comp-empty">Chọn cửa hàng để xem đối thủ đã có.</div>';
+  }
+  wrap.innerHTML = html;
+  document.getElementById('tagCount').textContent = `${total} đối thủ`;
+  document.getElementById('btnCount').textContent = competitorList.length;
+  document.getElementById('btnSubmit').disabled = (competitorList.length === 0);
+}
+function removeCompetitor(i){
+  competitorList.splice(i,1);
+  renderList();
 }
 
 // ===== VALIDATE SỐ =====
@@ -432,9 +511,9 @@ function mark(id, errId, ok){
   return ok;
 }
 
-// ===== THÊM ĐỐI THỦ VÀO DANH SÁCH =====
+// ===== THÊM ĐỐI THỦ =====
 function addCompetitor(){
-  if(!selectedStore){ toast('⚠️ Chọn cửa hàng khảo sát trước'); return; }
+  if(!selectedStore){ toast('⚠️ Chọn cửa hàng trước'); return; }
   const nhom = document.getElementById('nhom').value;
   const ten = document.getElementById('tenDoiThu').value.trim();
   const diaChi = document.getElementById('diaChi').value.trim();
@@ -451,53 +530,21 @@ function addCompetitor(){
     mark(id, errId, true);
   }
 
-  const comp = {
+  competitorList.push({
     nhom, ten, diaChi, ngay,
     lat: curLat, lng: curLng,
     kc_km: selectedStore.lat && selectedStore.lng ? +haversine(curLat,curLng,selectedStore.lat,selectedStore.lng).toFixed(3) : null,
+    kc: selectedStore.lat && selectedStore.lng ? haversine(curLat,curLng,selectedStore.lat,selectedStore.lng).toFixed(2) : null,
     doanhSo: document.getElementById('doanhSo').value.trim(),
     luongKhach: document.getElementById('luongKhach').value.trim(),
     mt: document.getElementById('mt').value.trim(),
     giaThue: document.getElementById('giaThue').value.trim(),
     dienTich: document.getElementById('dienTich').value.trim()
-  };
-  competitorList.push(comp);
+  });
   renderList();
   resetCompetitorFields();
-  toast(`✅ Đã thêm "${ten}" (${competitorList.length} đối thủ)`);
+  toast(`✅ Đã thêm "${ten}"`);
 }
-
-function renderList(){
-  const wrap = document.getElementById('compList');
-  document.getElementById('tagCount').textContent = `${competitorList.length} đối thủ`;
-  document.getElementById('btnCount').textContent = competitorList.length;
-  if(competitorList.length===0){
-    wrap.innerHTML = '<div class="comp-empty">Chưa có đối thủ nào. Thêm bên dưới 👇</div>';
-    return;
-  }
-  wrap.innerHTML = competitorList.map((c,i)=>{
-    const extra = [];
-    if(c.doanhSo) extra.push(`DS ${c.doanhSo}tr`);
-    if(c.luongKhach) extra.push(`${c.luongKhach} khách`);
-    if(c.mt) extra.push(`MT ${c.mt}m`);
-    if(c.giaThue) extra.push(`Giá ${c.giaThue}tr`);
-    if(c.dienTich) extra.push(`${c.dienTich}m²`);
-    const sub = [c.diaChi, `KC ${c.kc_km??'-'}km`, extra.join(' · ')].filter(Boolean).join(' · ');
-    return `<div class="comp-item">
-      <div class="idx">${i+1}</div>
-      <div class="body">
-        <div class="t">${c.nhom} — ${c.ten}</div>
-        <div class="s">${sub}</div>
-      </div>
-      <button class="del" onclick="removeCompetitor(${i})" title="Xoá">✕</button>
-    </div>`;
-  }).join('');
-}
-function removeCompetitor(i){
-  competitorList.splice(i,1);
-  renderList();
-}
-
 function resetCompetitorFields(){
   document.getElementById('tenDoiThu').value='';
   document.getElementById('diaChi').value='';
@@ -527,29 +574,25 @@ function submitAll(){
     competitors: competitorList
   };
 
-  const key = 'ra-soat-doi-thu-data';
-  const arr = JSON.parse(localStorage.getItem(key)||'[]');
-  batch.competitors.forEach(c=>{
-    arr.push({ ...batch, ...c, competitors: undefined });
-  });
-  localStorage.setItem(key, JSON.stringify(arr));
-
   if(GAS_URL){
     fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(batch) })
-      .then(()=>toast('✅ Đã lưu lên hệ thống'))
-      .catch(()=>toast('⚠️ Lưu máy tạm thời (chưa kết nối máy chủ)'));
+      .then(()=>{ toast('✅ Đã lưu lên hệ thống'); competitorList=[]; renderList(); })
+      .catch(()=>toast('⚠️ Lưu thất bại, thử lại nhé'));
   } else {
-    toast(`✅ Đã lưu ${competitorList.length} đối thủ (bản draft)`);
+    const key = 'ra-soat-doi-thu-data';
+    const arr = JSON.parse(localStorage.getItem(key)||'[]');
+    batch.competitors.forEach(c=>{ arr.push({ ...batch, ...c, competitors: undefined }); });
+    localStorage.setItem(key, JSON.stringify(arr));
+    toast(`✅ Đã lưu ${competitorList.length} đối thủ (bản draft — chưa có GAS URL)`);
+    competitorList=[]; renderList();
   }
-
-  competitorList = [];
-  renderList();
 }
 
 // ===== INIT =====
 (function init(){
   document.getElementById('ngayKhaiTruong').value = new Date().toISOString().slice(0,10);
   loadStorelist();
+  loadExistingData();
 })();
 </script>
 </body>
