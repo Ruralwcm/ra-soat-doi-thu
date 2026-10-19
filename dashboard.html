@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard · Rà Soát Đối Thủ</title>
+<style>
+:root{--red:#d71920;--blue:#1a3c6e;--gold:#ffc107;--green:#16a34a;--bg:#f4f5f7;--card:#fff;--txt:#1f2937;--muted:#6b7280;--border:#e5e7eb;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Be Vietnam Pro',-apple-system,'Segoe UI',Roboto,Arial,sans-serif;background:var(--bg);color:var(--txt);line-height:1.5;padding-bottom:40px;}
+.topbar{background:linear-gradient(135deg,var(--red),#a31016);color:#fff;padding:14px 16px;}
+.topbar h1{font-size:19px;font-weight:800;}
+.topbar .sub{font-size:12px;opacity:.9;margin-top:2px;}
+.topbar .ver{font-size:10px;opacity:.7;margin-top:4px;}
+.wrap{max-width:760px;margin:0 auto;padding:0 12px;}
+
+/* Login */
+#loginScreen{max-width:360px;margin:60px auto 0;background:var(--card);border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px 24px;}
+#loginScreen h2{font-size:18px;text-align:center;margin-bottom:16px;}
+#loginScreen label{font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:6px;}
+#loginScreen input{width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:9px;font-size:15px;margin-bottom:14px;}
+#loginScreen .err{color:var(--red);font-size:12px;margin-bottom:10px;display:none;}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 16px;border-radius:9px;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;}
+.btn-primary{background:var(--red);color:#fff;width:100%;}
+
+/* KPI */
+.kpi-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;}
+.kpi{flex:1;min-width:130px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.06);}
+.kpi .n{font-size:24px;font-weight:800;color:var(--blue);}
+.kpi .l{font-size:12px;color:var(--muted);margin-top:2px;}
+.kpi.red .n{color:var(--red);}
+.kpi.green .n{color:var(--green);}
+
+.card{background:var(--card);border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-top:14px;overflow:hidden;}
+.card-head{display:flex;align-items:center;gap:8px;padding:13px 16px;font-weight:700;font-size:15px;border-bottom:1px solid var(--border);}
+.card-head .dot{width:9px;height:9px;border-radius:50%;background:var(--red);flex-shrink:0;}
+.card-body{padding:12px 16px;}
+
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);}
+th{color:var(--muted);font-weight:600;font-size:12px;}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;}
+tr:last-child td{border-bottom:none;}
+.bar{display:inline-block;height:8px;border-radius:4px;background:var(--blue);vertical-align:middle;}
+.bar.red{background:var(--red);}
+.bar.gold{background:var(--gold);}
+
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
+.filters select{padding:9px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#fff;}
+
+.muted{color:var(--muted);font-size:12px;}
+.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:12px 18px;border-radius:10px;font-size:14px;z-index:200;opacity:0;transition:opacity .3s;pointer-events:none;}
+.toast.show{opacity:1;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>📊 Dashboard · Rà Soát Đối Thủ</h1>
+  <div class="sub">Dành cho Admin — WinMart+ Rural</div>
+  <div class="ver">v1.0</div>
+</div>
+
+<!-- Login -->
+<div id="loginScreen">
+  <h2>🔒 Đăng nhập</h2>
+  <label>Mật khẩu Admin</label>
+  <input type="password" id="pwd" placeholder="Nhập mật khẩu..." onkeydown="if(event.key==='Enter')login()">
+  <div class="err" id="loginErr">Sai mật khẩu, thử lại nhé!</div>
+  <button class="btn btn-primary" onclick="login()">Đăng nhập</button>
+</div>
+
+<!-- Dashboard -->
+<div id="dash" style="display:none;">
+  <div class="wrap">
+    <div class="kpi-row">
+      <div class="kpi"><div class="n" id="kTotal">0</div><div class="l">Đối thủ đang theo dõi</div></div>
+      <div class="kpi"><div class="n" id="kCh">0</div><div class="l">Cửa hàng có đối thủ</div></div>
+      <div class="kpi green"><div class="n" id="kUpdated">0</div><div class="l">Đã cập nhật</div></div>
+      <div class="kpi red"><div class="n" id="kPending">0</div><div class="l">Chưa cập nhật</div></div>
+    </div>
+
+    <div class="filters">
+      <select id="fMien" onchange="renderAll()"><option value="">— Tất cả Miền —</option></select>
+      <select id="fGdv" onchange="renderAll()"><option value="">— Tất cả GĐV —</option></select>
+      <select id="fNhom" onchange="renderAll()"><option value="">— Tất cả Nhóm —</option></select>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><span class="dot"></span>Theo Nhóm đối thủ</div>
+      <div class="card-body"><table id="tNhom"><thead><tr><th>Nhóm</th><th class="num">Số lượng</th><th class="num">Tỷ lệ</th><th></th></tr></thead><tbody></tbody></table></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><span class="dot"></span>Theo Miền</div>
+      <div class="card-body"><table id="tMien"><thead><tr><th>Miền</th><th class="num">Số lượng</th></tr></thead><tbody></tbody></table></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><span class="dot"></span>Theo GĐV (Top 20)</div>
+      <div class="card-body"><table id="tGdv"><thead><tr><th>GĐV</th><th class="num">Số lượng</th><th class="num">Đã cập nhật</th></tr></thead><tbody></tbody></table></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const ADMIN_PWD = 'admin123'; // ⚠️ Đổi mật khẩu admin ở đây
+const DATA_CSV = 'https://docs.google.com/spreadsheets/d/1UMtB9MOxGOaZvxN5VAUGAS1bPaAL2tVVFEViGANd4Tk/gviz/tq?tqx=out:csv&gid=320821145';
+
+let rows = [];
+let toastTimer;
+function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2600); }
+
+function login(){
+  const p = document.getElementById('pwd').value;
+  if(p === ADMIN_PWD){
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('dash').style.display = 'block';
+    loadData();
+  } else {
+    document.getElementById('loginErr').style.display = 'block';
+  }
+}
+
+async function loadData(){
+  try{
+    const res = await fetch(DATA_CSV);
+    const text = await res.text();
+    const parsed = parseCSV(text);
+    rows = parsed.filter(r => (r['Mã CH']||'').trim() !== '');
+    buildFilters();
+    renderAll();
+  }catch(e){
+    toast('⚠️ Không tải được dữ liệu');
+  }
+}
+
+function parseCSV(text){
+  const rows=[]; let row=[],cur='',inQ=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(inQ){ if(c==='"'){ if(text[i+1]==='"'){cur+='"';i++;} else inQ=false; } else cur+=c; }
+    else if(c==='"') inQ=true;
+    else if(c===','){ row.push(cur); cur=''; }
+    else if(c==='\n'||c==='\r'){ if(c==='\r'&&text[i+1]==='\n')i++; row.push(cur); cur=''; if(row.length>1)rows.push(row); row=[]; }
+    else cur+=c;
+  }
+  row.push(cur); if(row.length>1)rows.push(row);
+  if(rows.length<2) return [];
+  const hdr = rows[0].map(h=>h.trim());
+  return rows.slice(1).map(r=>{ const o={}; hdr.forEach((h,i)=>o[h]=r[i]); return o; });
+}
+
+function filtered(){
+  const m = document.getElementById('fMien').value;
+  const g = document.getElementById('fGdv').value;
+  const n = document.getElementById('fNhom').value;
+  return rows.filter(r =>
+    (!m || r['Miền']===m) && (!g || r['GĐV']===g) && (!n || r['Nhóm đối thủ']===n)
+  );
+}
+
+function buildFilters(){
+  const miens = [...new Set(rows.map(r=>r['Miền']).filter(Boolean))].sort();
+  const gdvs = [...new Set(rows.map(r=>r['GĐV']).filter(Boolean))].sort();
+  const nhoms = [...new Set(rows.map(r=>r['Nhóm đối thủ']).filter(Boolean))].sort();
+  const fMien = document.getElementById('fMien');
+  const fGdv = document.getElementById('fGdv');
+  const fNhom = document.getElementById('fNhom');
+  fMien.innerHTML = '<option value="">— Tất cả Miền —</option>' + miens.map(x=>`<option>${x}</option>`).join('');
+  fGdv.innerHTML = '<option value="">— Tất cả GĐV —</option>' + gdvs.map(x=>`<option>${x}</option>`).join('');
+  fNhom.innerHTML = '<option value="">— Tất cả Nhóm —</option>' + nhoms.map(x=>`<option>${x}</option>`).join('');
+}
+
+function renderAll(){
+  const f = filtered();
+  // KPIs
+  document.getElementById('kTotal').textContent = f.length;
+  document.getElementById('kCh').textContent = new Set(f.map(r=>r['Mã CH'])).size;
+  const updated = f.filter(r => (r['Ngày sửa']||'').trim() !== '').length;
+  document.getElementById('kUpdated').textContent = updated;
+  document.getElementById('kPending').textContent = f.length - updated;
+
+  // Theo nhóm
+  renderGroup('tNhom', 'Nhóm đối thủ', f, true);
+  // Theo miền
+  renderGroup('tMien', 'Miền', f, false);
+  // Theo GĐV
+  renderGdv(f);
+}
+
+function renderGroup(tableId, key, data, withBar){
+  const counts = {};
+  data.forEach(r => { const k = r[key] || '(trống)'; counts[k] = (counts[k]||0)+1; });
+  const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  const total = data.length;
+  const tbody = document.querySelector('#'+tableId+' tbody');
+  tbody.innerHTML = sorted.map(([k,v])=>{
+    const pct = total ? (v/total*100).toFixed(1) : '0';
+    const bar = withBar ? `<td><span class="bar" style="width:${Math.min(100,pct)}%"></span></td>` : '';
+    return `<tr><td>${k}</td><td class="num">${v}</td><td class="num">${pct}%</td>${bar}</tr>`;
+  }).join('');
+}
+
+function renderGdv(data){
+  const counts = {};
+  const updated = {};
+  data.forEach(r => {
+    const k = r['GĐV'] || '(trống)';
+    counts[k] = (counts[k]||0)+1;
+    if((r['Ngày sửa']||'').trim() !== '') updated[k] = (updated[k]||0)+1;
+  });
+  const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,20);
+  const tbody = document.querySelector('#tGdv tbody');
+  tbody.innerHTML = sorted.map(([k,v])=>{
+    const up = updated[k]||0;
+    const pct = v ? Math.round(up/v*100) : 0;
+    const color = pct>=80 ? 'green' : (pct>=40 ? 'gold' : 'red');
+    return `<tr><td>${k}</td><td class="num">${v}</td><td class="num" style="color:var(--${color})">${up} (${pct}%)</td></tr>`;
+  }).join('');
+}
+</script>
+</body>
+</html>
