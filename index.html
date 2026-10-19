@@ -129,7 +129,7 @@ input.range-warn{border-color:var(--red);background:#fff5f5;}
 <div class="topbar">
   <div class="t-row">
     <div>
-      <div class="t-title">🔍 Rà Soát Đối Thủ <span class="vbadge">v1.33</span></div>
+      <div class="t-title">🔍 Rà Soát Đối Thủ <span class="vbadge">v1.34</span></div>
       <div class="t-sub">Khai báo & cập nhật đối thủ quanh cửa hàng</div>
     </div>
     <a href="dashboard.html" style="color:#fff;text-decoration:none;font-size:13px;font-weight:700;background:rgba(255,255,255,.18);padding:8px 14px;border-radius:8px;white-space:nowrap;">📊 Dashboard</a>
@@ -595,11 +595,18 @@ function fmtParams(c){
   return parts.join(' · ');
 }
 function itemHTML(c, i){
-  const sub = [`Ngày khai trương: ${c.ngay||'-'}`];
-  if(c.sua) sub.push(`Sửa: ${c.sua}`);
-  if(c.kc) sub.push(`KC ${c.kc}km`);
+  const lines = [];
+  // Dòng 1: Ngày khai trương + Ngày cập nhật
+  const dateInfo = [`Ngày KT: ${c.ngay||'-'}`];
+  if(c.sua) dateInfo.push(`Cập nhật: ${c.sua}`);
+  lines.push(dateInfo.join(' · '));
+  
+  // Dòng 2: Diễn giải (KC + số liệu)
+  const descParts = [];
+  if(c.kc) descParts.push(`KC ${c.kc}km`);
   const p = fmtParams(c);
-  if(p) sub.push(p);
+  if(p) descParts.push(p);
+  if(descParts.length) lines.push('Diễn giải: ' + descParts.join(' · '));
 
   const isExisting = !!c._existing;
   const isEdited = !!c._edited;
@@ -617,7 +624,7 @@ function itemHTML(c, i){
     <div class="idx" ${idxStyle}>${idxLabel}</div>
     <div class="body">
       <div class="t">${c.nhom?c.nhom+' — ':''}${c.ten}${badge}</div>
-      <div class="s">${sub.join(' · ')}</div>
+      <div class="s">${lines.join('<br>')}</div>
     </div>
     <div class="acts">${acts}</div>
   </div>`;
