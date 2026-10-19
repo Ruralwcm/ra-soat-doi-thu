@@ -19,7 +19,7 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 body{
   font-family:'Be Vietnam Pro',-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
-  background:var(--bg);color:var(--txt);line-height:1.5;padding-bottom:80px;
+  background:var(--bg);color:var(--txt);line-height:1.5;padding-bottom:90px;
 }
 .topbar{
   background:linear-gradient(135deg,var(--red),#a31016);
@@ -69,9 +69,7 @@ input.invalid{border-color:var(--red);}
 
 /* info pills */
 .pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
-.pill{
-  font-size:12px;padding:4px 10px;border-radius:20px;background:#eef2f7;color:#374151;font-weight:500;
-}
+.pill{font-size:12px;padding:4px 10px;border-radius:20px;background:#eef2f7;color:#374151;font-weight:500;}
 .pill b{color:var(--blue);}
 
 /* location */
@@ -85,13 +83,39 @@ input.invalid{border-color:var(--red);}
 }
 .loc-input .gps-btn:disabled{opacity:.5;cursor:not-allowed;}
 
-.dist-result{
-  margin-top:10px;padding:10px 12px;border-radius:9px;font-size:14px;font-weight:600;
-  display:none;
-}
+.dist-result{margin-top:10px;padding:10px 12px;border-radius:9px;font-size:14px;font-weight:600;display:none;}
 .dist-result.ok{display:block;background:#ecfdf5;color:#065f46;}
 .dist-result.warn{display:block;background:#fef3c7;color:#92400e;}
 .dist-result.bad{display:block;background:#fee2e2;color:#991b1b;}
+
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:11px 14px;border-radius:9px;border:none;font-size:14px;font-weight:700;
+  cursor:pointer;transition:opacity .15s, transform .05s;font-family:inherit;
+}
+.btn:active{transform:scale(.98);}
+.btn-primary{background:var(--red);color:#fff;}
+.btn-blue{background:var(--blue);color:#fff;}
+.btn-ghost{background:#fff;color:var(--blue);border:1.5px solid var(--blue);}
+.btn-block{width:100%;margin-top:14px;}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+
+/* competitor list */
+.comp-empty{text-align:center;color:var(--muted);font-size:14px;padding:18px 10px;}
+.comp-item{
+  border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-top:8px;
+  display:flex;align-items:flex-start;gap:10px;background:#fafbfc;
+}
+.comp-item .idx{
+  background:var(--blue);color:#fff;border-radius:50%;width:24px;height:24px;min-width:24px;
+  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin-top:2px;
+}
+.comp-item .body{flex:1;min-width:0;}
+.comp-item .t{font-weight:700;font-size:14px;}
+.comp-item .s{font-size:12px;color:var(--muted);margin-top:2px;word-break:break-word;}
+.comp-item .del{
+  background:none;border:none;color:var(--red);font-size:18px;cursor:pointer;padding:2px 6px;
+}
 
 /* submit bar */
 .submit-bar{
@@ -100,20 +124,6 @@ input.invalid{border-color:var(--red);}
   box-shadow:0 -2px 10px rgba(0,0,0,.05);
 }
 .submit-bar .btn{flex:1;padding:13px;font-size:15px;}
-.btn{
-  display:inline-flex;align-items:center;justify-content:center;gap:6px;
-  padding:11px 14px;border-radius:9px;border:none;font-size:14px;font-weight:700;
-  cursor:pointer;transition:opacity .15s, transform .05s;font-family:inherit;
-}
-.btn:active{transform:scale(.98);}
-.btn-primary{background:var(--red);color:#fff;}
-.btn:disabled{opacity:.5;cursor:not-allowed;}
-
-/* progress */
-.progress-summary{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
-.kpi{flex:1;min-width:90px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;}
-.kpi .n{font-size:20px;font-weight:800;color:var(--blue);}
-.kpi .l{font-size:11px;color:var(--muted);margin-top:2px;}
 
 .toast{
   position:fixed;top:16px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;
@@ -128,8 +138,8 @@ input.invalid{border-color:var(--red);}
 <div class="topbar">
   <div class="brand">WINMART+ · RURAL</div>
   <h1>🔍 Rà Soát Đối Thủ</h1>
-  <div class="sub">Khai báo & cập nhật thông tin đối thủ quanh cửa hàng</div>
-  <div class="ver">v1.2-draft · MsT ✨</div>
+  <div class="sub">Khai báo & cập nhật đối thủ quanh cửa hàng (nhiều đối thủ / CH)</div>
+  <div class="ver">v1.3-draft · MsT ✨</div>
 </div>
 
 <div class="wrap">
@@ -162,9 +172,17 @@ input.invalid{border-color:var(--red);}
     </div>
   </div>
 
-  <!-- ===== Đối thủ ===== -->
+  <!-- ===== Danh sách đối thủ ===== -->
   <div class="card">
-    <div class="card-head"><span class="dot"></span>② Thông tin đối thủ <span class="tag req">BẮT BUỘC</span></div>
+    <div class="card-head"><span class="dot"></span>② Danh sách đối thủ <span class="tag" id="tagCount">0 đối thủ</span></div>
+    <div class="card-body">
+      <div id="compList"><div class="comp-empty">Chưa có đối thủ nào. Thêm bên dưới 👇</div></div>
+    </div>
+  </div>
+
+  <!-- ===== Thêm đối thủ ===== -->
+  <div class="card">
+    <div class="card-head opt"><span class="dot"></span>③ Thêm đối thủ <span class="tag req">BẮT BUỘC</span></div>
     <div class="card-body">
       <label>Nhóm đối thủ <span class="req-star">*</span></label>
       <select id="nhom">
@@ -199,14 +217,8 @@ input.invalid{border-color:var(--red);}
         <div class="hint">Dán link Google Maps (copy từ "Chia sẻ") hoặc nhập toạ độ → tự nhận diện vị trí.</div>
       </div>
       <div class="dist-result" id="distResult"></div>
-    </div>
-  </div>
 
-  <!-- ===== Option: Doanh số & khách (1 line) ===== -->
-  <div class="card">
-    <div class="card-head opt"><span class="dot"></span>③ Doanh số & Khách <span class="tag">TUỲ CHỌN</span></div>
-    <div class="card-body">
-      <div class="row">
+      <div class="row" style="margin-top:12px;">
         <div>
           <label>Doanh số TB/ngày (trđ)</label>
           <input type="text" id="doanhSo" inputmode="decimal" placeholder="VD: 25">
@@ -218,13 +230,7 @@ input.invalid{border-color:var(--red);}
           <div class="err" id="errKhach">Nhập số</div>
         </div>
       </div>
-    </div>
-  </div>
 
-  <!-- ===== Option: Mặt bằng (1 line) ===== -->
-  <div class="card">
-    <div class="card-head opt"><span class="dot"></span>④ Mặt bằng <span class="tag">TUỲ CHỌN</span></div>
-    <div class="card-body">
       <div class="row3">
         <div>
           <label>MT (m)</label>
@@ -242,25 +248,15 @@ input.invalid{border-color:var(--red);}
           <div class="err" id="errDt">Số</div>
         </div>
       </div>
-    </div>
-  </div>
 
-  <!-- ===== Tiến độ ===== -->
-  <div class="card">
-    <div class="card-head"><span class="dot"></span>⑤ Tiến độ khảo sát (máy này)</div>
-    <div class="card-body">
-      <div class="progress-summary">
-        <div class="kpi"><div class="n" id="kDa">0</div><div class="l">Đã khảo sát</div></div>
-        <div class="kpi"><div class="n" id="kChua">0</div><div class="l">CH còn lại</div></div>
-        <div class="kpi"><div class="n" id="kHomNay">0</div><div class="l">Hôm nay</div></div>
-      </div>
+      <button class="btn btn-blue btn-block" onclick="addCompetitor()">➕ Thêm vào danh sách</button>
     </div>
   </div>
 
 </div>
 
 <div class="submit-bar">
-  <button class="btn btn-primary" id="btnSubmit" onclick="submitForm()">✅ Lưu khảo sát</button>
+  <button class="btn btn-primary" id="btnSubmit" onclick="submitAll()">✅ Lưu tất cả (<span id="btnCount">0</span> đối thủ)</button>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -269,11 +265,12 @@ input.invalid{border-color:var(--red);}
 // ===== CẤU HÌNH =====
 const GAS_URL = ''; // Điền URL Google Apps Script Web App khi deploy
 const STORELIST_CSV = 'https://docs.google.com/spreadsheets/d/1fMmEm1GC9aei_3oeu2vcadPVsUM9ms9eVhm99d7pF8A/gviz/tq?tqx=out:csv&gid=900581387';
-const MAX_DIST_KM = 2; // ngưỡng cảnh báo khoảng cách (km)
+const MAX_DIST_KM = 2;
 
 let stores = [];
 let selectedStore = null;
-let competitorLat = null, competitorLng = null;
+let competitorList = []; // đối thủ đã thêm (chưa lưu)
+let curLat = null, curLng = null; // toạ độ đối thủ đang nhập
 
 // ===== TOAST =====
 let toastTimer;
@@ -321,7 +318,7 @@ function parseCSV(text){
   return rows.slice(1).map(r=>{ const o={}; header.forEach((h,i)=>o[h]=r[i]); return o; });
 }
 
-// ===== CROSSLINK: Miền → GĐV → QLKV → CH =====
+// ===== CROSSLINK =====
 const selMien = document.getElementById('selMien');
 const selGdv = document.getElementById('selGdv');
 const selQlkv = document.getElementById('selQlkv');
@@ -331,12 +328,10 @@ function fill(sel, items, placeholder, valueFn, labelFn){
   sel.innerHTML = `<option value="">${placeholder}</option>` +
     items.map(v=>`<option value="${valueFn(v)}">${labelFn(v)}</option>`).join('');
 }
-
 function buildMienDropdown(){
   const miens = [...new Set(stores.map(s=>s.mien).filter(Boolean))].sort();
   fill(selMien, miens, '— Miền —', m=>m, m=>m);
 }
-
 selMien.addEventListener('change', ()=>{
   const m = selMien.value;
   const gdvs = [...new Set(stores.filter(s=>s.mien===m).map(s=>s.gdv).filter(Boolean))].sort();
@@ -345,7 +340,6 @@ selMien.addEventListener('change', ()=>{
   selCh.innerHTML='<option value="">— Chọn Cửa hàng —</option>';
   clearStoreInfo();
 });
-
 selGdv.addEventListener('change', ()=>{
   const m = selMien.value, g = selGdv.value;
   const qlkvs = [...new Set(stores.filter(s=>s.mien===m && s.gdv===g).map(s=>s.qlkv).filter(Boolean))].sort();
@@ -353,7 +347,6 @@ selGdv.addEventListener('change', ()=>{
   selCh.innerHTML='<option value="">— Chọn Cửa hàng —</option>';
   clearStoreInfo();
 });
-
 selQlkv.addEventListener('change', ()=>{
   const m = selMien.value, g = selGdv.value, q = selQlkv.value;
   const chs = stores.filter(s=>s.mien===m && s.gdv===g && s.qlkv===q);
@@ -361,7 +354,6 @@ selQlkv.addEventListener('change', ()=>{
     chs.map(s=>`<option value="${s.ma}">${s.ma} — ${s.ten}</option>`).join('');
   clearStoreInfo();
 });
-
 selCh.addEventListener('change', ()=>{
   const ma = selCh.value;
   selectedStore = stores.find(s=>s.ma===ma) || null;
@@ -373,155 +365,134 @@ selCh.addEventListener('change', ()=>{
   }
   validateDistance();
 });
-
 function clearStoreInfo(){
   selectedStore = null;
   document.getElementById('chInfo').style.display='none';
   validateDistance();
 }
 
-// ===== ĐỊNH VỊ: paste link / toạ độ → detect =====
+// ===== ĐỊNH VỊ =====
 function parseLocation(input){
   const s = (input||'').trim();
   if(!s) return null;
-  // 1) Google Maps URL: @lat,lng
   let m = s.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
   if(m) return [parseFloat(m[1]), parseFloat(m[2])];
-  // 2) URL query: q= / ll= / sll= / daddr=
   m = s.match(/[?&](?:q|ll|sll|daddr)=(-?\d+\.\d+),(-?\d+\.\d+)/);
   if(m) return [parseFloat(m[1]), parseFloat(m[2])];
-  // 3) Toạ độ thô: lat, lng (chấm hoặc phẩy thập phân)
   m = s.match(/(-?\d+[.,]\d+)\s*[,;]\s*(-?\d+[.,]\d+)/);
   if(m) return [parseFloat(m[1].replace(',','.')), parseFloat(m[2].replace(',','.'))];
   return null;
 }
-
 document.getElementById('locInput').addEventListener('input', ()=>{
-  const val = document.getElementById('locInput').value;
-  const c = parseLocation(val);
-  if(c){
-    competitorLat = c[0]; competitorLng = c[1];
-    validateDistance();
-  } else {
-    competitorLat = null; competitorLng = null;
-    document.getElementById('distResult').style.display='none';
-  }
+  const c = parseLocation(document.getElementById('locInput').value);
+  if(c){ curLat=c[0]; curLng=c[1]; validateDistance(); }
+  else { curLat=null; curLng=null; document.getElementById('distResult').style.display='none'; }
 });
-
 function getLocation(){
   const btn = document.getElementById('btnLoc');
   if(!navigator.geolocation){ toast('Thiết bị không hỗ trợ định vị'); return; }
   btn.disabled = true; btn.textContent='⏳...';
   navigator.geolocation.getCurrentPosition(
     pos=>{
-      competitorLat = pos.coords.latitude;
-      competitorLng = pos.coords.longitude;
-      document.getElementById('locInput').value = competitorLat.toFixed(6)+', '+competitorLng.toFixed(6);
+      curLat = pos.coords.latitude; curLng = pos.coords.longitude;
+      document.getElementById('locInput').value = curLat.toFixed(6)+', '+curLng.toFixed(6);
       btn.disabled=false; btn.textContent='📍 GPS';
-      validateDistance();
-      toast('✅ Đã lấy định vị');
+      validateDistance(); toast('✅ Đã lấy định vị');
     },
-    err=>{
-      btn.disabled=false; btn.textContent='📍 GPS';
-      toast('⚠️ Không lấy được GPS, dán link/toạ độ nhé');
-    },
+    err=>{ btn.disabled=false; btn.textContent='📍 GPS'; toast('⚠️ Không lấy được GPS, dán link/toạ độ nhé'); },
     { enableHighAccuracy:true, timeout:12000, maximumAge:30000 }
   );
 }
-
 function haversine(lat1,lng1,lat2,lng2){
   const R=6371, toRad=x=>x*Math.PI/180;
   const dLat=toRad(lat2-lat1), dLng=toRad(lng2-lng1);
   const a=Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLng/2)**2;
   return R*2*Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
-
 function validateDistance(){
   const el = document.getElementById('distResult');
-  if(!selectedStore || !competitorLat || !competitorLng || !selectedStore.lat || !selectedStore.lng){ el.style.display='none'; return; }
-  const km = haversine(competitorLat, competitorLng, selectedStore.lat, selectedStore.lng);
+  if(!selectedStore || !curLat || !curLng || !selectedStore.lat || !selectedStore.lng){ el.style.display='none'; return; }
+  const km = haversine(curLat, curLng, selectedStore.lat, selectedStore.lng);
   el.style.display='block';
-  if(km <= MAX_DIST_KM){
-    el.className='dist-result ok';
-    el.textContent = `✅ Khoảng cách tới CH khảo sát: ${km.toFixed(2)} km — hợp lệ`;
-  } else {
-    el.className='dist-result bad';
-    el.textContent = `⚠️ Khoảng cách tới CH khảo sát: ${km.toFixed(2)} km — vượt ${MAX_DIST_KM}km, kiểm tra lại vị trí!`;
-  }
+  if(km <= MAX_DIST_KM){ el.className='dist-result ok'; el.textContent = `✅ Khoảng cách tới CH: ${km.toFixed(2)} km — hợp lệ`; }
+  else { el.className='dist-result bad'; el.textContent = `⚠️ Khoảng cách tới CH: ${km.toFixed(2)} km — vượt ${MAX_DIST_KM}km, kiểm tra lại vị trí!`; }
 }
 
 // ===== VALIDATE SỐ =====
 function isNum(s){ return s==='' || (!isNaN(parseFloat(s.replace(',','.'))) && isFinite(parseFloat(s.replace(',','.')))); }
 function mark(id, errId, ok){
-  const input = document.getElementById(id);
-  const err = document.getElementById(errId);
-  if(!ok){ input.classList.add('invalid'); err.style.display='block'; }
-  else { input.classList.remove('invalid'); err.style.display='none'; }
+  document.getElementById(id).classList.toggle('invalid', !ok);
+  document.getElementById(errId).style.display = ok ? 'none' : 'block';
   return ok;
 }
 
-// ===== SUBMIT =====
-function submitForm(){
-  if(!selectedStore){ toast('⚠️ Chọn cửa hàng khảo sát (Miền → GĐV → QLKV → CH)'); return; }
+// ===== THÊM ĐỐI THỦ VÀO DANH SÁCH =====
+function addCompetitor(){
+  if(!selectedStore){ toast('⚠️ Chọn cửa hàng khảo sát trước'); return; }
   const nhom = document.getElementById('nhom').value;
   const ten = document.getElementById('tenDoiThu').value.trim();
   const diaChi = document.getElementById('diaChi').value.trim();
   const ngay = document.getElementById('ngayKhaiTruong').value;
-
   if(!nhom){ toast('⚠️ Chọn nhóm đối thủ'); return; }
   if(!ten){ toast('⚠️ Nhập tên đối thủ'); return; }
-  if(!diaChi){ toast('⚠️ Nhập địa chỉ đối thủ'); return; }
+  if(!diaChi){ toast('⚠️ Nhập địa chỉ'); return; }
   if(!ngay){ toast('⚠️ Chọn ngày khai trương'); return; }
-  if(!competitorLat || !competitorLng){ toast('⚠️ Nhập định vị (link Google Maps hoặc toạ độ)'); return; }
+  if(!curLat || !curLng){ toast('⚠️ Nhập định vị (link Google Maps / toạ độ)'); return; }
 
   const fields = [['doanhSo','errDoanhSo'],['luongKhach','errKhach'],['mt','errMt'],['dienTich','errDt'],['giaThue','errGia']];
   for(const [id, errId] of fields){
-    const v = document.getElementById(id).value.trim();
-    if(!isNum(v)){ mark(id, errId, false); toast('⚠️ Kiểm tra lại số liệu'); return; }
+    if(!isNum(document.getElementById(id).value.trim())){ mark(id, errId, false); toast('⚠️ Kiểm tra lại số liệu'); return; }
     mark(id, errId, true);
   }
 
-  const payload = {
-    timestamp: new Date().toISOString(),
-    ma_ch: selectedStore.ma,
-    ten_ch: selectedStore.ten,
-    mien: selectedStore.mien,
-    tinh: selectedStore.tinh,
-    huyen: selectedStore.huyen,
-    qlkv: selectedStore.qlkv,
-    gdv: selectedStore.gdv,
-    nhom_doi_thu: nhom,
-    ten_doi_thu: ten,
-    dia_chi: diaChi,
-    lat: competitorLat,
-    lng: competitorLng,
-    kc_km: selectedStore.lat && selectedStore.lng ? +haversine(competitorLat,competitorLng,selectedStore.lat,selectedStore.lng).toFixed(3) : null,
-    ngay_khai_truong: ngay,
-    doanh_so_tb_ngay: document.getElementById('doanhSo').value.trim(),
-    khach_tb_ngay: document.getElementById('luongKhach').value.trim(),
+  const comp = {
+    nhom, ten, diaChi, ngay,
+    lat: curLat, lng: curLng,
+    kc_km: selectedStore.lat && selectedStore.lng ? +haversine(curLat,curLng,selectedStore.lat,selectedStore.lng).toFixed(3) : null,
+    doanhSo: document.getElementById('doanhSo').value.trim(),
+    luongKhach: document.getElementById('luongKhach').value.trim(),
     mt: document.getElementById('mt').value.trim(),
-    gia_thue: document.getElementById('giaThue').value.trim(),
-    dien_tich: document.getElementById('dienTich').value.trim()
+    giaThue: document.getElementById('giaThue').value.trim(),
+    dienTich: document.getElementById('dienTich').value.trim()
   };
-
-  const key = 'ra-soat-doi-thu-data';
-  const arr = JSON.parse(localStorage.getItem(key)||'[]');
-  arr.push(payload);
-  localStorage.setItem(key, JSON.stringify(arr));
-  updateProgress();
-
-  if(GAS_URL){
-    fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(payload) })
-      .then(()=>toast('✅ Đã lưu lên hệ thống'))
-      .catch(()=>toast('⚠️ Lưu máy tạm thời (chưa kết nối máy chủ)'));
-  } else {
-    toast('✅ Đã lưu (bản draft)');
-  }
-
-  resetForm();
+  competitorList.push(comp);
+  renderList();
+  resetCompetitorFields();
+  toast(`✅ Đã thêm "${ten}" (${competitorList.length} đối thủ)`);
 }
 
-function resetForm(){
+function renderList(){
+  const wrap = document.getElementById('compList');
+  document.getElementById('tagCount').textContent = `${competitorList.length} đối thủ`;
+  document.getElementById('btnCount').textContent = competitorList.length;
+  if(competitorList.length===0){
+    wrap.innerHTML = '<div class="comp-empty">Chưa có đối thủ nào. Thêm bên dưới 👇</div>';
+    return;
+  }
+  wrap.innerHTML = competitorList.map((c,i)=>{
+    const extra = [];
+    if(c.doanhSo) extra.push(`DS ${c.doanhSo}tr`);
+    if(c.luongKhach) extra.push(`${c.luongKhach} khách`);
+    if(c.mt) extra.push(`MT ${c.mt}m`);
+    if(c.giaThue) extra.push(`Giá ${c.giaThue}tr`);
+    if(c.dienTich) extra.push(`${c.dienTich}m²`);
+    const sub = [c.diaChi, `KC ${c.kc_km??'-'}km`, extra.join(' · ')].filter(Boolean).join(' · ');
+    return `<div class="comp-item">
+      <div class="idx">${i+1}</div>
+      <div class="body">
+        <div class="t">${c.nhom} — ${c.ten}</div>
+        <div class="s">${sub}</div>
+      </div>
+      <button class="del" onclick="removeCompetitor(${i})" title="Xoá">✕</button>
+    </div>`;
+  }).join('');
+}
+function removeCompetitor(i){
+  competitorList.splice(i,1);
+  renderList();
+}
+
+function resetCompetitorFields(){
   document.getElementById('tenDoiThu').value='';
   document.getElementById('diaChi').value='';
   document.getElementById('nhom').value='';
@@ -531,25 +502,48 @@ function resetForm(){
   document.getElementById('mt').value='';
   document.getElementById('giaThue').value='';
   document.getElementById('dienTich').value='';
-  competitorLat=null; competitorLng=null;
+  curLat=null; curLng=null;
   document.getElementById('distResult').style.display='none';
   ['doanhSo','luongKhach','mt','dienTich','giaThue'].forEach(id=>document.getElementById(id).classList.remove('invalid'));
   ['errDoanhSo','errKhach','errMt','errDt','errGia'].forEach(id=>document.getElementById(id).style.display='none');
 }
 
-function updateProgress(){
-  const arr = JSON.parse(localStorage.getItem('ra-soat-doi-thu-data')||'[]');
-  document.getElementById('kDa').textContent = arr.length;
-  document.getElementById('kChua').textContent = Math.max(0, stores.length - arr.length);
-  const today = new Date().toISOString().slice(0,10);
-  document.getElementById('kHomNay').textContent = arr.filter(r=>r.timestamp.slice(0,10)===today).length;
+// ===== LƯU TẤT CẢ =====
+function submitAll(){
+  if(!selectedStore){ toast('⚠️ Chọn cửa hàng khảo sát'); return; }
+  if(competitorList.length===0){ toast('⚠️ Thêm ít nhất 1 đối thủ'); return; }
+
+  const batch = {
+    timestamp: new Date().toISOString(),
+    ma_ch: selectedStore.ma, ten_ch: selectedStore.ten,
+    mien: selectedStore.mien, tinh: selectedStore.tinh, huyen: selectedStore.huyen,
+    qlkv: selectedStore.qlkv, gdv: selectedStore.gdv,
+    competitors: competitorList
+  };
+
+  const key = 'ra-soat-doi-thu-data';
+  const arr = JSON.parse(localStorage.getItem(key)||'[]');
+  batch.competitors.forEach(c=>{
+    arr.push({ ...batch, ...c, competitors: undefined });
+  });
+  localStorage.setItem(key, JSON.stringify(arr));
+
+  if(GAS_URL){
+    fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(batch) })
+      .then(()=>toast('✅ Đã lưu lên hệ thống'))
+      .catch(()=>toast('⚠️ Lưu máy tạm thời (chưa kết nối máy chủ)'));
+  } else {
+    toast(`✅ Đã lưu ${competitorList.length} đối thủ (bản draft)`);
+  }
+
+  competitorList = [];
+  renderList();
 }
 
 // ===== INIT =====
 (function init(){
   document.getElementById('ngayKhaiTruong').value = new Date().toISOString().slice(0,10);
   loadStorelist();
-  updateProgress();
 })();
 </script>
 </body>
