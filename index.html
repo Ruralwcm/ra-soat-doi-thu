@@ -21,30 +21,18 @@ body{
   font-family:'Be Vietnam Pro',-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
   background:var(--bg);color:var(--txt);line-height:1.5;padding-bottom:90px;
 }
-.topbar{
-  background:linear-gradient(135deg,var(--red),#a31016);
-  color:#fff;padding:10px 14px;
-}
+.topbar{background:linear-gradient(135deg,var(--red),#a31016);color:#fff;padding:10px 14px;}
 .topbar .t-row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
 .topbar .t-title{font-size:16px;font-weight:800;line-height:1.2;}
 .topbar .t-sub{font-size:11px;opacity:.85;margin-top:1px;}
 .topbar .t-ver{font-size:10px;opacity:.75;white-space:nowrap;}
 
 .wrap{max-width:640px;margin:0 auto;padding:0 12px;}
-.card{
-  background:var(--card);border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.08);
-  margin-top:14px;overflow:hidden;
-}
-.card-head{
-  display:flex;align-items:center;gap:8px;padding:14px 16px;font-weight:700;font-size:15px;
-  border-bottom:1px solid var(--border);
-}
+.card{background:var(--card);border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-top:14px;overflow:hidden;}
+.card-head{display:flex;align-items:center;gap:8px;padding:14px 16px;font-weight:700;font-size:15px;border-bottom:1px solid var(--border);}
 .card-head .dot{width:10px;height:10px;border-radius:50%;background:var(--red);flex-shrink:0;}
 .card-head.opt .dot{background:var(--gold);}
-.card-head .tag{
-  margin-left:auto;font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;
-  background:#fef3c7;color:#92400e;white-space:nowrap;
-}
+.card-head .tag{margin-left:auto;font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;background:#fef3c7;color:#92400e;white-space:nowrap;}
 .card-head .tag.req{background:#fee2e2;color:#991b1b;}
 .card-body{padding:14px 16px;}
 
@@ -56,9 +44,7 @@ input,select,textarea{
   font-size:15px;font-family:inherit;background:#fff;color:var(--txt);
   transition:border-color .15s, box-shadow .15s;
 }
-input:focus,select:focus,textarea:focus{
-  outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,60,110,.12);
-}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,60,110,.12);}
 .row{display:flex;gap:8px;}
 .row > div{flex:1;min-width:0;}
 .row5{display:flex;gap:5px;}
@@ -99,23 +85,21 @@ input.invalid{border-color:var(--red);}
 .btn-block{width:100%;margin-top:12px;}
 .btn:disabled{opacity:.5;cursor:not-allowed;}
 
-/* competitor list */
 .comp-empty{text-align:center;color:var(--muted);font-size:14px;padding:16px 10px;}
-.comp-item{
-  border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-top:8px;
-  display:flex;align-items:flex-start;gap:10px;background:#fafbfc;
-}
+.comp-item{border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-top:8px;display:flex;align-items:flex-start;gap:10px;background:#fafbfc;}
 .comp-item.existing{background:#f0f7ff;border-color:#dbeafe;}
-.comp-item .idx{
-  background:var(--blue);color:#fff;border-radius:50%;width:24px;height:24px;min-width:24px;
-  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin-top:2px;
-}
+.comp-item.edited{background:#fefce8;border-color:#fde68a;}
+.comp-item .idx{background:var(--blue);color:#fff;border-radius:50%;width:24px;height:24px;min-width:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin-top:2px;}
 .comp-item.existing .idx{background:#64748b;}
 .comp-item .body{flex:1;min-width:0;}
 .comp-item .t{font-weight:700;font-size:14px;}
 .comp-item .t .badge{font-size:10px;font-weight:600;background:#dbeafe;color:#1d4ed8;border-radius:20px;padding:1px 7px;margin-left:6px;vertical-align:middle;}
+.comp-item .t .badge.ed{background:#fde68a;color:#92400e;}
 .comp-item .s{font-size:12px;color:var(--muted);margin-top:2px;word-break:break-word;}
-.comp-item .del{background:none;border:none;color:var(--red);font-size:18px;cursor:pointer;padding:2px 6px;}
+.comp-item .acts{display:flex;flex-direction:column;gap:4px;}
+.comp-item .act{background:none;border:none;cursor:pointer;padding:2px 6px;font-size:16px;}
+.comp-item .act.edit{color:var(--blue);}
+.comp-item .act.del{color:var(--red);}
 
 .submit-bar{
   position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--border);
@@ -140,7 +124,7 @@ input.invalid{border-color:var(--red);}
       <div class="t-title">🔍 Rà Soát Đối Thủ</div>
       <div class="t-sub">Khai báo & cập nhật đối thủ quanh cửa hàng</div>
     </div>
-    <div class="t-ver">v1.8-draft · MsT ✨</div>
+    <div class="t-ver">v1.9-draft · MsT ✨</div>
   </div>
 </div>
 
@@ -183,9 +167,9 @@ input.invalid{border-color:var(--red);}
     </div>
   </div>
 
-  <!-- ===== Thêm đối thủ (form) ===== -->
+  <!-- ===== Form thêm/sửa đối thủ ===== -->
   <div class="card" id="addCard" style="display:none;">
-    <div class="card-head opt"><span class="dot"></span>③ Thêm đối thủ</div>
+    <div class="card-head opt"><span class="dot"></span>③ <span id="formTitle">Thêm đối thủ</span></div>
     <div class="card-body">
       <label>Nhóm đối thủ <span class="req-star">*</span></label>
       <select id="nhom">
@@ -253,8 +237,9 @@ input.invalid{border-color:var(--red);}
         </div>
       </div>
 
-      <div style="text-align:center;margin-top:14px;">
-        <button class="btn btn-blue" onclick="addCompetitor()" style="padding:9px 22px;font-size:13px;">➕ Thêm vào danh sách</button>
+      <div style="display:flex;gap:8px;margin-top:14px;">
+        <button class="btn btn-blue" id="btnSaveForm" onclick="saveForm()" style="flex:1;">➕ Thêm vào danh sách</button>
+        <button class="btn btn-ghost" id="btnCancelEdit" onclick="cancelEdit()" style="display:none;">Huỷ</button>
       </div>
     </div>
   </div>
@@ -275,9 +260,10 @@ const DATA_CSV = 'https://docs.google.com/spreadsheets/d/1UMtB9MOxGOaZvxN5VAUGAS
 const MAX_DIST_KM = 2;
 
 let stores = [];
-let existingData = []; // dữ liệu đối thủ đã lưu (từ sheet)
+let existingData = [];   // đối thủ đã lưu (từ sheet)
+let competitorList = []; // danh sách đối thủ hiện tại của CH (đã có + mới)
 let selectedStore = null;
-let competitorList = []; // đối thủ MỚI thêm trong phiên (chưa lưu)
+let editingIdx = null;   // index đang sửa trong competitorList
 let curLat = null, curLng = null;
 
 // ===== TOAST =====
@@ -317,6 +303,8 @@ async function loadExistingData(){
       nhom: r['Nhóm đối thủ'] || '',
       ten: r['Tên đối thủ'] || '',
       diaChi: r['Địa chỉ'] || '',
+      lat: r['Vĩ độ'] || '',
+      lng: r['Kinh độ'] || '',
       kc: r['KC (km)'] || '',
       ngay: r['Ngày khai trương'] || '',
       doanhSo: r['Doanh số TB/ngày (trđ)'] || '',
@@ -326,7 +314,6 @@ async function loadExistingData(){
       dienTich: r['Diện tích (m²)'] || ''
     }));
     renderList();
-    console.log('Existing data loaded:', existingData.length);
   }catch(e){ console.warn('Không load được data đối thủ:', e); }
 }
 
@@ -385,8 +372,16 @@ selCh.addEventListener('change', ()=>{
     document.getElementById('chInfo').style.display='flex';
     document.getElementById('btnAdd').disabled = false;
   }
-  competitorList = []; // reset đối thủ mới khi đổi CH
+  // Load danh sách đối thủ đã có của CH này
+  editingIdx = null;
+  if(selectedStore){
+    competitorList = existingData.filter(c => c.ma_ch === selectedStore.ma)
+      .map(c => ({ ...c, _existing: true, _edited: false }));
+  } else {
+    competitorList = [];
+  }
   document.getElementById('addCard').style.display = 'none';
+  resetCompetitorFields();
   validateDistance();
   renderList();
 });
@@ -450,15 +445,20 @@ function validateDistance(){
   else { el.className='dist-result bad'; el.textContent = `⚠️ Khoảng cách tới CH: ${km.toFixed(2)} km — vượt ${MAX_DIST_KM}km, kiểm tra lại!`; }
 }
 
-// ===== TOGGLE FORM THÊM =====
-function toggleAddForm(){
+// ===== TOGGLE FORM =====
+function toggleAddForm(forceShow){
   const card = document.getElementById('addCard');
-  const show = card.style.display === 'none';
+  const show = forceShow === undefined ? (card.style.display === 'none') : forceShow;
+  if(show && editingIdx === null){
+    document.getElementById('formTitle').textContent = 'Thêm đối thủ';
+    document.getElementById('btnSaveForm').textContent = '➕ Thêm vào danh sách';
+    document.getElementById('btnCancelEdit').style.display = 'none';
+  }
   card.style.display = show ? 'block' : 'none';
   if(show) card.scrollIntoView({ behavior:'smooth', block:'start' });
 }
 
-// ===== RENDER DANH SÁCH (đã có + mới) =====
+// ===== RENDER DANH SÁCH =====
 function fmtParams(c){
   const parts = [];
   if(c.doanhSo) parts.push(`DS ${c.doanhSo}tr`);
@@ -468,44 +468,83 @@ function fmtParams(c){
   if(c.dienTich) parts.push(`${c.dienTich}m²`);
   return parts.join(' · ');
 }
-function itemHTML(c, i, isExisting){
+function itemHTML(c, i){
   const sub = [`Ngày KT: ${c.ngay||'-'}`];
   if(c.kc) sub.push(`KC ${c.kc}km`);
   const p = fmtParams(c);
   if(p) sub.push(p);
-  const badge = isExisting ? '<span class="badge">đã có</span>' : '';
-  return `<div class="comp-item ${isExisting?'existing':''}">
-    <div class="idx">${i}</div>
+
+  const isExisting = !!c._existing;
+  const isEdited = !!c._edited;
+  const badge = isEdited ? '<span class="badge ed">đã sửa</span>' : (isExisting ? '<span class="badge">đã có</span>' : '');
+  const cls = isEdited ? 'edited' : (isExisting ? 'existing' : '');
+
+  const acts = isExisting
+    ? `<button class="act edit" onclick="editCompetitor(${i})" title="Sửa">✏️</button>`
+    : `<button class="act del" onclick="removeCompetitor(${i})" title="Xoá">✕</button>`;
+
+  return `<div class="comp-item ${cls}">
+    <div class="idx">${i+1}</div>
     <div class="body">
       <div class="t">${c.nhom?c.nhom+' — ':''}${c.ten}${badge}</div>
       <div class="s">${sub.join(' · ')}</div>
     </div>
-    ${isExisting?'':`<button class="del" onclick="removeCompetitor(${i})" title="Xoá">✕</button>`}
+    <div class="acts">${acts}</div>
   </div>`;
 }
 function renderList(){
   const wrap = document.getElementById('compList');
   let html = '';
-  let total = 0;
-  if(selectedStore){
-    const ex = existingData.filter(c => c.ma_ch === selectedStore.ma);
-    total = ex.length + competitorList.length;
-    ex.forEach((c,i)=> html += itemHTML(c, i+1, true));
-    competitorList.forEach((c,i)=> html += itemHTML(c, ex.length+i+1, false));
-  }
-  if(total === 0){
+  if(competitorList.length === 0){
     html = selectedStore
       ? '<div class="comp-empty">Chưa có đối thủ nào cho CH này. Bấm "➕ Thêm đối thủ".</div>'
       : '<div class="comp-empty">Chọn cửa hàng để xem đối thủ đã có.</div>';
+  } else {
+    competitorList.forEach((c,i)=> html += itemHTML(c, i));
   }
   wrap.innerHTML = html;
-  document.getElementById('tagCount').textContent = `${total} đối thủ`;
-  document.getElementById('btnCount').textContent = competitorList.length;
-  document.getElementById('btnSubmit').disabled = (competitorList.length === 0);
+  document.getElementById('tagCount').textContent = `${competitorList.length} đối thủ`;
+  const newCount = competitorList.filter(c => !c._existing || c._edited).length;
+  document.getElementById('btnCount').textContent = newCount;
+  document.getElementById('btnSubmit').disabled = (newCount === 0);
 }
 function removeCompetitor(i){
   competitorList.splice(i,1);
   renderList();
+}
+
+// ===== EDIT COMPETITOR (fill xuống form) =====
+function editCompetitor(i){
+  const c = competitorList[i];
+  if(!c) return;
+  editingIdx = i;
+  document.getElementById('nhom').value = c.nhom || '';
+  document.getElementById('tenDoiThu').value = c.ten || '';
+  document.getElementById('diaChi').value = c.diaChi || '';
+  document.getElementById('ngayKhaiTruong').value = (c.ngay||'').length >= 10 ? c.ngay.slice(0,10) : (c.ngay||'');
+  document.getElementById('locInput').value = (c.lat && c.lng) ? `${c.lat}, ${c.lng}` : '';
+  document.getElementById('doanhSo').value = c.doanhSo || '';
+  document.getElementById('luongKhach').value = c.luongKhach || '';
+  document.getElementById('mt').value = c.mt || '';
+  document.getElementById('giaThue').value = c.giaThue || '';
+  document.getElementById('dienTich').value = c.dienTich || '';
+  curLat = parseFloat(c.lat) || null;
+  curLng = parseFloat(c.lng) || null;
+
+  document.getElementById('formTitle').textContent = 'Sửa đối thủ';
+  document.getElementById('btnSaveForm').textContent = '💾 Cập nhật';
+  document.getElementById('btnCancelEdit').style.display = 'inline-flex';
+  document.getElementById('addCard').style.display = 'block';
+  document.getElementById('addCard').scrollIntoView({ behavior:'smooth', block:'start' });
+  validateDistance();
+}
+function cancelEdit(){
+  editingIdx = null;
+  resetCompetitorFields();
+  document.getElementById('addCard').style.display = 'none';
+  document.getElementById('formTitle').textContent = 'Thêm đối thủ';
+  document.getElementById('btnSaveForm').textContent = '➕ Thêm vào danh sách';
+  document.getElementById('btnCancelEdit').style.display = 'none';
 }
 
 // ===== VALIDATE SỐ =====
@@ -516,8 +555,8 @@ function mark(id, errId, ok){
   return ok;
 }
 
-// ===== THÊM ĐỐI THỦ =====
-function addCompetitor(){
+// ===== SAVE FORM (thêm mới hoặc cập nhật) =====
+function saveForm(){
   if(!selectedStore){ toast('⚠️ Chọn cửa hàng trước'); return; }
   const nhom = document.getElementById('nhom').value;
   const ten = document.getElementById('tenDoiThu').value.trim();
@@ -535,21 +574,35 @@ function addCompetitor(){
     mark(id, errId, true);
   }
 
-  competitorList.push({
+  const data = {
     nhom, ten, diaChi, ngay,
     lat: curLat, lng: curLng,
-    kc_km: selectedStore.lat && selectedStore.lng ? +haversine(curLat,curLng,selectedStore.lat,selectedStore.lng).toFixed(3) : null,
     kc: selectedStore.lat && selectedStore.lng ? haversine(curLat,curLng,selectedStore.lat,selectedStore.lng).toFixed(2) : null,
+    kc_km: selectedStore.lat && selectedStore.lng ? +haversine(curLat,curLng,selectedStore.lat,selectedStore.lng).toFixed(3) : null,
     doanhSo: document.getElementById('doanhSo').value.trim(),
     luongKhach: document.getElementById('luongKhach').value.trim(),
     mt: document.getElementById('mt').value.trim(),
     giaThue: document.getElementById('giaThue').value.trim(),
     dienTich: document.getElementById('dienTich').value.trim()
-  });
-  renderList();
+  };
+
+  if(editingIdx !== null){
+    competitorList[editingIdx] = { ...data, _existing: true, _edited: true };
+    toast(`✅ Đã cập nhật "${ten}"`);
+    editingIdx = null;
+  } else {
+    competitorList.push({ ...data, _existing: false, _edited: false });
+    toast(`✅ Đã thêm "${ten}"`);
+  }
+
   resetCompetitorFields();
-  toast(`✅ Đã thêm "${ten}"`);
+  document.getElementById('formTitle').textContent = 'Thêm đối thủ';
+  document.getElementById('btnSaveForm').textContent = '➕ Thêm vào danh sách';
+  document.getElementById('btnCancelEdit').style.display = 'none';
+  document.getElementById('addCard').style.display = 'none';
+  renderList();
 }
+
 function resetCompetitorFields(){
   document.getElementById('tenDoiThu').value='';
   document.getElementById('diaChi').value='';
@@ -569,28 +622,36 @@ function resetCompetitorFields(){
 // ===== LƯU TẤT CẢ =====
 function submitAll(){
   if(!selectedStore){ toast('⚠️ Chọn cửa hàng khảo sát'); return; }
-  if(competitorList.length===0){ toast('⚠️ Thêm ít nhất 1 đối thủ'); return; }
+  const toSave = competitorList.filter(c => !c._existing || c._edited);
+  if(toSave.length===0){ toast('⚠️ Thêm hoặc sửa ít nhất 1 đối thủ'); return; }
 
   const batch = {
     timestamp: new Date().toISOString(),
     ma_ch: selectedStore.ma, ten_ch: selectedStore.ten,
     mien: selectedStore.mien, tinh: selectedStore.tinh, huyen: selectedStore.huyen,
     qlkv: selectedStore.qlkv, gdv: selectedStore.gdv,
-    competitors: competitorList
+    competitors: toSave.map(c => ({ ...c, _existing: undefined, _edited: undefined }))
   };
 
   if(GAS_URL){
     fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(batch) })
-      .then(()=>{ toast('✅ Đã lưu lên hệ thống'); competitorList=[]; renderList(); })
+      .then(()=>{ toast('✅ Đã lưu lên hệ thống'); reloadAfterSave(); })
       .catch(()=>toast('⚠️ Lưu thất bại, thử lại nhé'));
   } else {
     const key = 'ra-soat-doi-thu-data';
     const arr = JSON.parse(localStorage.getItem(key)||'[]');
     batch.competitors.forEach(c=>{ arr.push({ ...batch, ...c, competitors: undefined }); });
     localStorage.setItem(key, JSON.stringify(arr));
-    toast(`✅ Đã lưu ${competitorList.length} đối thủ (bản draft — chưa có GAS URL)`);
-    competitorList=[]; renderList();
+    toast(`✅ Đã lưu ${toSave.length} đối thủ (bản draft — chưa có GAS URL)`);
+    reloadAfterSave();
   }
+}
+function reloadAfterSave(){
+  competitorList = selectedStore
+    ? existingData.filter(c => c.ma_ch === selectedStore.ma).map(c => ({ ...c, _existing: true, _edited: false }))
+    : [];
+  editingIdx = null;
+  renderList();
 }
 
 // ===== INIT =====
