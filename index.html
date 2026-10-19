@@ -129,7 +129,7 @@ input.range-warn{border-color:var(--red);background:#fff5f5;}
 <div class="topbar">
   <div class="t-row">
     <div>
-      <div class="t-title">🔍 Rà Soát Đối Thủ <span class="vbadge">v1.34</span></div>
+      <div class="t-title">🔍 Rà Soát Đối Thủ <span class="vbadge">v1.35</span></div>
       <div class="t-sub">Khai báo & cập nhật đối thủ quanh cửa hàng</div>
     </div>
     <a href="dashboard.html" style="color:#fff;text-decoration:none;font-size:13px;font-weight:700;background:rgba(255,255,255,.18);padding:8px 14px;border-radius:8px;white-space:nowrap;">📊 Dashboard</a>
@@ -585,28 +585,23 @@ function toggleAddForm(forceShow){
 }
 
 // ===== RENDER DANH SÁCH =====
-function fmtParams(c){
-  const parts = [];
-  if(c.doanhSo) parts.push(`DS ${c.doanhSo}tr`);
-  if(c.luongKhach) parts.push(`${c.luongKhach} khách`);
-  if(c.mt) parts.push(`MT ${c.mt}m`);
-  if(c.giaThue) parts.push(`Giá ${c.giaThue}tr`);
-  if(c.dienTich) parts.push(`${c.dienTich}m²`);
-  return parts.join(' · ');
-}
 function itemHTML(c, i){
-  const lines = [];
-  // Dòng 1: Ngày khai trương + Ngày cập nhật
-  const dateInfo = [`Ngày KT: ${c.ngay||'-'}`];
-  if(c.sua) dateInfo.push(`Cập nhật: ${c.sua}`);
-  lines.push(dateInfo.join(' · '));
+  // 1 dòng liền mạch: "Update dd/mm/yy: Ngày KT dd/mm/yy. KC: xkm. DS xx tr, xx khách, MT xm, Giá xx tr, xxm²"
+  const parts = [];
+  if(c.sua) parts.push(`Update ${c.sua}: Ngày KT ${c.ngay||'-'}`);
+  else parts.push(`Ngày KT: ${c.ngay||'-'}`);
   
-  // Dòng 2: Diễn giải (KC + số liệu)
-  const descParts = [];
-  if(c.kc) descParts.push(`KC ${c.kc}km`);
-  const p = fmtParams(c);
-  if(p) descParts.push(p);
-  if(descParts.length) lines.push('Diễn giải: ' + descParts.join(' · '));
+  if(c.kc) parts.push(`KC: ${c.kc}km`);
+  
+  const metrics = [];
+  if(c.doanhSo) metrics.push(`DS ${c.doanhSo}tr`);
+  if(c.luongKhach) metrics.push(`${c.luongKhach} khách`);
+  if(c.mt) metrics.push(`MT ${c.mt}m`);
+  if(c.giaThue) metrics.push(`Giá ${c.giaThue}tr`);
+  if(c.dienTich) metrics.push(`${c.dienTich}m²`);
+  if(metrics.length) parts.push(metrics.join(', '));
+
+  const sub = parts.join('. ') + (parts.length ? '.' : '');
 
   const isExisting = !!c._existing;
   const isEdited = !!c._edited;
@@ -624,7 +619,7 @@ function itemHTML(c, i){
     <div class="idx" ${idxStyle}>${idxLabel}</div>
     <div class="body">
       <div class="t">${c.nhom?c.nhom+' — ':''}${c.ten}${badge}</div>
-      <div class="s">${lines.join('<br>')}</div>
+      <div class="s">${sub}</div>
     </div>
     <div class="acts">${acts}</div>
   </div>`;
