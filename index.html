@@ -127,7 +127,7 @@ input.invalid{border-color:var(--red);}
 <div class="topbar">
   <div class="t-row">
     <div>
-      <div class="t-title">🔍 Rà Soát Đối Thủ <span class="vbadge">v1.22</span></div>
+      <div class="t-title">🔍 Rà Soát Đối Thủ <span class="vbadge">v1.23</span></div>
       <div class="t-sub">Khai báo & cập nhật đối thủ quanh cửa hàng</div>
     </div>
   </div>
@@ -202,7 +202,8 @@ input.invalid{border-color:var(--red);}
       <div class="row">
         <div style="flex:0 0 42%;">
           <label>Ngày KT <span class="req-star">*</span></label>
-          <input type="date" id="ngayKhaiTruong">
+          <input type="date" id="ngayKhaiTruong" onchange="validateNgay()">
+          <div class="hint" id="ngayResult" style="display:none;color:var(--red);font-weight:600;"></div>
         </div>
         <div style="flex:1;">
           <label>Định vị <span class="req-star">*</span></label>
@@ -284,6 +285,7 @@ let selectedStore = null;
 let editingIdx = null;   // index đang sửa trong competitorList
 let curLat = null, curLng = null;
 let distanceWarn = false; // khoảng cách bất thường (quá gần/quá xa)
+let ngayWarn = false;     // ngày KT bất thường (tương lai hoặc quá 12 tháng)
 
 // ===== TOAST =====
 let toastTimer;
@@ -501,6 +503,27 @@ function validateDistance(){
   }
 }
 
+function validateNgay(){
+  const el = document.getElementById('ngayResult');
+  const v = document.getElementById('ngayKhaiTruong').value; // yyyy-mm-dd
+  if(!v){ el.style.display='none'; ngayWarn=false; return; }
+  const d = new Date(v + 'T00:00:00');
+  const now = new Date(); now.setHours(0,0,0,0);
+  const oneYearAgo = new Date(now); oneYearAgo.setFullYear(now.getFullYear() - 1);
+  let msg = '';
+  if(d > now){
+    msg = '⚠️ Ngày KT là ngày tương lai!';
+    ngayWarn = true;
+  } else if(d < oneYearAgo){
+    msg = '⚠️ Ngày KT quá 12 tháng so với hiện tại!';
+    ngayWarn = true;
+  } else {
+    ngayWarn = false;
+  }
+  if(msg){ el.textContent = msg; el.style.display='block'; }
+  else { el.style.display='none'; }
+}
+
 // ===== TOGGLE FORM =====
 function toggleAddForm(forceShow){
   const card = document.getElementById('addCard');
@@ -581,6 +604,7 @@ function editCompetitor(i){
   document.getElementById('tenDoiThu').value = c.ten || '';
   document.getElementById('diaChi').value = c.diaChi || '';
   document.getElementById('ngayKhaiTruong').value = toISO(c.ngay);
+  validateNgay();
   document.getElementById('locInput').value = (c.lat && c.lng) ? `${c.lat}, ${c.lng}` : '';
   document.getElementById('doanhSo').value = c.doanhSo || '';
   document.getElementById('luongKhach').value = c.luongKhach || '';
@@ -619,6 +643,10 @@ function saveForm(){
   if(!selectedStore){ toast('⚠️ Chọn cửa hàng trước'); return; }
   if(distanceWarn){
     askConfirm('⚠️ Khoảng cách bất thường (quá gần <50m hoặc quá xa >1km). Vẫn tiếp tục?', doSaveForm);
+    return;
+  }
+  if(ngayWarn){
+    askConfirm('⚠️ Ngày KT bất thường (ngày tương lai hoặc quá 12 tháng). Vẫn tiếp tục?', doSaveForm);
     return;
   }
   doSaveForm();
@@ -682,7 +710,9 @@ function resetCompetitorFields(){
   document.getElementById('dienTich').value='';
   curLat=null; curLng=null;
   distanceWarn=false;
+  ngayWarn=false;
   document.getElementById('distResult').style.display='none';
+  document.getElementById('ngayResult').style.display='none';
   ['doanhSo','luongKhach','mt','dienTich','giaThue'].forEach(id=>document.getElementById(id).classList.remove('invalid'));
   ['errDoanhSo','errKhach','errMt','errDt','errGia'].forEach(id=>document.getElementById(id).style.display='none');
 }
