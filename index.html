@@ -122,7 +122,7 @@ input.invalid{border-color:var(--red);}
 <div class="topbar">
   <div class="t-row">
     <div>
-      <div class="t-title">🔍 Rà Soát Đối Thủ <span class="vbadge">v1.20</span></div>
+      <div class="t-title">🔍 Rà Soát Đối Thủ <span class="vbadge">v1.21</span></div>
       <div class="t-sub">Khai báo & cập nhật đối thủ quanh cửa hàng</div>
     </div>
   </div>
@@ -259,7 +259,8 @@ input.invalid{border-color:var(--red);}
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbwhPoI7RroB-c0HJZGw3mgcO5J55rO8pLl9vL6pSJJKevg-O6QLFtj5xj9cqMSui2Cm/exec';
 const STORELIST_CSV = 'https://docs.google.com/spreadsheets/d/1fMmEm1GC9aei_3oeu2vcadPVsUM9ms9eVhm99d7pF8A/gviz/tq?tqx=out:csv&gid=900581387';
 const DATA_CSV = 'https://docs.google.com/spreadsheets/d/1UMtB9MOxGOaZvxN5VAUGAS1bPaAL2tVVFEViGANd4Tk/gviz/tq?tqx=out:csv&gid=320821145';
-const MAX_DIST_KM = 2;
+const MIN_DIST_M = 50;   // quá gần
+const MAX_DIST_KM = 1;   // quá xa
 
 let stores = [];
 let existingData = [];   // đối thủ đã lưu (từ sheet)
@@ -267,6 +268,7 @@ let competitorList = []; // danh sách đối thủ hiện tại của CH (đã 
 let selectedStore = null;
 let editingIdx = null;   // index đang sửa trong competitorList
 let curLat = null, curLng = null;
+let distanceWarn = false; // khoảng cách bất thường (quá gần/quá xa)
 
 // ===== TOAST =====
 let toastTimer;
@@ -448,11 +450,23 @@ function haversine(lat1,lng1,lat2,lng2){
 }
 function validateDistance(){
   const el = document.getElementById('distResult');
-  if(!selectedStore || !curLat || !curLng || !selectedStore.lat || !selectedStore.lng){ el.style.display='none'; return; }
+  if(!selectedStore || !curLat || !curLng || !selectedStore.lat || !selectedStore.lng){ el.style.display='none'; distanceWarn=false; return; }
   const km = haversine(curLat, curLng, selectedStore.lat, selectedStore.lng);
+  const m = km * 1000;
   el.style.display='block';
-  if(km <= MAX_DIST_KM){ el.className='dist-result ok'; el.textContent = `✅ Khoảng cách tới CH: ${km.toFixed(2)} km — hợp lệ`; }
-  else { el.className='dist-result bad'; el.textContent = `⚠️ Khoảng cách tới CH: ${km.toFixed(2)} km — vượt ${MAX_DIST_KM}km, kiểm tra lại!`; }
+  if(m < MIN_DIST_M){
+    el.className='dist-result bad';
+    el.textContent = `⚠️ Khoảng cách quá gần: ${m.toFixed(0)}m (<${MIN_DIST_M}m) — kiểm tra lại!`;
+    distanceWarn = true;
+  } else if(km > MAX_DIST_KM){
+    el.className='dist-result bad';
+    el.textContent = `⚠️ Khoảng cách quá xa: ${km.toFixed(2)} km (>${MAX_DIST_KM}km) — kiểm tra lại!`;
+    distanceWarn = true;
+  } else {
+    el.className='dist-result ok';
+    el.textContent = `✅ Khoảng cách tới CH: ${km.toFixed(2)} km — hợp lệ`;
+    distanceWarn = false;
+  }
 }
 
 // ===== TOGGLE FORM =====
@@ -580,6 +594,7 @@ function saveForm(){
   if(!diaChi){ toast('⚠️ Nhập địa chỉ'); return; }
   if(!ngay){ toast('⚠️ Chọn ngày khai trương'); return; }
   if(!curLat || !curLng){ toast('⚠️ Nhập định vị (link Google Maps / toạ độ)'); return; }
+  if(distanceWarn){ if(!confirm('⚠️ Khoảng cách bất thường (quá gần <50m hoặc quá xa >1km). Vẫn tiếp tục?')) return; }
 
   const fields = [['doanhSo','errDoanhSo'],['luongKhach','errKhach'],['mt','errMt'],['dienTich','errDt'],['giaThue','errGia']];
   for(const [id, errId] of fields){
@@ -627,6 +642,7 @@ function resetCompetitorFields(){
   document.getElementById('giaThue').value='';
   document.getElementById('dienTich').value='';
   curLat=null; curLng=null;
+  distanceWarn=false;
   document.getElementById('distResult').style.display='none';
   ['doanhSo','luongKhach','mt','dienTich','giaThue'].forEach(id=>document.getElementById(id).classList.remove('invalid'));
   ['errDoanhSo','errKhach','errMt','errDt','errGia'].forEach(id=>document.getElementById(id).style.display='none');
