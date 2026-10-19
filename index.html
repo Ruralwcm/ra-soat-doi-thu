@@ -115,6 +115,11 @@ input.invalid{border-color:var(--red);}
   pointer-events:none;max-width:90vw;text-align:center;
 }
 .toast.show{opacity:1;}
+.confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:300;}
+.confirm-box{background:#fff;border-radius:14px;padding:20px 18px;max-width:320px;width:90%;box-shadow:0 8px 30px rgba(0,0,0,.25);}
+.confirm-msg{font-size:14px;font-weight:600;margin-bottom:16px;line-height:1.5;}
+.confirm-actions{display:flex;gap:10px;}
+.confirm-actions .btn{flex:1;}
 </style>
 </head>
 <body>
@@ -122,7 +127,7 @@ input.invalid{border-color:var(--red);}
 <div class="topbar">
   <div class="t-row">
     <div>
-      <div class="t-title">🔍 Rà Soát Đối Thủ <span class="vbadge">v1.21</span></div>
+      <div class="t-title">🔍 Rà Soát Đối Thủ <span class="vbadge">v1.22</span></div>
       <div class="t-sub">Khai báo & cập nhật đối thủ quanh cửa hàng</div>
     </div>
   </div>
@@ -254,6 +259,16 @@ input.invalid{border-color:var(--red);}
 
 <div class="toast" id="toast"></div>
 
+<div class="confirm-overlay" id="confirmOverlay" style="display:none;">
+  <div class="confirm-box">
+    <div class="confirm-msg" id="confirmMsg">⚠️ Khoảng cách bất thường. Vẫn tiếp tục?</div>
+    <div class="confirm-actions">
+      <button class="btn btn-ghost" onclick="dismissConfirm()">Huỷ</button>
+      <button class="btn btn-primary" id="confirmOk">✅ Xác nhận</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ===== CẤU HÌNH =====
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbwhPoI7RroB-c0HJZGw3mgcO5J55rO8pLl9vL6pSJJKevg-O6QLFtj5xj9cqMSui2Cm/exec';
@@ -273,6 +288,23 @@ let distanceWarn = false; // khoảng cách bất thường (quá gần/quá xa)
 // ===== TOAST =====
 let toastTimer;
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2600); }
+
+// ===== CONFIRM (inline) =====
+let confirmCallback = null;
+function askConfirm(msg, cb){
+  document.getElementById('confirmMsg').textContent = msg;
+  document.getElementById('confirmOverlay').style.display = 'flex';
+  confirmCallback = cb;
+}
+function dismissConfirm(){
+  document.getElementById('confirmOverlay').style.display = 'none';
+  confirmCallback = null;
+}
+document.getElementById('confirmOk').addEventListener('click', ()=>{
+  document.getElementById('confirmOverlay').style.display = 'none';
+  const cb = confirmCallback; confirmCallback = null;
+  if(cb) cb();
+});
 
 // ===== LOAD STORELIST =====
 async function loadStorelist(){
@@ -585,6 +617,14 @@ function mark(id, errId, ok){
 // ===== SAVE FORM (thêm mới hoặc cập nhật) =====
 function saveForm(){
   if(!selectedStore){ toast('⚠️ Chọn cửa hàng trước'); return; }
+  if(distanceWarn){
+    askConfirm('⚠️ Khoảng cách bất thường (quá gần <50m hoặc quá xa >1km). Vẫn tiếp tục?', doSaveForm);
+    return;
+  }
+  doSaveForm();
+}
+
+function doSaveForm(){
   const nhom = document.getElementById('nhom').value;
   const ten = document.getElementById('tenDoiThu').value.trim();
   const diaChi = document.getElementById('diaChi').value.trim();
@@ -594,7 +634,6 @@ function saveForm(){
   if(!diaChi){ toast('⚠️ Nhập địa chỉ'); return; }
   if(!ngay){ toast('⚠️ Chọn ngày khai trương'); return; }
   if(!curLat || !curLng){ toast('⚠️ Nhập định vị (link Google Maps / toạ độ)'); return; }
-  if(distanceWarn){ if(!confirm('⚠️ Khoảng cách bất thường (quá gần <50m hoặc quá xa >1km). Vẫn tiếp tục?')) return; }
 
   const fields = [['doanhSo','errDoanhSo'],['luongKhach','errKhach'],['mt','errMt'],['dienTich','errDt'],['giaThue','errGia']];
   for(const [id, errId] of fields){
