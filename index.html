@@ -23,12 +23,12 @@ body{
 }
 .topbar{
   background:linear-gradient(135deg,var(--red),#a31016);
-  color:#fff;padding:18px 16px 16px;
+  color:#fff;padding:10px 14px;
 }
-.topbar .brand{font-size:13px;opacity:.9;letter-spacing:.5px;}
-.topbar h1{font-size:22px;font-weight:800;margin-top:4px;}
-.topbar .sub{font-size:13px;opacity:.9;margin-top:2px;}
-.topbar .ver{font-size:11px;opacity:.7;margin-top:6px;}
+.topbar .t-row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.topbar .t-title{font-size:16px;font-weight:800;line-height:1.2;}
+.topbar .t-sub{font-size:11px;opacity:.85;margin-top:1px;}
+.topbar .t-ver{font-size:10px;opacity:.75;white-space:nowrap;}
 
 .wrap{max-width:640px;margin:0 auto;padding:0 12px;}
 .card{
@@ -135,10 +135,13 @@ input.invalid{border-color:var(--red);}
 <body>
 
 <div class="topbar">
-  <div class="brand">WINMART+ · RURAL</div>
-  <h1>🔍 Rà Soát Đối Thủ</h1>
-  <div class="sub">Khai báo & cập nhật đối thủ quanh cửa hàng (nhiều đối thủ / CH)</div>
-  <div class="ver">v1.6-draft · MsT ✨</div>
+  <div class="t-row">
+    <div>
+      <div class="t-title">🔍 Rà Soát Đối Thủ</div>
+      <div class="t-sub">Khai báo & cập nhật đối thủ quanh cửa hàng</div>
+    </div>
+    <div class="t-ver">v1.7-draft · MsT ✨</div>
+  </div>
 </div>
 
 <div class="wrap">
