@@ -82,6 +82,7 @@ tr:last-child td{border-bottom:none;}
     </div>
 
     <div class="filters">
+      <select id="fTuan" onchange="renderAll()"><option value="">— Tất cả Tuần —</option></select>
       <select id="fMien" onchange="renderAll()"><option value="">— Tất cả Miền —</option></select>
       <select id="fGdv" onchange="renderAll()"><option value="">— Tất cả GĐV —</option></select>
       <select id="fNhom" onchange="renderAll()"><option value="">— Tất cả Nhóm —</option></select>
@@ -131,11 +132,28 @@ async function loadData(){
     const text = await res.text();
     const parsed = parseCSV(text);
     rows = parsed.filter(r => (r['Mã CH']||'').trim() !== '');
+    rows.forEach(r => { r._week = weekLabel(r['Ngày sửa'] || r['Ngày KT']); });
     buildFilters();
     renderAll();
   }catch(e){
     toast('⚠️ Không tải được dữ liệu');
   }
+}
+
+function weekLabel(dateStr){
+  const m = String(dateStr||'').match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if(!m) return '';
+  const d = new Date(+m[3], +m[2]-1, +m[1]);
+  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const dayNum = date.getUTCDay() || 7;
+  date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+  const week = Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+  const dow = (d.getDay() + 6) % 7; // 0 = Monday
+  const monday = new Date(d); monday.setDate(d.getDate() - dow);
+  const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
+  const f = x => String(x.getDate()).padStart(2,'0') + '/' + String(x.getMonth()+1).padStart(2,'0');
+  return 'W' + String(week).padStart(2,'0') + ' (' + f(monday) + '-' + f(sunday) + ')';
 }
 
 function parseCSV(text){
@@ -155,21 +173,25 @@ function parseCSV(text){
 }
 
 function filtered(){
+  const t = document.getElementById('fTuan').value;
   const m = document.getElementById('fMien').value;
   const g = document.getElementById('fGdv').value;
   const n = document.getElementById('fNhom').value;
   return rows.filter(r =>
-    (!m || r['Miền']===m) && (!g || r['GĐV']===g) && (!n || r['Nhóm đối thủ']===n)
+    (!t || r._week===t) && (!m || r['Miền']===m) && (!g || r['GĐV']===g) && (!n || r['Nhóm đối thủ']===n)
   );
 }
 
 function buildFilters(){
+  const tuans = [...new Set(rows.map(r=>r._week).filter(Boolean))].sort();
   const miens = [...new Set(rows.map(r=>r['Miền']).filter(Boolean))].sort();
   const gdvs = [...new Set(rows.map(r=>r['GĐV']).filter(Boolean))].sort();
   const nhoms = [...new Set(rows.map(r=>r['Nhóm đối thủ']).filter(Boolean))].sort();
+  const fTuan = document.getElementById('fTuan');
   const fMien = document.getElementById('fMien');
   const fGdv = document.getElementById('fGdv');
   const fNhom = document.getElementById('fNhom');
+  fTuan.innerHTML = '<option value="">— Tất cả Tuần —</option>' + tuans.map(x=>`<option>${x}</option>`).join('');
   fMien.innerHTML = '<option value="">— Tất cả Miền —</option>' + miens.map(x=>`<option>${x}</option>`).join('');
   fGdv.innerHTML = '<option value="">— Tất cả GĐV —</option>' + gdvs.map(x=>`<option>${x}</option>`).join('');
   fNhom.innerHTML = '<option value="">— Tất cả Nhóm —</option>' + nhoms.map(x=>`<option>${x}</option>`).join('');
