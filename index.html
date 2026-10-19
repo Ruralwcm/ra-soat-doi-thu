@@ -122,7 +122,7 @@ input.invalid{border-color:var(--red);}
 <div class="topbar">
   <div class="t-row">
     <div>
-      <div class="t-title">🔍 Rà Soát Đối Thủ <span class="vbadge">v1.16</span></div>
+      <div class="t-title">🔍 Rà Soát Đối Thủ <span class="vbadge">v1.17</span></div>
       <div class="t-sub">Khai báo & cập nhật đối thủ quanh cửa hàng</div>
     </div>
   </div>
@@ -162,6 +162,7 @@ input.invalid{border-color:var(--red);}
   <div class="card">
     <div class="card-head"><span class="dot"></span>② Danh sách đối thủ <span class="tag" id="tagCount">0 đối thủ</span></div>
     <div class="card-body">
+      <div class="hint" style="margin-bottom:8px;">📊 Số đối thủ đang theo dõi: <b id="totalCount">0</b></div>
       <div id="compList"><div class="comp-empty">Chọn cửa hàng để xem đối thủ đã có.</div></div>
       <button class="btn btn-ghost btn-block" id="btnAdd" onclick="toggleAddForm()" disabled>➕ Thêm đối thủ</button>
     </div>
@@ -315,6 +316,7 @@ async function loadExistingData(){
       giaThue: r['Giá thuê (tr/th)'] || '',
       dienTich: r['Diện tích (m²)'] || ''
     }));
+    document.getElementById('totalCount').textContent = existingData.length;
     renderList();
   }catch(e){ console.warn('Không load được data đối thủ:', e); }
 }
