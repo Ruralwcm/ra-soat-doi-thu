@@ -122,7 +122,7 @@ input.invalid{border-color:var(--red);}
 <div class="topbar">
   <div class="t-row">
     <div>
-      <div class="t-title">🔍 Rà Soát Đối Thủ <span class="vbadge">v1.17</span></div>
+      <div class="t-title">🔍 Rà Soát Đối Thủ <span class="vbadge">v1.18</span></div>
       <div class="t-sub">Khai báo & cập nhật đối thủ quanh cửa hàng</div>
     </div>
   </div>
@@ -310,6 +310,7 @@ async function loadExistingData(){
       lng: r['Kinh độ'] || '',
       kc: r['KC (km)'] || '',
       ngay: r['Ngày KT'] || '',
+      sua: r['Ngày sửa'] || '',
       doanhSo: r['Doanh số TB/ngày (trđ)'] || '',
       luongKhach: r['Khách TB/ngày'] || '',
       mt: r['MT (m)'] || '',
@@ -481,6 +482,7 @@ function fmtParams(c){
 }
 function itemHTML(c, i){
   const sub = [`Ngày KT: ${c.ngay||'-'}`];
+  if(c.sua) sub.push(`Sửa: ${c.sua}`);
   if(c.kc) sub.push(`KC ${c.kc}km`);
   const p = fmtParams(c);
   if(p) sub.push(p);
