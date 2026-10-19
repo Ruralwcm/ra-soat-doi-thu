@@ -139,7 +139,7 @@ input.invalid{border-color:var(--red);}
   <div class="brand">WINMART+ · RURAL</div>
   <h1>🔍 Rà Soát Đối Thủ</h1>
   <div class="sub">Khai báo & cập nhật đối thủ quanh cửa hàng (nhiều đối thủ / CH)</div>
-  <div class="ver">v1.3-draft · MsT ✨</div>
+  <div class="ver">v1.4-draft · MsT ✨</div>
 </div>
 
 <div class="wrap">
@@ -205,17 +205,20 @@ input.invalid{border-color:var(--red);}
       <label>Địa chỉ <span class="req-star">*</span></label>
       <input type="text" id="diaChi" placeholder="VD: 2/3 Lê Quang Hoà, Khu phố 17, Thới An, Q.12">
 
-      <label>Ngày khai trương <span class="req-star">*</span></label>
-      <input type="date" id="ngayKhaiTruong">
-
-      <label>Định vị <span class="req-star">*</span></label>
-      <div class="loc-box">
-        <div class="loc-input">
-          <input type="text" id="locInput" placeholder="Dán link Google Maps hoặc toạ độ (lat, lng)...">
-          <button class="gps-btn" id="btnLoc" onclick="getLocation()">📍 GPS</button>
+      <div class="row">
+        <div style="flex:0 0 42%;">
+          <label>Ngày khai trương <span class="req-star">*</span></label>
+          <input type="date" id="ngayKhaiTruong">
         </div>
-        <div class="hint">Dán link Google Maps (copy từ "Chia sẻ") hoặc nhập toạ độ → tự nhận diện vị trí.</div>
+        <div style="flex:1;">
+          <label>Định vị <span class="req-star">*</span></label>
+          <div class="loc-input">
+            <input type="text" id="locInput" placeholder="Link Maps / lat,lng...">
+            <button class="gps-btn" id="btnLoc" onclick="getLocation()">📍</button>
+          </div>
+        </div>
       </div>
+      <div class="hint">Định vị: dán link Google Maps hoặc toạ độ → tự nhận diện + tính khoảng cách tới CH.</div>
       <div class="dist-result" id="distResult"></div>
 
       <div class="row" style="margin-top:12px;">
