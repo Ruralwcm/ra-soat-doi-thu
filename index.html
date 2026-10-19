@@ -122,7 +122,7 @@ input.invalid{border-color:var(--red);}
 <div class="topbar">
   <div class="t-row">
     <div>
-      <div class="t-title">🔍 Rà Soát Đối Thủ <span class="vbadge">v1.13</span></div>
+      <div class="t-title">🔍 Rà Soát Đối Thủ <span class="vbadge">v1.14</span></div>
       <div class="t-sub">Khai báo & cập nhật đối thủ quanh cửa hàng</div>
     </div>
   </div>
@@ -651,7 +651,7 @@ function submitAll(){
     const arr = JSON.parse(localStorage.getItem(key)||'[]');
     batch.competitors.forEach(c=>{ arr.push({ ...batch, ...c, competitors: undefined }); });
     localStorage.setItem(key, JSON.stringify(arr));
-    toast(`✅ Đã lưu ${toSave.length} đối thủ (bản draft — chưa có GAS URL)`);
+    toast(`⚠️ Chưa lưu gas — ${toSave.length} đối thủ chỉ lưu tạm trên máy`);
     markSaved();
   }
 }
