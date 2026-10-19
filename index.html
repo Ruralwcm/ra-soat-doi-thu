@@ -24,6 +24,7 @@ body{
 .topbar{background:linear-gradient(135deg,var(--red),#a31016);color:#fff;padding:10px 14px;}
 .topbar .t-row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
 .topbar .t-title{font-size:16px;font-weight:800;line-height:1.2;}
+.topbar .t-title .vbadge{font-size:11px;font-weight:700;background:rgba(255,255,255,.22);color:#fff;padding:2px 8px;border-radius:20px;margin-left:6px;vertical-align:middle;}
 .topbar .t-sub{font-size:11px;opacity:.85;margin-top:1px;}
 .topbar .t-ver{font-size:12px;opacity:.95;white-space:nowrap;font-weight:600;}
 
@@ -121,10 +122,9 @@ input.invalid{border-color:var(--red);}
 <div class="topbar">
   <div class="t-row">
     <div>
-      <div class="t-title">🔍 Rà Soát Đối Thủ</div>
+      <div class="t-title">🔍 Rà Soát Đối Thủ <span class="vbadge">v1.12</span></div>
       <div class="t-sub">Khai báo & cập nhật đối thủ quanh cửa hàng</div>
     </div>
-    <div class="t-ver">v1.11</div>
   </div>
 </div>
 
@@ -171,21 +171,25 @@ input.invalid{border-color:var(--red);}
   <div class="card" id="addCard" style="display:none;">
     <div class="card-head opt"><span class="dot"></span>③ <span id="formTitle">Thêm đối thủ</span></div>
     <div class="card-body">
-      <label>Nhóm đối thủ <span class="req-star">*</span></label>
-      <select id="nhom">
-        <option value="">— Chọn nhóm —</option>
-        <option>BHX (Bách Hoá Xanh)</option>
-        <option>Coopmart</option>
-        <option>Maxidi</option>
-        <option>KingFood Mart</option>
-        <option>Satrafoods</option>
-        <option>TataMart</option>
-        <option>Tiệm tạp hoá</option>
-        <option>Khác</option>
-      </select>
-
-      <label>Tên đối thủ <span class="req-star">*</span></label>
-      <input type="text" id="tenDoiThu" placeholder="VD: BHX - 2/3 Lê Quang Hoà">
+      <div class="row">
+        <div style="flex:0 0 40%;">
+          <label>Nhóm đối thủ <span class="req-star">*</span></label>
+          <select id="nhom">
+            <option value="">— Chọn nhóm —</option>
+            <option>BHX (Bách Hoá Xanh)</option>
+            <option>Coopmart</option>
+            <option>Maxidi</option>
+            <option>KingFood Mart</option>
+            <option>Satrafoods</option>
+            <option>TataMart</option>
+            <option>Tạp hóa/Khác</option>
+          </select>
+        </div>
+        <div style="flex:1;">
+          <label>Tên đối thủ <span class="req-star">*</span></label>
+          <input type="text" id="tenDoiThu" placeholder="VD: BHX - 2/3 Lê Quang Hoà">
+        </div>
+      </div>
 
       <label>Địa chỉ <span class="req-star">*</span></label>
       <input type="text" id="diaChi" placeholder="VD: 2/3 Lê Quang Hoà, Khu phố 17, Thới An, Q.12">
