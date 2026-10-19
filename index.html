@@ -48,45 +48,42 @@ body{
 .card-head .tag.req{background:#fee2e2;color:#991b1b;}
 .card-body{padding:14px 16px;}
 
-label{display:block;font-size:13px;font-weight:600;color:#374151;margin:12px 0 5px;}
+label{display:block;font-size:12px;font-weight:600;color:#374151;margin:10px 0 4px;}
 label:first-child{margin-top:0;}
 label .req-star{color:var(--red);}
 input,select,textarea{
-  width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:9px;
+  width:100%;padding:10px 11px;border:1px solid var(--border);border-radius:9px;
   font-size:15px;font-family:inherit;background:#fff;color:var(--txt);
   transition:border-color .15s, box-shadow .15s;
 }
 input:focus,select:focus,textarea:focus{
   outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,60,110,.12);
 }
-.row{display:flex;gap:10px;}
-.row > div{flex:1;}
+.row{display:flex;gap:8px;}
+.row > div{flex:1;min-width:0;}
+.row3{display:flex;gap:8px;}
+.row3 > div{flex:1;min-width:0;}
 .hint{font-size:12px;color:var(--muted);margin-top:4px;}
-.err{color:var(--red);font-size:12px;margin-top:3px;display:none;}
+.err{color:var(--red);font-size:11px;margin-top:3px;display:none;}
 input.invalid{border-color:var(--red);}
 
 /* info pills */
-.pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
 .pill{
   font-size:12px;padding:4px 10px;border-radius:20px;background:#eef2f7;color:#374151;font-weight:500;
 }
 .pill b{color:var(--blue);}
 
 /* location */
-.loc-box{
-  border:1.5px dashed var(--border);border-radius:10px;padding:12px;background:#fafbfc;
-  display:flex;flex-direction:column;gap:10px;
+.loc-box{display:flex;flex-direction:column;gap:8px;}
+.loc-input{position:relative;}
+.loc-input input{padding-right:96px;}
+.loc-input .gps-btn{
+  position:absolute;right:6px;top:50%;transform:translateY(-50%);
+  background:var(--blue);color:#fff;border:none;border-radius:7px;padding:7px 10px;
+  font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;
 }
-.btn{
-  display:inline-flex;align-items:center;justify-content:center;gap:6px;
-  padding:11px 14px;border-radius:9px;border:none;font-size:14px;font-weight:700;
-  cursor:pointer;transition:opacity .15s, transform .05s;font-family:inherit;
-}
-.btn:active{transform:scale(.98);}
-.btn-primary{background:var(--red);color:#fff;}
-.btn-blue{background:var(--blue);color:#fff;}
-.btn-ghost{background:#fff;color:var(--blue);border:1.5px solid var(--blue);}
-.btn:disabled{opacity:.5;cursor:not-allowed;}
+.loc-input .gps-btn:disabled{opacity:.5;cursor:not-allowed;}
 
 .dist-result{
   margin-top:10px;padding:10px 12px;border-radius:9px;font-size:14px;font-weight:600;
@@ -103,6 +100,14 @@ input.invalid{border-color:var(--red);}
   box-shadow:0 -2px 10px rgba(0,0,0,.05);
 }
 .submit-bar .btn{flex:1;padding:13px;font-size:15px;}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:11px 14px;border-radius:9px;border:none;font-size:14px;font-weight:700;
+  cursor:pointer;transition:opacity .15s, transform .05s;font-family:inherit;
+}
+.btn:active{transform:scale(.98);}
+.btn-primary{background:var(--red);color:#fff;}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
 
 /* progress */
 .progress-summary{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
@@ -124,37 +129,40 @@ input.invalid{border-color:var(--red);}
   <div class="brand">WINMART+ · RURAL</div>
   <h1>🔍 Rà Soát Đối Thủ</h1>
   <div class="sub">Khai báo & cập nhật thông tin đối thủ quanh cửa hàng</div>
-  <div class="ver">v1.1-draft · MsT ✨</div>
+  <div class="ver">v1.2-draft · MsT ✨</div>
 </div>
 
 <div class="wrap">
 
-  <!-- ===== CH khảo sát (crosslink) ===== -->
+  <!-- ===== CH khảo sát ===== -->
   <div class="card">
     <div class="card-head"><span class="dot"></span>① Cửa hàng khảo sát</div>
     <div class="card-body">
-      <label>Miền <span class="req-star">*</span></label>
-      <select id="selMien"><option value="">— Chọn Miền —</option></select>
-
-      <label>GĐV <span class="req-star">*</span></label>
-      <select id="selGdv"><option value="">— Chọn GĐV —</option></select>
-
-      <label>QLKV <span class="req-star">*</span></label>
-      <select id="selQlkv"><option value="">— Chọn QLKV —</option></select>
-
+      <div class="row3">
+        <div>
+          <label>Miền <span class="req-star">*</span></label>
+          <select id="selMien"><option value="">— Miền —</option></select>
+        </div>
+        <div>
+          <label>GĐV <span class="req-star">*</span></label>
+          <select id="selGdv"><option value="">— GĐV —</option></select>
+        </div>
+        <div>
+          <label>QLKV <span class="req-star">*</span></label>
+          <select id="selQlkv"><option value="">— QLKV —</option></select>
+        </div>
+      </div>
       <label>Cửa hàng <span class="req-star">*</span></label>
       <select id="selCh"><option value="">— Chọn Cửa hàng —</option></select>
-
       <div class="pills" id="chInfo" style="display:none;">
         <span class="pill">Tỉnh: <b id="pTinh">-</b></span>
         <span class="pill">Huyện: <b id="pHuyen">-</b></span>
-        <span class="pill">QLKV: <b id="pQlkv">-</b></span>
         <span class="pill">GĐV: <b id="pGdv">-</b></span>
       </div>
     </div>
   </div>
 
-  <!-- ===== Đối thủ (bắt buộc) ===== -->
+  <!-- ===== Đối thủ ===== -->
   <div class="card">
     <div class="card-head"><span class="dot"></span>② Thông tin đối thủ <span class="tag req">BẮT BUỘC</span></div>
     <div class="card-body">
@@ -179,27 +187,22 @@ input.invalid{border-color:var(--red);}
       <label>Địa chỉ <span class="req-star">*</span></label>
       <input type="text" id="diaChi" placeholder="VD: 2/3 Lê Quang Hoà, Khu phố 17, Thới An, Q.12">
 
-      <label>Định vị (toạ độ) <span class="req-star">*</span></label>
-      <div class="loc-box">
-        <button class="btn btn-blue" id="btnLoc" onclick="getLocation()">📍 Lấy định vị GPS (đứng tại đối thủ)</button>
-        <div class="row">
-          <div>
-            <input type="text" id="lat" placeholder="Vĩ độ (lat)" inputmode="decimal">
-          </div>
-          <div>
-            <input type="text" id="lng" placeholder="Kinh độ (lng)" inputmode="decimal">
-          </div>
-        </div>
-        <div class="hint">Bấm "Lấy định vị" để dùng GPS hiện tại, hoặc nhập tay toạ độ.</div>
-      </div>
-      <div class="dist-result" id="distResult"></div>
-
       <label>Ngày khai trương <span class="req-star">*</span></label>
       <input type="date" id="ngayKhaiTruong">
+
+      <label>Định vị <span class="req-star">*</span></label>
+      <div class="loc-box">
+        <div class="loc-input">
+          <input type="text" id="locInput" placeholder="Dán link Google Maps hoặc toạ độ (lat, lng)...">
+          <button class="gps-btn" id="btnLoc" onclick="getLocation()">📍 GPS</button>
+        </div>
+        <div class="hint">Dán link Google Maps (copy từ "Chia sẻ") hoặc nhập toạ độ → tự nhận diện vị trí.</div>
+      </div>
+      <div class="dist-result" id="distResult"></div>
     </div>
   </div>
 
-  <!-- ===== Option: Doanh số & khách ===== -->
+  <!-- ===== Option: Doanh số & khách (1 line) ===== -->
   <div class="card">
     <div class="card-head opt"><span class="dot"></span>③ Doanh số & Khách <span class="tag">TUỲ CHỌN</span></div>
     <div class="card-body">
@@ -207,36 +210,38 @@ input.invalid{border-color:var(--red);}
         <div>
           <label>Doanh số TB/ngày (trđ)</label>
           <input type="text" id="doanhSo" inputmode="decimal" placeholder="VD: 25">
-          <div class="err" id="errDoanhSo">Nhập số hợp lệ</div>
+          <div class="err" id="errDoanhSo">Nhập số</div>
         </div>
         <div>
           <label>Khách TB/ngày</label>
           <input type="text" id="luongKhach" inputmode="decimal" placeholder="VD: 300">
-          <div class="err" id="errKhach">Nhập số hợp lệ</div>
+          <div class="err" id="errKhach">Nhập số</div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ===== Option: Mặt bằng ===== -->
+  <!-- ===== Option: Mặt bằng (1 line) ===== -->
   <div class="card">
-    <div class="card-head opt"><span class="dot"></span>④ Thông số mặt bằng <span class="tag">TUỲ CHỌN</span></div>
+    <div class="card-head opt"><span class="dot"></span>④ Mặt bằng <span class="tag">TUỲ CHỌN</span></div>
     <div class="card-body">
-      <div class="row">
+      <div class="row3">
         <div>
-          <label>MT - Mặt tiền (m)</label>
+          <label>MT (m)</label>
           <input type="text" id="mt" inputmode="decimal" placeholder="VD: 8">
-          <div class="err" id="errMt">Nhập số hợp lệ</div>
+          <div class="err" id="errMt">Số</div>
+        </div>
+        <div>
+          <label>Giá thuê (tr/th)</label>
+          <input type="text" id="giaThue" inputmode="decimal" placeholder="VD: 15">
+          <div class="err" id="errGia">Số</div>
         </div>
         <div>
           <label>Diện tích (m²)</label>
           <input type="text" id="dienTich" inputmode="decimal" placeholder="VD: 120">
-          <div class="err" id="errDt">Nhập số hợp lệ</div>
+          <div class="err" id="errDt">Số</div>
         </div>
       </div>
-      <label>Giá thuê (tr/tháng)</label>
-      <input type="text" id="giaThue" inputmode="decimal" placeholder="VD: 15">
-      <div class="err" id="errGia">Nhập số hợp lệ</div>
     </div>
   </div>
 
@@ -300,7 +305,6 @@ async function loadStorelist(){
   }
 }
 
-// CSV parser (xử lý quote)
 function parseCSV(text){
   const rows = []; let row=[], cur='', inQ=false;
   for(let i=0;i<text.length;i++){
@@ -330,14 +334,14 @@ function fill(sel, items, placeholder, valueFn, labelFn){
 
 function buildMienDropdown(){
   const miens = [...new Set(stores.map(s=>s.mien).filter(Boolean))].sort();
-  fill(selMien, miens, '— Chọn Miền —', m=>m, m=>m);
+  fill(selMien, miens, '— Miền —', m=>m, m=>m);
 }
 
 selMien.addEventListener('change', ()=>{
   const m = selMien.value;
   const gdvs = [...new Set(stores.filter(s=>s.mien===m).map(s=>s.gdv).filter(Boolean))].sort();
-  fill(selGdv, gdvs, '— Chọn GĐV —', g=>g, g=>g);
-  selQlkv.innerHTML='<option value="">— Chọn QLKV —</option>';
+  fill(selGdv, gdvs, '— GĐV —', g=>g, g=>g);
+  selQlkv.innerHTML='<option value="">— QLKV —</option>';
   selCh.innerHTML='<option value="">— Chọn Cửa hàng —</option>';
   clearStoreInfo();
 });
@@ -345,7 +349,7 @@ selMien.addEventListener('change', ()=>{
 selGdv.addEventListener('change', ()=>{
   const m = selMien.value, g = selGdv.value;
   const qlkvs = [...new Set(stores.filter(s=>s.mien===m && s.gdv===g).map(s=>s.qlkv).filter(Boolean))].sort();
-  fill(selQlkv, qlkvs, '— Chọn QLKV —', q=>q, q=>q);
+  fill(selQlkv, qlkvs, '— QLKV —', q=>q, q=>q);
   selCh.innerHTML='<option value="">— Chọn Cửa hàng —</option>';
   clearStoreInfo();
 });
@@ -364,7 +368,6 @@ selCh.addEventListener('change', ()=>{
   if(selectedStore){
     document.getElementById('pTinh').textContent = selectedStore.tinh||'-';
     document.getElementById('pHuyen').textContent = selectedStore.huyen||'-';
-    document.getElementById('pQlkv').textContent = selectedStore.qlkv||'-';
     document.getElementById('pGdv').textContent = selectedStore.gdv||'-';
     document.getElementById('chInfo').style.display='flex';
   }
@@ -377,32 +380,55 @@ function clearStoreInfo(){
   validateDistance();
 }
 
-// ===== ĐỊNH VỊ =====
+// ===== ĐỊNH VỊ: paste link / toạ độ → detect =====
+function parseLocation(input){
+  const s = (input||'').trim();
+  if(!s) return null;
+  // 1) Google Maps URL: @lat,lng
+  let m = s.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+  if(m) return [parseFloat(m[1]), parseFloat(m[2])];
+  // 2) URL query: q= / ll= / sll= / daddr=
+  m = s.match(/[?&](?:q|ll|sll|daddr)=(-?\d+\.\d+),(-?\d+\.\d+)/);
+  if(m) return [parseFloat(m[1]), parseFloat(m[2])];
+  // 3) Toạ độ thô: lat, lng (chấm hoặc phẩy thập phân)
+  m = s.match(/(-?\d+[.,]\d+)\s*[,;]\s*(-?\d+[.,]\d+)/);
+  if(m) return [parseFloat(m[1].replace(',','.')), parseFloat(m[2].replace(',','.'))];
+  return null;
+}
+
+document.getElementById('locInput').addEventListener('input', ()=>{
+  const val = document.getElementById('locInput').value;
+  const c = parseLocation(val);
+  if(c){
+    competitorLat = c[0]; competitorLng = c[1];
+    validateDistance();
+  } else {
+    competitorLat = null; competitorLng = null;
+    document.getElementById('distResult').style.display='none';
+  }
+});
+
 function getLocation(){
   const btn = document.getElementById('btnLoc');
   if(!navigator.geolocation){ toast('Thiết bị không hỗ trợ định vị'); return; }
-  btn.disabled = true; btn.textContent='⏳ Đang lấy định vị...';
+  btn.disabled = true; btn.textContent='⏳...';
   navigator.geolocation.getCurrentPosition(
     pos=>{
       competitorLat = pos.coords.latitude;
       competitorLng = pos.coords.longitude;
-      document.getElementById('lat').value = competitorLat.toFixed(6);
-      document.getElementById('lng').value = competitorLng.toFixed(6);
-      btn.disabled=false; btn.textContent='📍 Lấy định vị GPS (đứng tại đối thủ)';
+      document.getElementById('locInput').value = competitorLat.toFixed(6)+', '+competitorLng.toFixed(6);
+      btn.disabled=false; btn.textContent='📍 GPS';
       validateDistance();
       toast('✅ Đã lấy định vị');
     },
     err=>{
-      btn.disabled=false; btn.textContent='📍 Lấy định vị GPS (đứng tại đối thủ)';
-      toast('⚠️ Không lấy được GPS, nhập tay toạ độ nhé');
+      btn.disabled=false; btn.textContent='📍 GPS';
+      toast('⚠️ Không lấy được GPS, dán link/toạ độ nhé');
     },
     { enableHighAccuracy:true, timeout:12000, maximumAge:30000 }
   );
 }
-document.getElementById('lat').addEventListener('input', ()=>{ competitorLat = parseFloat(document.getElementById('lat').value.replace(',','.')); validateDistance(); });
-document.getElementById('lng').addEventListener('input', ()=>{ competitorLng = parseFloat(document.getElementById('lng').value.replace(',','.')); validateDistance(); });
 
-// Haversine distance (km)
 function haversine(lat1,lng1,lat2,lng2){
   const R=6371, toRad=x=>x*Math.PI/180;
   const dLat=toRad(lat2-lat1), dLng=toRad(lng2-lng1);
@@ -445,14 +471,10 @@ function submitForm(){
   if(!nhom){ toast('⚠️ Chọn nhóm đối thủ'); return; }
   if(!ten){ toast('⚠️ Nhập tên đối thủ'); return; }
   if(!diaChi){ toast('⚠️ Nhập địa chỉ đối thủ'); return; }
-  if(!competitorLat || !competitorLng){ toast('⚠️ Cần định vị/toạ độ đối thủ'); return; }
   if(!ngay){ toast('⚠️ Chọn ngày khai trương'); return; }
+  if(!competitorLat || !competitorLng){ toast('⚠️ Nhập định vị (link Google Maps hoặc toạ độ)'); return; }
 
-  // Validate số liệu (nếu có nhập)
-  const fields = [
-    ['doanhSo','errDoanhSo'], ['luongKhach','errKhach'],
-    ['mt','errMt'], ['dienTich','errDt'], ['giaThue','errGia']
-  ];
+  const fields = [['doanhSo','errDoanhSo'],['luongKhach','errKhach'],['mt','errMt'],['dienTich','errDt'],['giaThue','errGia']];
   for(const [id, errId] of fields){
     const v = document.getElementById(id).value.trim();
     if(!isNum(v)){ mark(id, errId, false); toast('⚠️ Kiểm tra lại số liệu'); return; }
@@ -478,8 +500,8 @@ function submitForm(){
     doanh_so_tb_ngay: document.getElementById('doanhSo').value.trim(),
     khach_tb_ngay: document.getElementById('luongKhach').value.trim(),
     mt: document.getElementById('mt').value.trim(),
-    dien_tich: document.getElementById('dienTich').value.trim(),
-    gia_thue: document.getElementById('giaThue').value.trim()
+    gia_thue: document.getElementById('giaThue').value.trim(),
+    dien_tich: document.getElementById('dienTich').value.trim()
   };
 
   const key = 'ra-soat-doi-thu-data';
@@ -503,13 +525,12 @@ function resetForm(){
   document.getElementById('tenDoiThu').value='';
   document.getElementById('diaChi').value='';
   document.getElementById('nhom').value='';
-  document.getElementById('lat').value='';
-  document.getElementById('lng').value='';
+  document.getElementById('locInput').value='';
   document.getElementById('doanhSo').value='';
   document.getElementById('luongKhach').value='';
   document.getElementById('mt').value='';
-  document.getElementById('dienTich').value='';
   document.getElementById('giaThue').value='';
+  document.getElementById('dienTich').value='';
   competitorLat=null; competitorLng=null;
   document.getElementById('distResult').style.display='none';
   ['doanhSo','luongKhach','mt','dienTich','giaThue'].forEach(id=>document.getElementById(id).classList.remove('invalid'));
