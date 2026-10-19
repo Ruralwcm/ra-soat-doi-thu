@@ -127,7 +127,7 @@ input.invalid{border-color:var(--red);}
 <div class="topbar">
   <div class="t-row">
     <div>
-      <div class="t-title">🔍 Rà Soát Đối Thủ <span class="vbadge">v1.25</span></div>
+      <div class="t-title">🔍 Rà Soát Đối Thủ <span class="vbadge">v1.26</span></div>
       <div class="t-sub">Khai báo & cập nhật đối thủ quanh cửa hàng</div>
     </div>
   </div>
@@ -286,6 +286,7 @@ let editingIdx = null;   // index đang sửa trong competitorList
 let curLat = null, curLng = null;
 let distanceWarn = false; // khoảng cách bất thường (quá gần/quá xa)
 let ngayWarn = false;     // ngày KT bất thường (tương lai hoặc quá 12 tháng)
+let isSubmitting = false; // chống double submit
 
 // ===== TOAST =====
 let toastTimer;
@@ -638,6 +639,30 @@ function mark(id, errId, ok){
   return ok;
 }
 
+// ===== KIỂM TRA TRÙNG ĐỐI THỦ =====
+function checkDuplicate(nhom, ten, lat, lng, skipIdx){
+  // Kiểm tra trùng trong competitorList (cùng nhóm + tên hoặc cùng vị trí < 100m)
+  const sameList = existingData.filter(c => c.ma_ch === selectedStore.ma);
+  const all = [...sameList, ...competitorList];
+  for(let i = 0; i < all.length; i++){
+    const c = all[i];
+    if(skipIdx !== null && i === skipIdx + sameList.length) continue; // bỏ qua chính nó khi edit
+    const sameName = c.ten && ten && c.ten.trim().toLowerCase() === ten.trim().toLowerCase();
+    const sameGroup = c.nhom && nhom && c.nhom.trim().toLowerCase() === nhom.trim().toLowerCase();
+    // Cùng nhóm + cùng tên
+    if(sameName && sameGroup) return { type: 'name', msg: `Đối thủ "${ten}" (${nhom}) đã tồn tại cho CH này` };
+    // Cùng vị trí (< 100m)
+    if(lat && lng && c.lat && c.lng){
+      const clat = parseFloat(c.lat), clng = parseFloat(c.lng);
+      if(!isNaN(clat) && !isNaN(clng)){
+        const d = haversine(lat, lng, clat, clng) * 1000;
+        if(d < 100) return { type: 'pos', msg: `Vị trí này cách "${c.ten||'đối thủ khác'}" chỉ ${d.toFixed(0)}m — có thể trùng` };
+      }
+    }
+  }
+  return null;
+}
+
 // ===== SAVE FORM (thêm mới hoặc cập nhật) =====
 function saveForm(){
   if(!selectedStore){ toast('⚠️ Chọn cửa hàng trước'); return; }
@@ -682,10 +707,16 @@ function doSaveForm(){
   };
 
   if(editingIdx !== null){
+    // Check duplicate khi EDIT (bỏ qua chính nó)
+    const dup = checkDuplicate(nhom, ten, curLat, curLng, editingIdx);
+    if(dup){ toast('⚠️ ' + dup.msg); return; }
     competitorList[editingIdx] = { ...data, _existing: true, _edited: true };
     toast(`✅ Đã cập nhật "${ten}"`);
     editingIdx = null;
   } else {
+    // Check duplicate khi THÊM MỚI
+    const dup = checkDuplicate(nhom, ten, curLat, curLng, null);
+    if(dup){ toast('⚠️ ' + dup.msg); return; }
     competitorList.push({ ...data, _existing: false, _edited: false });
     toast(`✅ Đã thêm "${ten}"`);
   }
@@ -720,8 +751,26 @@ function resetCompetitorFields(){
 // ===== LƯU TẤT CẢ =====
 function submitAll(){
   if(!selectedStore){ toast('⚠️ Chọn cửa hàng khảo sát'); return; }
+  if(isSubmitting){ toast('⚠️ Đang lưu, vui lòng đợi...'); return; }
   const toSave = competitorList.filter(c => !c._existing || c._edited);
   if(toSave.length===0){ toast('⚠️ Thêm hoặc sửa ít nhất 1 đối thủ'); return; }
+
+  // Check trùng chéo giữa các mục mới trong cùng batch
+  for(let i=0; i<toSave.length; i++){
+    for(let j=i+1; j<toSave.length; j++){
+      const a=toSave[i], b=toSave[j];
+      const sameName = a.ten && b.ten && a.ten.trim().toLowerCase() === b.ten.trim().toLowerCase();
+      const sameGroup = a.nhom && b.nhom && a.nhom.trim().toLowerCase() === b.nhom.trim().toLowerCase();
+      if(sameName && sameGroup){
+        toast(`⚠️ Trùng lặp trong danh sách: "${a.ten}" (${a.nhom}) xuất hiện ${i+1} lần`);
+        return;
+      }
+    }
+  }
+
+  isSubmitting = true;
+  document.getElementById('btnSubmit').disabled = true;
+  document.getElementById('btnSubmit').textContent = '⏳ Đang lưu...';
 
   const batch = {
     timestamp: new Date().toISOString(),
@@ -734,7 +783,8 @@ function submitAll(){
   if(GAS_URL){
     fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(batch) })
       .then(()=>{ toast('✅ Đã lưu lên hệ thống'); markSaved(); })
-      .catch(()=>toast('⚠️ Lưu thất bại, thử lại nhé'));
+      .catch(()=>{ toast('⚠️ Lưu thất bại, thử lại nhé'); isSubmitting = false; })
+      .finally(()=>{ updateSubmitButton(); });
   } else {
     const key = 'ra-soat-doi-thu-data';
     const arr = JSON.parse(localStorage.getItem(key)||'[]');
@@ -742,7 +792,13 @@ function submitAll(){
     localStorage.setItem(key, JSON.stringify(arr));
     toast(`⚠️ Chưa lưu gas — ${toSave.length} đối thủ chỉ lưu tạm trên máy`);
     markSaved();
+    updateSubmitButton();
   }
+}
+function updateSubmitButton(){
+  isSubmitting = false;
+  document.getElementById('btnSubmit').disabled = false;
+  document.getElementById('btnSubmit').textContent = '✅ Lưu tất cả (' + document.getElementById('btnCount').textContent + ' mới)';
 }
 function markSaved(){
   // Sau khi lưu: giữ nguyên danh sách, đánh dấu các mục đã lưu là "đã có" để cho phép sửa
