@@ -63,6 +63,11 @@ input:focus,select:focus,textarea:focus{
 .row > div{flex:1;min-width:0;}
 .row3{display:flex;gap:8px;}
 .row3 > div{flex:1;min-width:0;}
+.row5{display:flex;gap:5px;}
+.row5 > div{flex:1;min-width:0;}
+.row5 label{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.row5 input{padding:9px 6px;font-size:14px;}
+.opt-label{font-size:12px;font-weight:700;color:var(--muted);margin:14px 0 6px;border-top:1px dashed var(--border);padding-top:12px;}
 .hint{font-size:12px;color:var(--muted);margin-top:4px;}
 .err{color:var(--red);font-size:11px;margin-top:3px;display:none;}
 input.invalid{border-color:var(--red);}
@@ -139,7 +144,7 @@ input.invalid{border-color:var(--red);}
   <div class="brand">WINMART+ · RURAL</div>
   <h1>🔍 Rà Soát Đối Thủ</h1>
   <div class="sub">Khai báo & cập nhật đối thủ quanh cửa hàng (nhiều đối thủ / CH)</div>
-  <div class="ver">v1.4-draft · MsT ✨</div>
+  <div class="ver">v1.5-draft · MsT ✨</div>
 </div>
 
 <div class="wrap">
@@ -221,33 +226,31 @@ input.invalid{border-color:var(--red);}
       <div class="hint">Định vị: dán link Google Maps hoặc toạ độ → tự nhận diện + tính khoảng cách tới CH.</div>
       <div class="dist-result" id="distResult"></div>
 
-      <div class="row" style="margin-top:12px;">
+      <div class="opt-label">Thông tin bổ sung (tuỳ chọn)</div>
+      <div class="row5">
         <div>
-          <label>Doanh số TB/ngày (trđ)</label>
-          <input type="text" id="doanhSo" inputmode="decimal" placeholder="VD: 25">
-          <div class="err" id="errDoanhSo">Nhập số</div>
+          <label>DS/ngày (trđ)</label>
+          <input type="text" id="doanhSo" inputmode="decimal" placeholder="25">
+          <div class="err" id="errDoanhSo">Số</div>
         </div>
         <div>
-          <label>Khách TB/ngày</label>
-          <input type="text" id="luongKhach" inputmode="decimal" placeholder="VD: 300">
-          <div class="err" id="errKhach">Nhập số</div>
+          <label>Khách/ngày</label>
+          <input type="text" id="luongKhach" inputmode="decimal" placeholder="300">
+          <div class="err" id="errKhach">Số</div>
         </div>
-      </div>
-
-      <div class="row3">
         <div>
           <label>MT (m)</label>
-          <input type="text" id="mt" inputmode="decimal" placeholder="VD: 8">
+          <input type="text" id="mt" inputmode="decimal" placeholder="8">
           <div class="err" id="errMt">Số</div>
         </div>
         <div>
-          <label>Giá thuê (tr/th)</label>
-          <input type="text" id="giaThue" inputmode="decimal" placeholder="VD: 15">
+          <label>Giá thuê (tr)</label>
+          <input type="text" id="giaThue" inputmode="decimal" placeholder="15">
           <div class="err" id="errGia">Số</div>
         </div>
         <div>
-          <label>Diện tích (m²)</label>
-          <input type="text" id="dienTich" inputmode="decimal" placeholder="VD: 120">
+          <label>DT (m²)</label>
+          <input type="text" id="dienTich" inputmode="decimal" placeholder="120">
           <div class="err" id="errDt">Số</div>
         </div>
       </div>
