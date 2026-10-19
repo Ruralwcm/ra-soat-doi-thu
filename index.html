@@ -129,7 +129,7 @@ input.range-warn{border-color:var(--red);background:#fff5f5;}
 <div class="topbar">
   <div class="t-row">
     <div>
-      <div class="t-title">🔍 Rà Soát Đối Thủ <span class="vbadge">v1.30</span></div>
+      <div class="t-title">🔍 Rà Soát Đối Thủ <span class="vbadge">v1.31</span></div>
       <div class="t-sub">Khai báo & cập nhật đối thủ quanh cửa hàng</div>
     </div>
   </div>
@@ -350,6 +350,7 @@ async function loadExistingData(){
     const rows = parseCSV(text);
     existingData = rows.filter(r => (r['Mã CH']||'').trim() !== '').map(r => ({
       ma_ch: (r['Mã CH']||'').trim(),
+      ma_dt: r['Mã ĐT'] || '',
       nhom: r['Nhóm đối thủ'] || '',
       ten: r['Tên đối thủ'] || '',
       diaChi: r['Địa chỉ'] || '',
@@ -608,8 +609,11 @@ function itemHTML(c, i){
     ? `<button class="act edit" onclick="editCompetitor(${i})" title="Sửa">✏️</button>`
     : `<button class="act del" onclick="removeCompetitor(${i})" title="Xoá">✕</button>`;
 
+  const idxLabel = c.ma_dt || (isExisting ? '---' : 'Mới');
+  const idxStyle = c.ma_dt ? '' : 'style="font-size:9px;background:#94a3b8"';
+
   return `<div class="comp-item ${cls}">
-    <div class="idx">${i+1}</div>
+    <div class="idx" ${idxStyle}>${idxLabel}</div>
     <div class="body">
       <div class="t">${c.nhom?c.nhom+' — ':''}${c.ten}${badge}</div>
       <div class="s">${sub.join(' · ')}</div>
