@@ -127,7 +127,7 @@ input.invalid{border-color:var(--red);}
 <div class="topbar">
   <div class="t-row">
     <div>
-      <div class="t-title">🔍 Rà Soát Đối Thủ <span class="vbadge">v1.23</span></div>
+      <div class="t-title">🔍 Rà Soát Đối Thủ <span class="vbadge">v1.24</span></div>
       <div class="t-sub">Khai báo & cập nhật đối thủ quanh cửa hàng</div>
     </div>
   </div>
@@ -201,7 +201,7 @@ input.invalid{border-color:var(--red);}
 
       <div class="row">
         <div style="flex:0 0 42%;">
-          <label>Ngày KT <span class="req-star">*</span></label>
+          <label>Ngày khai trương đối thủ <span class="req-star">*</span></label>
           <input type="date" id="ngayKhaiTruong" onchange="validateNgay()">
           <div class="hint" id="ngayResult" style="display:none;color:var(--red);font-weight:600;"></div>
         </div>
@@ -344,7 +344,7 @@ async function loadExistingData(){
       lat: r['Vĩ độ'] || '',
       lng: r['Kinh độ'] || '',
       kc: r['KC (km)'] || '',
-      ngay: r['Ngày KT'] || '',
+      ngay: r['Ngày khai trương'] || '',
       sua: r['Ngày sửa'] || '',
       doanhSo: r['Doanh số TB/ngày (trđ)'] || '',
       luongKhach: r['Khách TB/ngày'] || '',
@@ -512,10 +512,10 @@ function validateNgay(){
   const oneYearAgo = new Date(now); oneYearAgo.setFullYear(now.getFullYear() - 1);
   let msg = '';
   if(d > now){
-    msg = '⚠️ Ngày KT là ngày tương lai!';
+    msg = '⚠️ Ngày khai trương là ngày tương lai!';
     ngayWarn = true;
   } else if(d < oneYearAgo){
-    msg = '⚠️ Ngày KT quá 12 tháng so với hiện tại!';
+    msg = '⚠️ Ngày khai trương quá 12 tháng so với hiện tại!';
     ngayWarn = true;
   } else {
     ngayWarn = false;
@@ -548,7 +548,7 @@ function fmtParams(c){
   return parts.join(' · ');
 }
 function itemHTML(c, i){
-  const sub = [`Ngày KT: ${c.ngay||'-'}`];
+  const sub = [`Ngày khai trương: ${c.ngay||'-'}`];
   if(c.sua) sub.push(`Sửa: ${c.sua}`);
   if(c.kc) sub.push(`KC ${c.kc}km`);
   const p = fmtParams(c);
@@ -646,7 +646,7 @@ function saveForm(){
     return;
   }
   if(ngayWarn){
-    askConfirm('⚠️ Ngày KT bất thường (ngày tương lai hoặc quá 12 tháng). Vẫn tiếp tục?', doSaveForm);
+    askConfirm('⚠️ Ngày khai trương bất thường (ngày tương lai hoặc quá 12 tháng). Vẫn tiếp tục?', doSaveForm);
     return;
   }
   doSaveForm();
