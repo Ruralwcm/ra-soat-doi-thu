@@ -43,7 +43,7 @@ body{
 .card-head.opt .dot{background:var(--gold);}
 .card-head .tag{
   margin-left:auto;font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;
-  background:#fef3c7;color:#92400e;
+  background:#fef3c7;color:#92400e;white-space:nowrap;
 }
 .card-head .tag.req{background:#fee2e2;color:#991b1b;}
 .card-body{padding:14px 16px;}
@@ -62,18 +62,8 @@ input:focus,select:focus,textarea:focus{
 .row{display:flex;gap:10px;}
 .row > div{flex:1;}
 .hint{font-size:12px;color:var(--muted);margin-top:4px;}
-
-/* autocomplete */
-.ac-wrap{position:relative;}
-.ac-list{
-  position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--border);
-  border-radius:0 0 10px 10px;max-height:260px;overflow-y:auto;z-index:50;
-  box-shadow:0 8px 20px rgba(0,0,0,.12);display:none;
-}
-.ac-item{padding:10px 12px;font-size:14px;border-bottom:1px solid #f3f4f6;cursor:pointer;}
-.ac-item:hover{background:#f0f5ff;}
-.ac-item .nm{font-weight:600;}
-.ac-item .sm{font-size:12px;color:var(--muted);}
+.err{color:var(--red);font-size:12px;margin-top:3px;display:none;}
+input.invalid{border-color:var(--red);}
 
 /* info pills */
 .pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
@@ -96,7 +86,6 @@ input:focus,select:focus,textarea:focus{
 .btn-primary{background:var(--red);color:#fff;}
 .btn-blue{background:var(--blue);color:#fff;}
 .btn-ghost{background:#fff;color:var(--blue);border:1.5px solid var(--blue);}
-.btn-gold{background:var(--gold);color:#78350f;}
 .btn:disabled{opacity:.5;cursor:not-allowed;}
 
 .dist-result{
@@ -135,30 +124,37 @@ input:focus,select:focus,textarea:focus{
   <div class="brand">WINMART+ · RURAL</div>
   <h1>🔍 Rà Soát Đối Thủ</h1>
   <div class="sub">Khai báo & cập nhật thông tin đối thủ quanh cửa hàng</div>
-  <div class="ver">v1.0-draft · MsT ✨</div>
+  <div class="ver">v1.1-draft · MsT ✨</div>
 </div>
 
 <div class="wrap">
 
-  <!-- ===== CH khảo sát ===== -->
+  <!-- ===== CH khảo sát (crosslink) ===== -->
   <div class="card">
     <div class="card-head"><span class="dot"></span>① Cửa hàng khảo sát</div>
     <div class="card-body">
-      <label>Mã CH / Tên cửa hàng <span class="req-star">*</span></label>
-      <div class="ac-wrap">
-        <input type="text" id="chInput" placeholder="Gõ mã CH hoặc tên CH để tìm..." autocomplete="off">
-        <div class="ac-list" id="chList"></div>
-      </div>
+      <label>Miền <span class="req-star">*</span></label>
+      <select id="selMien"><option value="">— Chọn Miền —</option></select>
+
+      <label>GĐV <span class="req-star">*</span></label>
+      <select id="selGdv"><option value="">— Chọn GĐV —</option></select>
+
+      <label>QLKV <span class="req-star">*</span></label>
+      <select id="selQlkv"><option value="">— Chọn QLKV —</option></select>
+
+      <label>Cửa hàng <span class="req-star">*</span></label>
+      <select id="selCh"><option value="">— Chọn Cửa hàng —</option></select>
+
       <div class="pills" id="chInfo" style="display:none;">
-        <span class="pill">GĐV: <b id="pGdv">-</b></span>
-        <span class="pill">QLKV: <b id="pQlkv">-</b></span>
         <span class="pill">Tỉnh: <b id="pTinh">-</b></span>
-        <span class="pill">Miền: <b id="pMien">-</b></span>
+        <span class="pill">Huyện: <b id="pHuyen">-</b></span>
+        <span class="pill">QLKV: <b id="pQlkv">-</b></span>
+        <span class="pill">GĐV: <b id="pGdv">-</b></span>
       </div>
     </div>
   </div>
 
-  <!-- ===== Đối thủ ===== -->
+  <!-- ===== Đối thủ (bắt buộc) ===== -->
   <div class="card">
     <div class="card-head"><span class="dot"></span>② Thông tin đối thủ <span class="tag req">BẮT BUỘC</span></div>
     <div class="card-body">
@@ -178,7 +174,10 @@ input:focus,select:focus,textarea:focus{
       </select>
 
       <label>Tên đối thủ <span class="req-star">*</span></label>
-      <input type="text" id="tenDoiThu" placeholder="VD: BHX - 2/3 Lê Quang Hoà...">
+      <input type="text" id="tenDoiThu" placeholder="VD: BHX - 2/3 Lê Quang Hoà">
+
+      <label>Địa chỉ <span class="req-star">*</span></label>
+      <input type="text" id="diaChi" placeholder="VD: 2/3 Lê Quang Hoà, Khu phố 17, Thới An, Q.12">
 
       <label>Định vị (toạ độ) <span class="req-star">*</span></label>
       <div class="loc-box">
@@ -195,44 +194,49 @@ input:focus,select:focus,textarea:focus{
       </div>
       <div class="dist-result" id="distResult"></div>
 
-      <label>Ngày khảo sát <span class="req-star">*</span></label>
-      <input type="date" id="ngayKT">
+      <label>Ngày khai trương <span class="req-star">*</span></label>
+      <input type="date" id="ngayKhaiTruong">
     </div>
   </div>
 
-  <!-- ===== Option: Doanh số - lượng khách ===== -->
+  <!-- ===== Option: Doanh số & khách ===== -->
   <div class="card">
-    <div class="card-head opt"><span class="dot"></span>③ Doanh số & Lượng khách <span class="tag">TUỲ CHỌN</span></div>
+    <div class="card-head opt"><span class="dot"></span>③ Doanh số & Khách <span class="tag">TUỲ CHỌN</span></div>
     <div class="card-body">
       <div class="row">
         <div>
-          <label>Doanh số (tr/tháng)</label>
-          <input type="text" id="doanhSo" inputmode="decimal" placeholder="VD: 800">
+          <label>Doanh số TB/ngày (trđ)</label>
+          <input type="text" id="doanhSo" inputmode="decimal" placeholder="VD: 25">
+          <div class="err" id="errDoanhSo">Nhập số hợp lệ</div>
         </div>
         <div>
-          <label>Lượng khách (khách/ngày)</label>
+          <label>Khách TB/ngày</label>
           <input type="text" id="luongKhach" inputmode="decimal" placeholder="VD: 300">
+          <div class="err" id="errKhach">Nhập số hợp lệ</div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ===== Option: MT - Diện tích - Giá thuê ===== -->
+  <!-- ===== Option: Mặt bằng ===== -->
   <div class="card">
-    <div class="card-head opt"><span class="dot"></span>④ Mặt bằng <span class="tag">TUỲ CHỌN</span></div>
+    <div class="card-head opt"><span class="dot"></span>④ Thông số mặt bằng <span class="tag">TUỲ CHỌN</span></div>
     <div class="card-body">
       <div class="row">
         <div>
           <label>MT - Mặt tiền (m)</label>
           <input type="text" id="mt" inputmode="decimal" placeholder="VD: 8">
+          <div class="err" id="errMt">Nhập số hợp lệ</div>
         </div>
         <div>
           <label>Diện tích (m²)</label>
           <input type="text" id="dienTich" inputmode="decimal" placeholder="VD: 120">
+          <div class="err" id="errDt">Nhập số hợp lệ</div>
         </div>
       </div>
       <label>Giá thuê (tr/tháng)</label>
       <input type="text" id="giaThue" inputmode="decimal" placeholder="VD: 15">
+      <div class="err" id="errGia">Nhập số hợp lệ</div>
     </div>
   </div>
 
@@ -258,12 +262,12 @@ input:focus,select:focus,textarea:focus{
 
 <script>
 // ===== CẤU HÌNH =====
-const GAS_URL = ''; // Điền URL Google Apps Script Web App ở đây khi deploy
+const GAS_URL = ''; // Điền URL Google Apps Script Web App khi deploy
 const STORELIST_CSV = 'https://docs.google.com/spreadsheets/d/1fMmEm1GC9aei_3oeu2vcadPVsUM9ms9eVhm99d7pF8A/gviz/tq?tqx=out:csv&gid=900581387';
 const MAX_DIST_KM = 2; // ngưỡng cảnh báo khoảng cách (km)
 
-let stores = [];       // Storelist
-let selectedStore = null; // CH đang chọn
+let stores = [];
+let selectedStore = null;
 let competitorLat = null, competitorLng = null;
 
 // ===== TOAST =====
@@ -288,9 +292,11 @@ async function loadStorelist(){
         lat: parseFloat((r['Vĩ độ']||'').replace(',','.')),
         lng: parseFloat((r['Kinh độ']||'').replace(',','.'))
       }));
+    buildMienDropdown();
     console.log('Storelist loaded:', stores.length);
   }catch(e){
     console.warn('Không load được Storelist:', e);
+    toast('⚠️ Chưa tải được dữ liệu cửa hàng');
   }
 }
 
@@ -311,36 +317,63 @@ function parseCSV(text){
   return rows.slice(1).map(r=>{ const o={}; header.forEach((h,i)=>o[h]=r[i]); return o; });
 }
 
-// ===== AUTOCOMPLETE CH =====
-const chInput = document.getElementById('chInput');
-const chList = document.getElementById('chList');
-chInput.addEventListener('input', ()=>{
-  const q = chInput.value.trim().toLowerCase();
-  chList.innerHTML=''; 
-  if(q.length < 1){ chList.style.display='none'; return; }
-  const matches = stores.filter(s =>
-    s.ma.toLowerCase().includes(q) || s.ten.toLowerCase().includes(q)
-  ).slice(0, 30);
-  if(matches.length===0){ chList.style.display='none'; return; }
-  matches.forEach(s=>{
-    const d = document.createElement('div'); d.className='ac-item';
-    d.innerHTML = `<div class="nm">${s.ma} — ${s.ten}</div><div class="sm">${s.gdv} · ${s.qlkv} · ${s.tinh}</div>`;
-    d.onclick = ()=>{ selectStore(s); };
-    chList.appendChild(d);
-  });
-  chList.style.display='block';
-});
-document.addEventListener('click', e=>{ if(!e.target.closest('.ac-wrap')) chList.style.display='none'; });
+// ===== CROSSLINK: Miền → GĐV → QLKV → CH =====
+const selMien = document.getElementById('selMien');
+const selGdv = document.getElementById('selGdv');
+const selQlkv = document.getElementById('selQlkv');
+const selCh = document.getElementById('selCh');
 
-function selectStore(s){
-  selectedStore = s;
-  chInput.value = s.ma + ' — ' + s.ten;
-  chList.style.display='none';
-  document.getElementById('pGdv').textContent = s.gdv||'-';
-  document.getElementById('pQlkv').textContent = s.qlkv||'-';
-  document.getElementById('pTinh').textContent = s.tinh||'-';
-  document.getElementById('pMien').textContent = s.mien||'-';
-  document.getElementById('chInfo').style.display='flex';
+function fill(sel, items, placeholder, valueFn, labelFn){
+  sel.innerHTML = `<option value="">${placeholder}</option>` +
+    items.map(v=>`<option value="${valueFn(v)}">${labelFn(v)}</option>`).join('');
+}
+
+function buildMienDropdown(){
+  const miens = [...new Set(stores.map(s=>s.mien).filter(Boolean))].sort();
+  fill(selMien, miens, '— Chọn Miền —', m=>m, m=>m);
+}
+
+selMien.addEventListener('change', ()=>{
+  const m = selMien.value;
+  const gdvs = [...new Set(stores.filter(s=>s.mien===m).map(s=>s.gdv).filter(Boolean))].sort();
+  fill(selGdv, gdvs, '— Chọn GĐV —', g=>g, g=>g);
+  selQlkv.innerHTML='<option value="">— Chọn QLKV —</option>';
+  selCh.innerHTML='<option value="">— Chọn Cửa hàng —</option>';
+  clearStoreInfo();
+});
+
+selGdv.addEventListener('change', ()=>{
+  const m = selMien.value, g = selGdv.value;
+  const qlkvs = [...new Set(stores.filter(s=>s.mien===m && s.gdv===g).map(s=>s.qlkv).filter(Boolean))].sort();
+  fill(selQlkv, qlkvs, '— Chọn QLKV —', q=>q, q=>q);
+  selCh.innerHTML='<option value="">— Chọn Cửa hàng —</option>';
+  clearStoreInfo();
+});
+
+selQlkv.addEventListener('change', ()=>{
+  const m = selMien.value, g = selGdv.value, q = selQlkv.value;
+  const chs = stores.filter(s=>s.mien===m && s.gdv===g && s.qlkv===q);
+  selCh.innerHTML = `<option value="">— Chọn Cửa hàng (${chs.length}) —</option>` +
+    chs.map(s=>`<option value="${s.ma}">${s.ma} — ${s.ten}</option>`).join('');
+  clearStoreInfo();
+});
+
+selCh.addEventListener('change', ()=>{
+  const ma = selCh.value;
+  selectedStore = stores.find(s=>s.ma===ma) || null;
+  if(selectedStore){
+    document.getElementById('pTinh').textContent = selectedStore.tinh||'-';
+    document.getElementById('pHuyen').textContent = selectedStore.huyen||'-';
+    document.getElementById('pQlkv').textContent = selectedStore.qlkv||'-';
+    document.getElementById('pGdv').textContent = selectedStore.gdv||'-';
+    document.getElementById('chInfo').style.display='flex';
+  }
+  validateDistance();
+});
+
+function clearStoreInfo(){
+  selectedStore = null;
+  document.getElementById('chInfo').style.display='none';
   validateDistance();
 }
 
@@ -379,8 +412,7 @@ function haversine(lat1,lng1,lat2,lng2){
 
 function validateDistance(){
   const el = document.getElementById('distResult');
-  if(!selectedStore || !competitorLat || !competitorLng){ el.style.display='none'; return; }
-  if(!selectedStore.lat || !selectedStore.lng){ el.style.display='none'; return; }
+  if(!selectedStore || !competitorLat || !competitorLng || !selectedStore.lat || !selectedStore.lng){ el.style.display='none'; return; }
   const km = haversine(competitorLat, competitorLng, selectedStore.lat, selectedStore.lng);
   el.style.display='block';
   if(km <= MAX_DIST_KM){
@@ -392,16 +424,40 @@ function validateDistance(){
   }
 }
 
+// ===== VALIDATE SỐ =====
+function isNum(s){ return s==='' || (!isNaN(parseFloat(s.replace(',','.'))) && isFinite(parseFloat(s.replace(',','.')))); }
+function mark(id, errId, ok){
+  const input = document.getElementById(id);
+  const err = document.getElementById(errId);
+  if(!ok){ input.classList.add('invalid'); err.style.display='block'; }
+  else { input.classList.remove('invalid'); err.style.display='none'; }
+  return ok;
+}
+
 // ===== SUBMIT =====
 function submitForm(){
-  if(!selectedStore){ toast('⚠️ Chọn cửa hàng khảo sát trước'); return; }
+  if(!selectedStore){ toast('⚠️ Chọn cửa hàng khảo sát (Miền → GĐV → QLKV → CH)'); return; }
   const nhom = document.getElementById('nhom').value;
   const ten = document.getElementById('tenDoiThu').value.trim();
-  const ngay = document.getElementById('ngayKT').value;
+  const diaChi = document.getElementById('diaChi').value.trim();
+  const ngay = document.getElementById('ngayKhaiTruong').value;
+
   if(!nhom){ toast('⚠️ Chọn nhóm đối thủ'); return; }
   if(!ten){ toast('⚠️ Nhập tên đối thủ'); return; }
+  if(!diaChi){ toast('⚠️ Nhập địa chỉ đối thủ'); return; }
   if(!competitorLat || !competitorLng){ toast('⚠️ Cần định vị/toạ độ đối thủ'); return; }
-  if(!ngay){ toast('⚠️ Chọn ngày khảo sát'); return; }
+  if(!ngay){ toast('⚠️ Chọn ngày khai trương'); return; }
+
+  // Validate số liệu (nếu có nhập)
+  const fields = [
+    ['doanhSo','errDoanhSo'], ['luongKhach','errKhach'],
+    ['mt','errMt'], ['dienTich','errDt'], ['giaThue','errGia']
+  ];
+  for(const [id, errId] of fields){
+    const v = document.getElementById(id).value.trim();
+    if(!isNum(v)){ mark(id, errId, false); toast('⚠️ Kiểm tra lại số liệu'); return; }
+    mark(id, errId, true);
+  }
 
   const payload = {
     timestamp: new Date().toISOString(),
@@ -409,29 +465,29 @@ function submitForm(){
     ten_ch: selectedStore.ten,
     mien: selectedStore.mien,
     tinh: selectedStore.tinh,
+    huyen: selectedStore.huyen,
     qlkv: selectedStore.qlkv,
     gdv: selectedStore.gdv,
     nhom_doi_thu: nhom,
     ten_doi_thu: ten,
+    dia_chi: diaChi,
     lat: competitorLat,
     lng: competitorLng,
     kc_km: selectedStore.lat && selectedStore.lng ? +haversine(competitorLat,competitorLng,selectedStore.lat,selectedStore.lng).toFixed(3) : null,
-    ngay_kt: ngay,
-    doanh_so: document.getElementById('doanhSo').value.trim(),
-    luong_khach: document.getElementById('luongKhach').value.trim(),
+    ngay_khai_truong: ngay,
+    doanh_so_tb_ngay: document.getElementById('doanhSo').value.trim(),
+    khach_tb_ngay: document.getElementById('luongKhach').value.trim(),
     mt: document.getElementById('mt').value.trim(),
     dien_tich: document.getElementById('dienTich').value.trim(),
     gia_thue: document.getElementById('giaThue').value.trim()
   };
 
-  // Lưu local (draft)
   const key = 'ra-soat-doi-thu-data';
   const arr = JSON.parse(localStorage.getItem(key)||'[]');
   arr.push(payload);
   localStorage.setItem(key, JSON.stringify(arr));
   updateProgress();
 
-  // Gửi GAS nếu có
   if(GAS_URL){
     fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(payload) })
       .then(()=>toast('✅ Đã lưu lên hệ thống'))
@@ -445,6 +501,7 @@ function submitForm(){
 
 function resetForm(){
   document.getElementById('tenDoiThu').value='';
+  document.getElementById('diaChi').value='';
   document.getElementById('nhom').value='';
   document.getElementById('lat').value='';
   document.getElementById('lng').value='';
@@ -455,6 +512,8 @@ function resetForm(){
   document.getElementById('giaThue').value='';
   competitorLat=null; competitorLng=null;
   document.getElementById('distResult').style.display='none';
+  ['doanhSo','luongKhach','mt','dienTich','giaThue'].forEach(id=>document.getElementById(id).classList.remove('invalid'));
+  ['errDoanhSo','errKhach','errMt','errDt','errGia'].forEach(id=>document.getElementById(id).style.display='none');
 }
 
 function updateProgress(){
@@ -467,7 +526,7 @@ function updateProgress(){
 
 // ===== INIT =====
 (function init(){
-  document.getElementById('ngayKT').value = new Date().toISOString().slice(0,10);
+  document.getElementById('ngayKhaiTruong').value = new Date().toISOString().slice(0,10);
   loadStorelist();
   updateProgress();
 })();
