@@ -56,6 +56,8 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue);bo
 .hint{font-size:12px;color:var(--muted);margin-top:4px;}
 .err{color:var(--red);font-size:11px;margin-top:3px;display:none;}
 input.invalid{border-color:var(--red);}
+.warn-hint{font-size:10px;color:#b45309;margin-top:2px;font-weight:500;}
+input.range-warn{border-color:#f59e0b;background:#fffbeb;}
 
 .pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
 .pill{font-size:12px;padding:4px 10px;border-radius:20px;background:#eef2f7;color:#374151;font-weight:500;}
@@ -127,7 +129,7 @@ input.invalid{border-color:var(--red);}
 <div class="topbar">
   <div class="t-row">
     <div>
-      <div class="t-title">🔍 Rà Soát Đối Thủ <span class="vbadge">v1.26</span></div>
+      <div class="t-title">🔍 Rà Soát Đối Thủ <span class="vbadge">v1.27</span></div>
       <div class="t-sub">Khai báo & cập nhật đối thủ quanh cửa hàng</div>
     </div>
   </div>
@@ -220,28 +222,33 @@ input.invalid{border-color:var(--red);}
       <div class="row5">
         <div>
           <label>DS/ngày (trđ)</label>
-          <input type="text" id="doanhSo" inputmode="decimal" placeholder="25">
+          <input type="text" id="doanhSo" inputmode="decimal" placeholder="25" oninput="validateRange()">
           <div class="err" id="errDoanhSo">Số</div>
+          <div class="warn-hint" id="warnDoanhSo" style="display:none"></div>
         </div>
         <div>
           <label>Khách/ngày</label>
-          <input type="text" id="luongKhach" inputmode="decimal" placeholder="300">
+          <input type="text" id="luongKhach" inputmode="decimal" placeholder="300" oninput="validateRange()">
           <div class="err" id="errKhach">Số</div>
+          <div class="warn-hint" id="warnKhach" style="display:none"></div>
         </div>
         <div>
           <label>MT (m)</label>
-          <input type="text" id="mt" inputmode="decimal" placeholder="8">
+          <input type="text" id="mt" inputmode="decimal" placeholder="8" oninput="validateRange()">
           <div class="err" id="errMt">Số</div>
+          <div class="warn-hint" id="warnMt" style="display:none"></div>
         </div>
         <div>
           <label>Giá thuê (tr)</label>
-          <input type="text" id="giaThue" inputmode="decimal" placeholder="15">
+          <input type="text" id="giaThue" inputmode="decimal" placeholder="15" oninput="validateRange()">
           <div class="err" id="errGia">Số</div>
+          <div class="warn-hint" id="warnGia" style="display:none"></div>
         </div>
         <div>
           <label>DT (m²)</label>
-          <input type="text" id="dienTich" inputmode="decimal" placeholder="120">
+          <input type="text" id="dienTich" inputmode="decimal" placeholder="120" oninput="validateRange()">
           <div class="err" id="errDt">Số</div>
+          <div class="warn-hint" id="warnDt" style="display:none"></div>
         </div>
       </div>
 
@@ -286,6 +293,7 @@ let editingIdx = null;   // index đang sửa trong competitorList
 let curLat = null, curLng = null;
 let distanceWarn = false; // khoảng cách bất thường (quá gần/quá xa)
 let ngayWarn = false;     // ngày KT bất thường (tương lai hoặc quá 12 tháng)
+let rangeWarn = false;    // số liệu ngoài khoảng hợp lý
 let isSubmitting = false; // chống double submit
 
 // ===== TOAST =====
@@ -525,6 +533,34 @@ function validateNgay(){
   else { el.style.display='none'; }
 }
 
+// ===== VALIDATE RANGE SỐ LIỆU =====
+// Ranges hợp lý cho cửa hàng WinMart+ Rural
+const RANGES = {
+  doanhSo:  { min: 1, max: 200, unit: 'tr/ngày', name: 'Doanh số' },
+  luongKhach:{ min: 10, max: 3000, unit: 'khách/ngày', name: 'Lượng khách' },
+  mt:       { min: 2, max: 50, unit: 'm', name: 'Mặt tiền' },
+  giaThue:  { min: 2, max: 200, unit: 'tr/tháng', name: 'Giá thuê' },
+  dienTich: { min: 20, max: 2000, unit: 'm²', name: 'Diện tích' },
+};
+
+function validateRange(){
+  rangeWarn = false;
+  const map = { doanhSo:'warnDoanhSo', luongKhach:'warnKhach', mt:'warnMt', giaThue:'warnGia', dienTich:'warnDt' };
+  Object.entries(map).forEach(([id, warnId]) => {
+    const el = document.getElementById(id);
+    const warnEl = document.getElementById(warnId);
+    const v = el.value.trim();
+    if(!v || !isNum(v)){ el.classList.remove('range-warn'); if(warnEl) warnEl.style.display='none'; return; }
+    const n = parseFloat(v.replace(',','.'));
+    const r = RANGES[id];
+    let msg = '';
+    if(n < r.min) msg = `⚠️ ${r.name} quá thấp (<${r.min} ${r.unit})`;
+    else if(n > r.max) msg = `⚠️ ${r.name} quá cao (${n.toLocaleString()} ${r.unit})`;
+    if(msg){ el.classList.add('range-warn'); warnEl.textContent = msg; warnEl.style.display='block'; rangeWarn = true; }
+    else { el.classList.remove('range-warn'); if(warnEl) warnEl.style.display='none'; }
+  });
+}
+
 // ===== TOGGLE FORM =====
 function toggleAddForm(forceShow){
   const card = document.getElementById('addCard');
@@ -614,6 +650,7 @@ function editCompetitor(i){
   document.getElementById('dienTich').value = c.dienTich || '';
   curLat = parseFloat(c.lat) || null;
   curLng = parseFloat(c.lng) || null;
+  validateRange();
 
   document.getElementById('formTitle').textContent = 'Sửa đối thủ';
   document.getElementById('btnSaveForm').textContent = '💾 Cập nhật';
@@ -672,6 +709,10 @@ function saveForm(){
   }
   if(ngayWarn){
     askConfirm('⚠️ Ngày khai trương bất thường (ngày tương lai hoặc quá 12 tháng). Vẫn tiếp tục?', doSaveForm);
+    return;
+  }
+  if(rangeWarn){
+    askConfirm('⚠️ Một số số liệu ngoài khoảng hợp lý. Vẫn tiếp tục?', doSaveForm);
     return;
   }
   doSaveForm();
@@ -742,10 +783,12 @@ function resetCompetitorFields(){
   curLat=null; curLng=null;
   distanceWarn=false;
   ngayWarn=false;
+  rangeWarn=false;
   document.getElementById('distResult').style.display='none';
   document.getElementById('ngayResult').style.display='none';
-  ['doanhSo','luongKhach','mt','dienTich','giaThue'].forEach(id=>document.getElementById(id).classList.remove('invalid'));
+  ['doanhSo','luongKhach','mt','dienTich','giaThue'].forEach(id=>{document.getElementById(id).classList.remove('invalid');document.getElementById(id).classList.remove('range-warn');});
   ['errDoanhSo','errKhach','errMt','errDt','errGia'].forEach(id=>document.getElementById(id).style.display='none');
+  ['warnDoanhSo','warnKhach','warnMt','warnGia','warnDt'].forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
 }
 
 // ===== LƯU TẤT CẢ =====
