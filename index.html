@@ -25,7 +25,7 @@ body{
 .topbar .t-row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
 .topbar .t-title{font-size:16px;font-weight:800;line-height:1.2;}
 .topbar .t-sub{font-size:11px;opacity:.85;margin-top:1px;}
-.topbar .t-ver{font-size:10px;opacity:.75;white-space:nowrap;}
+.topbar .t-ver{font-size:12px;opacity:.95;white-space:nowrap;font-weight:600;}
 
 .wrap{max-width:640px;margin:0 auto;padding:0 12px;}
 .card{background:var(--card);border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-top:14px;overflow:hidden;}
@@ -124,7 +124,7 @@ input.invalid{border-color:var(--red);}
       <div class="t-title">🔍 Rà Soát Đối Thủ</div>
       <div class="t-sub">Khai báo & cập nhật đối thủ quanh cửa hàng</div>
     </div>
-    <div class="t-ver">v1.9-draft · MsT ✨</div>
+    <div class="t-ver">v1.10</div>
   </div>
 </div>
 
@@ -347,7 +347,14 @@ function buildMienDropdown(){
   const miens = [...new Set(stores.map(s=>s.mien).filter(Boolean))].sort();
   fill(selMien, miens, '— Miền —', m=>m, m=>m);
 }
-selMien.addEventListener('change', ()=>{ resetLower(); });
+selMien.addEventListener('change', ()=>{
+  const m = selMien.value;
+  const gdvs = [...new Set(stores.filter(s=>s.mien===m).map(s=>s.gdv).filter(Boolean))].sort();
+  fill(selGdv, gdvs, '— GĐV —', g=>g, g=>g);
+  selQlkv.innerHTML='<option value="">— QLKV —</option>';
+  selCh.innerHTML='<option value="">— Chọn Cửa hàng —</option>';
+  clearStoreInfo();
+});
 selGdv.addEventListener('change', ()=>{
   const m = selMien.value, g = selGdv.value;
   const qlkvs = [...new Set(stores.filter(s=>s.mien===m && s.gdv===g).map(s=>s.qlkv).filter(Boolean))].sort();
