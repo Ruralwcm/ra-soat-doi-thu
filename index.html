@@ -122,7 +122,7 @@ input.invalid{border-color:var(--red);}
 <div class="topbar">
   <div class="t-row">
     <div>
-      <div class="t-title">🔍 Rà Soát Đối Thủ <span class="vbadge">v1.12</span></div>
+      <div class="t-title">🔍 Rà Soát Đối Thủ <span class="vbadge">v1.13</span></div>
       <div class="t-sub">Khai báo & cập nhật đối thủ quanh cửa hàng</div>
     </div>
   </div>
@@ -644,7 +644,7 @@ function submitAll(){
 
   if(GAS_URL){
     fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(batch) })
-      .then(()=>{ toast('✅ Đã lưu lên hệ thống'); reloadAfterSave(); })
+      .then(()=>{ toast('✅ Đã lưu lên hệ thống'); markSaved(); })
       .catch(()=>toast('⚠️ Lưu thất bại, thử lại nhé'));
   } else {
     const key = 'ra-soat-doi-thu-data';
@@ -652,13 +652,12 @@ function submitAll(){
     batch.competitors.forEach(c=>{ arr.push({ ...batch, ...c, competitors: undefined }); });
     localStorage.setItem(key, JSON.stringify(arr));
     toast(`✅ Đã lưu ${toSave.length} đối thủ (bản draft — chưa có GAS URL)`);
-    reloadAfterSave();
+    markSaved();
   }
 }
-function reloadAfterSave(){
-  competitorList = selectedStore
-    ? existingData.filter(c => c.ma_ch === selectedStore.ma).map(c => ({ ...c, _existing: true, _edited: false }))
-    : [];
+function markSaved(){
+  // Sau khi lưu: giữ nguyên danh sách, đánh dấu các mục đã lưu là "đã có" để cho phép sửa
+  competitorList.forEach(c => { c._existing = true; c._edited = false; });
   editingIdx = null;
   renderList();
 }
