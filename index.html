@@ -122,7 +122,7 @@ input.invalid{border-color:var(--red);}
 <div class="topbar">
   <div class="t-row">
     <div>
-      <div class="t-title">🔍 Rà Soát Đối Thủ <span class="vbadge">v1.18</span></div>
+      <div class="t-title">🔍 Rà Soát Đối Thủ <span class="vbadge">v1.19</span></div>
       <div class="t-sub">Khai báo & cập nhật đối thủ quanh cửa hàng</div>
     </div>
   </div>
@@ -527,6 +527,8 @@ function removeCompetitor(i){
 }
 
 // ===== EDIT COMPETITOR (fill xuống form) =====
+function toISO(d){ const m=String(d||'').match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/); return m ? `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}` : d; }
+function toVN(d){ const m=String(d||'').match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? `${m[3]}/${m[2]}/${m[1]}` : d; }
 function editCompetitor(i){
   const c = competitorList[i];
   if(!c) return;
@@ -534,7 +536,7 @@ function editCompetitor(i){
   document.getElementById('nhom').value = c.nhom || '';
   document.getElementById('tenDoiThu').value = c.ten || '';
   document.getElementById('diaChi').value = c.diaChi || '';
-  document.getElementById('ngayKhaiTruong').value = (c.ngay||'').length >= 10 ? c.ngay.slice(0,10) : (c.ngay||'');
+  document.getElementById('ngayKhaiTruong').value = toISO(c.ngay);
   document.getElementById('locInput').value = (c.lat && c.lng) ? `${c.lat}, ${c.lng}` : '';
   document.getElementById('doanhSo').value = c.doanhSo || '';
   document.getElementById('luongKhach').value = c.luongKhach || '';
@@ -574,7 +576,7 @@ function saveForm(){
   const nhom = document.getElementById('nhom').value;
   const ten = document.getElementById('tenDoiThu').value.trim();
   const diaChi = document.getElementById('diaChi').value.trim();
-  const ngay = document.getElementById('ngayKhaiTruong').value;
+  const ngay = toVN(document.getElementById('ngayKhaiTruong').value);
   if(!nhom){ toast('⚠️ Chọn nhóm đối thủ'); return; }
   if(!ten){ toast('⚠️ Nhập tên đối thủ'); return; }
   if(!diaChi){ toast('⚠️ Nhập địa chỉ'); return; }
