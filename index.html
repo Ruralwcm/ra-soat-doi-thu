@@ -172,7 +172,7 @@ input.range-warn{border-color:var(--red);background:#fff5f5;}
     <div class="card-body">
       <div id="compList"><div class="comp-empty">Chọn cửa hàng để xem đối thủ đã có.</div></div>
       <div style="display:flex;gap:8px;margin-top:8px;" id="confirmBar">
-        <button class="btn btn-ghost" id="btnNoChange" onclick="confirmNoChange()" disabled style="flex:1;border-color:var(--green);color:var(--green);">✅ Không đổi</button>
+        <button class="btn btn-ghost" id="btnNoChange" onclick="onNoChangeBtn()" disabled style="flex:1;border-color:var(--green);color:var(--green);">✅ Không đổi</button>
         <button class="btn btn-blue" id="btnAddNew" onclick="toggleAddForm()" disabled style="flex:1;">➕ Thêm</button>
       </div>
     </div>
@@ -644,6 +644,21 @@ function renderList(){
   const newCount = competitorList.filter(c => !c._existing || c._edited).length;
   document.getElementById('btnCount').textContent = newCount;
   document.getElementById('btnSubmit').disabled = (newCount === 0);
+  // Nút "Không đổi" <-> "Lưu thay đổi" theo trạng thái có thêm/sửa hay không
+  const btnNC = document.getElementById('btnNoChange');
+  if (newCount > 0) {
+    btnNC.textContent = '💾 Lưu thay đổi';
+    btnNC.dataset.mode = 'save';
+  } else {
+    btnNC.textContent = '✅ Không đổi';
+    btnNC.dataset.mode = 'nochange';
+  }
+}
+// Bấm nút Không đổi / Lưu thay đổi
+function onNoChangeBtn(){
+  const newCount = competitorList.filter(c => !c._existing || c._edited).length;
+  if (newCount > 0) submitAll();
+  else confirmNoChange();
 }
 function removeCompetitor(i){
   competitorList.splice(i,1);
