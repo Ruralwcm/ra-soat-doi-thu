@@ -266,10 +266,6 @@ input.range-warn{border-color:var(--red);background:#fff5f5;}
 
 </div>
 
-<div class="submit-bar">
-  <button class="btn btn-primary" id="btnSubmit" onclick="submitAll()" disabled>✅ Lưu tất cả (<span id="btnCount">0</span> mới)</button>
-</div>
-
 <div class="toast" id="toast"></div>
 
 <div class="confirm-overlay" id="confirmOverlay" style="display:none;">
@@ -642,12 +638,10 @@ function renderList(){
   wrap.innerHTML = html;
   document.getElementById('tagCount').textContent = `${competitorList.length} đối thủ`;
   const newCount = competitorList.filter(c => !c._existing || c._edited).length;
-  document.getElementById('btnCount').textContent = newCount;
-  document.getElementById('btnSubmit').disabled = (newCount === 0);
   // Nút "Không đổi" <-> "Lưu thay đổi" theo trạng thái có thêm/sửa hay không
   const btnNC = document.getElementById('btnNoChange');
   if (newCount > 0) {
-    btnNC.textContent = '💾 Lưu thay đổi';
+    btnNC.textContent = `💾 Lưu thay đổi (${newCount} mới)`;
     btnNC.dataset.mode = 'save';
   } else {
     btnNC.textContent = '✅ Không đổi';
@@ -877,8 +871,7 @@ function submitAll(){
   }
 
   isSubmitting = true;
-  document.getElementById('btnSubmit').disabled = true;
-  document.getElementById('btnSubmit').textContent = '⏳ Đang lưu...';
+  document.getElementById('btnNoChange').textContent = '⏳ Đang lưu...';
 
   const batch = {
     timestamp: new Date().toISOString(),
@@ -905,8 +898,6 @@ function submitAll(){
 }
 function updateSubmitButton(){
   isSubmitting = false;
-  document.getElementById('btnSubmit').disabled = false;
-  document.getElementById('btnSubmit').textContent = '✅ Lưu tất cả (' + document.getElementById('btnCount').textContent + ' mới)';
 }
 function markSaved(){
   // Sau khi lưu: giữ nguyên danh sách, đánh dấu các mục đã lưu là "đã có" để cho phép sửa
