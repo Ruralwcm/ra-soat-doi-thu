@@ -905,13 +905,45 @@ function showCompletedBox(ma, ten, trangThai){
   box.scrollIntoView({behavior:'smooth',block:'center'});
 }
 function resetCompletedBox(){
+  // Reset lại toàn bộ trang về trạng thái ban đầu
   const box = document.getElementById('completedBox');
   if(box) box.remove();
+  
   // Reset store selection
   selectedStore = null;
   document.getElementById('btnNoChange').disabled = true;
   document.getElementById('btnNoChange').textContent = '✅ Không đổi';
   document.getElementById('storeSearch').value = '';
+  
+  // Reset form fields
+  document.getElementById('nhom').value = '';
+  document.getElementById('tenDoiThu').value = '';
+  document.getElementById('diaChi').value = '';
+  document.getElementById('ngayKhaiTruong').value = '';
+  document.getElementById('locInput').value = '';
+  document.getElementById('dsTB').value = '';
+  document.getElementById('khachTB').value = '';
+  document.getElementById('mtInput').value = '';
+  document.getElementById('giaThue').value = '';
+  document.getElementById('dienTich').value = '';
+  
+  // Reset competitor list
+  competitorList = [];
+  editingIdx = null;
+  isSubmitting = false;
+  renderList();
+  
+  // Ẩn form thêm/sửa nếu đang mở
+  document.getElementById('addCard').style.display = 'none';
+  
+  // Reset dropdown
+  document.getElementById('mienSelect').value = '';
+  document.getElementById('gdvSelect').innerHTML = '<option value="">-- Chọn GĐV --</option>';
+  document.getElementById('qlkvSelect').innerHTML = '<option value="">-- Chọn QLKV --</option>';
+  document.getElementById('storeSelect').innerHTML = '<option value="">-- Chọn CH --</option>';
+  
+  // Scroll lên đầu trang
+  window.scrollTo({top: 0, behavior: 'smooth'});
   document.getElementById('storeSearch').focus();
 }
 
