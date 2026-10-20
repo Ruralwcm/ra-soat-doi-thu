@@ -172,7 +172,7 @@ input.range-warn{border-color:var(--red);background:#fff5f5;}
     <div class="card-body">
       <div id="compList"><div class="comp-empty">Chọn cửa hàng để xem đối thủ đã có.</div></div>
       <div style="display:flex;gap:8px;margin-top:8px;" id="confirmBar">
-        <button class="btn btn-ghost" id="btnNoChange" onclick="onNoChangeBtn()" disabled style="flex:1;border-color:var(--green);color:var(--green);">✅ Không đổi</button>
+        <button class="btn btn-ghost" id="btnNoChange" onclick="onNoChangeBtn()" disabled style="flex:1;border-color:var(--green);color:var(--green);">✅ Không thay đổi</button>
         <button class="btn btn-blue" id="btnAddNew" onclick="toggleAddForm()" disabled style="flex:1;">➕ Thêm</button>
       </div>
     </div>
@@ -650,7 +650,7 @@ function refreshNoChangeBtn(){
     btnNC.textContent = newCount > 0 ? `💾 Lưu thay đổi (${newCount} mới)` : '💾 Lưu thay đổi';
     btnNC.dataset.mode = 'save';
   } else {
-    btnNC.textContent = '✅ Không đổi';
+    btnNC.textContent = '✅ Không thay đổi';
     btnNC.dataset.mode = 'nochange';
   }
 }
@@ -860,7 +860,7 @@ function confirmNoChange(){
   if(GAS_URL){
     fetch(GAS_URL + '?action=tracklog', { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(track) })
       .then(() => saveAndShow())
-      .catch(() => { toast('⚠️ Lỗi ghi log, thử lại'); isSubmitting = false; btnNC.disabled = false; btnNC.textContent = '✅ Không đổi'; });
+      .catch(() => { toast('⚠️ Lỗi ghi log, thử lại'); isSubmitting = false; btnNC.disabled = false; btnNC.textContent = '✅ Không thay đổi'; });
   } else {
     const key = 'ra-soat-tracklog';
     const arr = JSON.parse(localStorage.getItem(key)||'[]');
@@ -881,7 +881,7 @@ function showCompletedBox(ma, ten, trangThai){
     <div style="font-size:28px;margin-bottom:4px">✅</div>
     <div style="font-size:16px;font-weight:800;color:#166534;margin-bottom:2px">Đã hoàn thành khảo sát!</div>
     <div style="font-size:13px;color:#065f46;margin-bottom:6px">${ma} — ${ten}</div>
-    <div style="font-size:12px;color:#047857;background:#a7f3d0;display:inline-block;padding:3px 12px;border-radius:20px;font-weight:600">Trạng thái: ${trangThai === 'không đổi' ? 'Không đổi (giữ nguyên)' : 'Đã cập nhật'}</div>
+    <div style="font-size:12px;color:#047857;background:#a7f3d0;display:inline-block;padding:3px 12px;border-radius:20px;font-weight:600">Trạng thái: ${trangThai === 'không đổi' ? 'Không thay đổi (giữ nguyên)' : 'Đã cập nhật'}</div>
     <div style="margin-top:10px">
       <button onclick="resetCompletedBox()" style="background:var(--blue);color:#fff;border:none;padding:8px 22px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">🔍 Khảo sát cửa hàng khác</button>
     </div>
@@ -912,7 +912,7 @@ function resetCompletedBox(){
   // Reset store selection
   selectedStore = null;
   document.getElementById('btnNoChange').disabled = true;
-  document.getElementById('btnNoChange').textContent = '✅ Không đổi';
+  document.getElementById('btnNoChange').textContent = '✅ Không thay đổi';
   document.getElementById('storeSearch').value = '';
   
   // Reset form fields
