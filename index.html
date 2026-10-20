@@ -129,7 +129,7 @@ input.range-warn{border-color:var(--red);background:#fff5f5;}
 <div class="topbar">
   <div class="t-row">
     <div>
-      <div class="t-title">🔍 Rà Soát Đối Thủ <span class="vbadge">v2.0</span></div>
+      <div class="t-title">🔍 Rà Soát Đối Thủ <span class="vbadge">v2.1</span></div>
       <div class="t-sub">Khai báo & cập nhật đối thủ quanh cửa hàng</div>
     </div>
     <a href="dashboard.html" style="color:#fff;text-decoration:none;font-size:13px;font-weight:700;background:rgba(255,255,255,.18);padding:8px 14px;border-radius:8px;white-space:nowrap;">📊 Dashboard</a>
@@ -820,16 +820,13 @@ function resetCompetitorFields(){
 // ===== XÁC NHẬN KHÔNG ĐỔI =====
 function confirmNoChange(){
   if(!selectedStore){ toast('⚠️ Chọn cửa hàng trước'); return; }
-  const name = prompt('👤 Người khai báo (tên CHT):', '');
-  if(!name || !name.trim()){ toast('⚠️ Nhập tên người khai báo'); return; }
   
   const track = {
     timestamp: new Date().toISOString(),
     ma_ch: selectedStore.ma, ten_ch: selectedStore.ten,
     mien: selectedStore.mien, tinh: selectedStore.tinh, huyen: selectedStore.huyen,
     qlkv: selectedStore.qlkv, gdv: selectedStore.gdv,
-    trang_thai: 'Không đổi',
-    nguoi_kb: name.trim()
+    trang_thai: 'Không đổi'
   };
 
   if(GAS_URL){
