@@ -583,6 +583,7 @@ function toggleAddForm(forceShow){
   }
   card.style.display = show ? 'block' : 'none';
   if(show) card.scrollIntoView({ behavior:'smooth', block:'start' });
+  refreshNoChangeBtn();
 }
 
 // ===== RENDER DANH SÁCH =====
@@ -637,11 +638,16 @@ function renderList(){
   }
   wrap.innerHTML = html;
   document.getElementById('tagCount').textContent = `${competitorList.length} đối thủ`;
-  const newCount = competitorList.filter(c => !c._existing || c._edited).length;
-  // Nút "Không đổi" <-> "Lưu thay đổi" theo trạng thái có thêm/sửa hay không
+  refreshNoChangeBtn();
+}
+// Nút "Không đổi" <-> "Lưu thay đổi" (đổi ngay khi mở form thêm/sửa)
+function refreshNoChangeBtn(){
   const btnNC = document.getElementById('btnNoChange');
-  if (newCount > 0) {
-    btnNC.textContent = `💾 Lưu thay đổi (${newCount} mới)`;
+  if(!btnNC) return;
+  const formOpen = document.getElementById('addCard').style.display !== 'none';
+  const newCount = competitorList.filter(c => !c._existing || c._edited).length;
+  if (formOpen || newCount > 0) {
+    btnNC.textContent = newCount > 0 ? `💾 Lưu thay đổi (${newCount} mới)` : '💾 Lưu thay đổi';
     btnNC.dataset.mode = 'save';
   } else {
     btnNC.textContent = '✅ Không đổi';
@@ -687,6 +693,7 @@ function editCompetitor(i){
   document.getElementById('addCard').style.display = 'block';
   document.getElementById('addCard').scrollIntoView({ behavior:'smooth', block:'start' });
   validateDistance();
+  refreshNoChangeBtn();
 }
 function cancelEdit(){
   editingIdx = null;
@@ -695,6 +702,7 @@ function cancelEdit(){
   document.getElementById('formTitle').textContent = 'Thêm đối thủ';
   document.getElementById('btnSaveForm').textContent = '➕ Thêm vào danh sách';
   document.getElementById('btnCancelEdit').style.display = 'none';
+  refreshNoChangeBtn();
 }
 
 // ===== VALIDATE SỐ =====
