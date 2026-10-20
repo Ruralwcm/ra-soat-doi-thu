@@ -880,10 +880,19 @@ function showCompletedBox(ma, ten, trangThai){
     </div>
   `;
   
-  // Chèn vào sau phần danh sách đối thủ
-  const listSection = document.querySelector('.card:last-of-type');
-  if(listSection) listSection.appendChild(box);
-  else document.querySelector('.container').insertAdjacentHTML('beforeend', box.outerHTML);
+  // Chèn vào sau phần danh sách đối thủ (tìm card chứa list)
+  const cards = document.querySelectorAll('.card');
+  let inserted = false;
+  for(const card of cards){
+    if(card.textContent.includes('Danh sách đối thủ')){
+      card.appendChild(box); inserted = true; break;
+    }
+  }
+  if(!inserted) {
+    // Fallback: chèn vào cuối container
+    const container = document.querySelector('.container') || document.body;
+    container.appendChild(box);
+  }
   
   // Scroll đến box
   box.scrollIntoView({behavior:'smooth',block:'center'});
