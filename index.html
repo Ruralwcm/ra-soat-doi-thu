@@ -845,17 +845,58 @@ function confirmNoChange(){
     trang_thai: 'Không đổi'
   };
 
+  const saveAndShow = () => {
+    // Hiển thị textbox "Đã hoàn thành" thay vì toast
+    showCompletedBox(selectedStore.ma, selectedStore.ten, 'không đổi');
+  };
+
   if(GAS_URL){
     fetch(GAS_URL + '?action=tracklog', { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(track) })
-      .then(() => toast('✅ Đã ghi nhận: ' + selectedStore.ma + ' — Không đổi'))
+      .then(() => saveAndShow())
       .catch(() => toast('⚠️ Lỗi ghi log, thử lại'));
   } else {
     const key = 'ra-soat-tracklog';
     const arr = JSON.parse(localStorage.getItem(key)||'[]');
     arr.push(track);
     localStorage.setItem(key, JSON.stringify(arr));
-    toast('⚠️ Chưa lưu gas — log chỉ lưu tạm trên máy');
+    saveAndShow();
   }
+}
+function showCompletedBox(ma, ten, trangThai){
+  // Tạo textbox "Đã hoàn thành" hiển thị cố định trên giao diện
+  const old = document.getElementById('completedBox');
+  if(old) old.remove();
+  
+  const box = document.createElement('div');
+  box.id = 'completedBox';
+  box.style.cssText = 'background:#d1fae5;border:2px solid #16a34a;border-radius:12px;padding:16px 18px;margin:12px 0;text-align:center;animation:fadeIn 0.3s ease';
+  box.innerHTML = `
+    <div style="font-size:28px;margin-bottom:4px">✅</div>
+    <div style="font-size:16px;font-weight:800;color:#166534;margin-bottom:2px">Đã hoàn thành khảo sát!</div>
+    <div style="font-size:13px;color:#065f46;margin-bottom:6px">${ma} — ${ten}</div>
+    <div style="font-size:12px;color:#047857;background:#a7f3d0;display:inline-block;padding:3px 12px;border-radius:20px;font-weight:600">Trạng thái: ${trangThai === 'không đổi' ? 'Không đổi (giữ nguyên)' : 'Đã cập nhật'}</div>
+    <div style="margin-top:10px">
+      <button onclick="resetCompletedBox()" style="background:var(--blue);color:#fff;border:none;padding:8px 22px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">🔍 Khảo sát cửa hàng khác</button>
+    </div>
+  `;
+  
+  // Chèn vào sau phần danh sách đối thủ
+  const listSection = document.querySelector('.card:last-of-type');
+  if(listSection) listSection.appendChild(box);
+  else document.querySelector('.container').insertAdjacentHTML('beforeend', box.outerHTML);
+  
+  // Scroll đến box
+  box.scrollIntoView({behavior:'smooth',block:'center'});
+}
+function resetCompletedBox(){
+  const box = document.getElementById('completedBox');
+  if(box) box.remove();
+  // Reset store selection
+  selectedStore = null;
+  document.getElementById('btnNoChange').disabled = true;
+  document.getElementById('btnNoChange').textContent = '✅ Không đổi';
+  document.getElementById('storeSearch').value = '';
+  document.getElementById('storeSearch').focus();
 }
 
 // ===== LƯU TẤT CẢ =====
@@ -891,7 +932,7 @@ function submitAll(){
 
   if(GAS_URL){
     fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(batch) })
-      .then(()=>{ toast('✅ Đã lưu lên hệ thống'); markSaved(); })
+      .then(()=>{ showCompletedBox(selectedStore.ma, selectedStore.ten, 'đã cập nhật'); markSaved(); })
       .catch(()=>{ toast('⚠️ Lưu thất bại, thử lại nhé'); isSubmitting = false; })
       .finally(()=>{ updateSubmitButton(); });
   } else {
