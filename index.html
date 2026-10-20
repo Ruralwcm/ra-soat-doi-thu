@@ -171,7 +171,6 @@ input.range-warn{border-color:var(--red);background:#fff5f5;}
     <div class="card-head"><span class="dot"></span>② Danh sách đối thủ <span class="tag" id="tagCount">0 đối thủ</span></div>
     <div class="card-body">
       <div id="compList"><div class="comp-empty">Chọn cửa hàng để xem đối thủ đã có.</div></div>
-      <button class="btn btn-ghost btn-block" id="btnAdd" onclick="toggleAddForm()" disabled>➕ Thêm đối thủ</button>
       <div style="display:flex;gap:8px;margin-top:8px;" id="confirmBar">
         <button class="btn btn-ghost" id="btnNoChange" onclick="confirmNoChange()" disabled style="flex:1;border-color:var(--green);color:var(--green);">✅ Không đổi</button>
         <button class="btn btn-blue" id="btnAddNew" onclick="toggleAddForm()" disabled style="flex:1;">➕ Thêm</button>
@@ -635,7 +634,7 @@ function renderList(){
   let html = '';
   if(competitorList.length === 0){
     html = selectedStore
-      ? '<div class="comp-empty">Chưa có đối thủ nào cho CH này. Bấm "➕ Thêm đối thủ".</div>'
+      ? '<div class="comp-empty">Chưa có đối thủ nào cho CH này. Bấm "➕ Thêm".</div>'
       : '<div class="comp-empty">Chọn cửa hàng để xem đối thủ đã có.</div>';
   } else {
     competitorList.forEach((c,i)=> html += itemHTML(c, i));
