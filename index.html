@@ -836,6 +836,9 @@ function resetCompetitorFields(){
 // ===== XÁC NHẬN KHÔNG ĐỔI =====
 function confirmNoChange(){
   if(!selectedStore){ toast('⚠️ Chọn cửa hàng trước'); return; }
+  if(isSubmitting){ return; } // Chống double-submit
+  
+  const btnNC = document.getElementById('btnNoChange');
   
   const track = {
     timestamp: new Date().toISOString(),
@@ -845,15 +848,19 @@ function confirmNoChange(){
     trang_thai: 'Không đổi'
   };
 
+  isSubmitting = true;
+  btnNC.textContent = '⏳ Đang lưu...';
+  btnNC.disabled = true;
+
   const saveAndShow = () => {
-    // Hiển thị textbox "Đã hoàn thành" thay vì toast
     showCompletedBox(selectedStore.ma, selectedStore.ten, 'không đổi');
+    isSubmitting = false;
   };
 
   if(GAS_URL){
     fetch(GAS_URL + '?action=tracklog', { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(track) })
       .then(() => saveAndShow())
-      .catch(() => toast('⚠️ Lỗi ghi log, thử lại'));
+      .catch(() => { toast('⚠️ Lỗi ghi log, thử lại'); isSubmitting = false; btnNC.disabled = false; btnNC.textContent = '✅ Không đổi'; });
   } else {
     const key = 'ra-soat-tracklog';
     const arr = JSON.parse(localStorage.getItem(key)||'[]');
