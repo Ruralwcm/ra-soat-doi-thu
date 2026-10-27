@@ -3,279 +3,665 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard · Rà Soát Đối Thủ</title>
+<title>Dashboard — Rà Soát Đối Thủ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--red:#d71920;--blue:#1a3c6e;--gold:#ffc107;--green:#16a34a;--bg:#f4f5f7;--card:#fff;--txt:#1f2937;--muted:#6b7280;--border:#e5e7eb;}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Be Vietnam Pro',-apple-system,'Segoe UI',Roboto,Arial,sans-serif;background:var(--bg);color:var(--txt);line-height:1.5;padding-bottom:40px;}
-.topbar{background:linear-gradient(135deg,var(--red),#a31016);color:#fff;padding:14px 16px;}
-.topbar h1{font-size:19px;font-weight:800;}
-.topbar .sub{font-size:12px;opacity:.9;margin-top:2px;}
-.topbar .ver{font-size:10px;opacity:.7;margin-top:4px;}
-.wrap{max-width:760px;margin:0 auto;padding:0 12px;}
-
-/* Login */
-#loginScreen{max-width:360px;margin:60px auto 0;background:var(--card);border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,.08);padding:28px 24px;}
-#loginScreen h2{font-size:18px;text-align:center;margin-bottom:16px;}
-#loginScreen label{font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:6px;}
-#loginScreen input{width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:9px;font-size:15px;margin-bottom:14px;}
-#loginScreen .err{color:var(--red);font-size:12px;margin-bottom:10px;display:none;}
-
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 16px;border-radius:9px;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;}
-.btn-primary{background:var(--red);color:#fff;width:100%;}
-
-/* KPI */
-.kpi-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;}
-.kpi{flex:1;min-width:130px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.06);}
-.kpi .n{font-size:24px;font-weight:800;color:var(--blue);}
-.kpi .l{font-size:12px;color:var(--muted);margin-top:2px;}
-.kpi.red .n{color:var(--red);}
-.kpi.green .n{color:var(--green);}
-
-.card{background:var(--card);border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-top:14px;overflow:hidden;}
-.card-head{display:flex;align-items:center;gap:8px;padding:13px 16px;font-weight:700;font-size:15px;border-bottom:1px solid var(--border);}
-.card-head .dot{width:9px;height:9px;border-radius:50%;background:var(--red);flex-shrink:0;}
-.card-body{padding:12px 16px;}
-
-table{width:100%;border-collapse:collapse;font-size:13px;}
-th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);}
-th{color:var(--muted);font-weight:600;font-size:12px;}
-td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;}
-tr:last-child td{border-bottom:none;}
-.bar{display:inline-block;height:8px;border-radius:4px;background:var(--blue);vertical-align:middle;}
-.bar.red{background:var(--red);}
-.bar.gold{background:var(--gold);}
-
-.filters{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
-.filters select{padding:9px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#fff;}
-
-.muted{color:var(--muted);font-size:12px;}
-.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:12px 18px;border-radius:10px;font-size:14px;z-index:200;opacity:0;transition:opacity .3s;pointer-events:none;}
-.toast.show{opacity:1;}
+  :root{ --red:#d71920; --navy:#1a3c6e; --gold:#ffc107; --green:#1e8e4e; --bg:#f4f6fb;
+    --card:#fff; --line:#e5e9f2; --txt:#1c2434; --mut:#6b7280; }
+  *{box-sizing:border-box; margin:0; padding:0}
+  body{font-family:'Be Vietnam Pro',system-ui,sans-serif; background:var(--bg); color:var(--txt);
+    min-height:100vh; padding:16px; -webkit-font-smoothing:antialiased}
+  .wrap{max-width:920px; margin:0 auto}
+  .head{background:linear-gradient(135deg,var(--navy),#2c4a8a); color:#fff; border-radius:16px;
+    padding:20px; box-shadow:0 8px 24px rgba(26,60,110,.18)}
+  .head h1{font-size:20px; font-weight:800} .head p{font-size:13px; opacity:.85; margin-top:5px}
+  .card{background:var(--card); border-radius:14px; padding:18px; margin-top:14px;
+    border:1px solid var(--line); box-shadow:0 2px 10px rgba(20,30,60,.06)}
+  .card h2{font-size:15px; font-weight:700; color:var(--navy); margin-bottom:12px}
+  .kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px}
+  .kpi{background:#f6f8fc; border:1px solid var(--line); border-radius:12px; padding:14px; text-align:center}
+  .kpi .n{font-size:26px; font-weight:800; line-height:1} .kpi .l{font-size:11.5px; color:var(--mut); margin-top:6px}
+  .kpi.red .n{color:var(--red)} .kpi.green .n{color:var(--green)} .kpi.navy .n{color:var(--navy)}
+  .bar-wrap{height:10px; background:#e9edf5; border-radius:8px; overflow:hidden; margin-top:12px}
+  .bar-wrap i{display:block; height:100%; background:linear-gradient(90deg,var(--green),#37b26c); border-radius:8px; transition:width .4s}
+  .cas{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-bottom:4px}
+  .cas label{font-size:11.5px; font-weight:600; color:var(--mut); display:block; margin-bottom:4px}
+  .cas select,.filters input{padding:11px 13px; border:1.5px solid var(--line); border-radius:10px;
+    font-family:inherit; font-size:14px; background:#fafbfd; outline:none; width:100%}
+  .filters{margin-top:10px}
+  .tbl-scroll{overflow-x:auto; -webkit-overflow-scrolling:touch; max-width:100%}
+  table{width:100%; border-collapse:collapse; margin-top:8px; font-size:11.5px; white-space:nowrap}
+  th,td{padding:6px 7px; text-align:left; border-bottom:1px solid var(--line); max-width:160px; overflow:hidden; text-overflow:ellipsis}
+  th{background:#f6f8fc; color:var(--mut); font-size:10px; font-weight:700}
+  td.num{font-weight:700}
+  .tag{display:inline-block; padding:2px 8px; border-radius:16px; font-size:10px; font-weight:700}
+  .tag.ok{background:#e6f6ec; color:var(--green)} .tag.warn{background:#fdeeee; color:var(--red)}
+  .hdr-acts{float:right; display:flex; gap:6px}
+  .hdr-btn{background:rgba(255,255,255,.16); color:#fff; border:none; border-radius:16px;
+    padding:5px 11px; font-size:11.5px; font-weight:600; font-family:inherit; cursor:pointer; white-space:nowrap}
+  .hdr-btn:hover{background:rgba(255,255,255,.26)}
+  .foot{text-align:center; color:var(--mut); font-size:11px; margin-top:16px}
+  .grow{cursor:pointer; user-select:none}
+  .grow .ar{display:inline-block; width:14px; font-size:11px; transition:.2s}
+  .grow .ar.open{transform:rotate(90deg)}
+  .tab-btn{background:none;border:1.5px solid var(--line);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;font-family:inherit;color:var(--mut);cursor:pointer;transition:.15s}
+  .tab-btn.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .sort-arrow{font-size:10px;margin-left:3px;opacity:.4}
+  .sort-arrow.on{opacity:1;color:var(--navy)}
+  th.sortable{cursor:pointer;user-select:none}
+  th.sortable:hover{color:var(--navy)}
+  .gdv-row{display:flex; align-items:center; padding:8px 0; border-bottom:1px solid var(--line)}
+  .gdv-table{width:100%;table-layout:fixed;border-collapse:collapse;margin-top:4px;font-size:12.5px}
+  .gdv-table col.col-gdv{width:20%}.gdv-table col.col-num{width:8%}
+  .gdv-table col.col-bar{width:18%}.gdv-table col.col-pct{width:6%}
+  .gdv-table col.col-doi{width:12%}
+  .gdv-table th{background:#f6f8fc;color:var(--mut);font-size:10.5px;font-weight:700;padding:8px 6px;text-align:center;border-bottom:2px solid var(--line);white-space:nowrap}
+  .gdv-table th.col-gdv{text-align:left}
+  .gdv-table td{padding:7px 6px;border-bottom:1px solid var(--line);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .gdv-table td.col-gdv{text-align:left;font-weight:600}
+  .gdv-table .bar-cell{padding:7px 6px;vertical-align:middle}
+  .gdv-table .bar-cell i{display:block;height:7px;background:linear-gradient(90deg,var(--green),#37b26c);border-radius:5px}
+  .gdv-table .qlkv-name{font-weight:500;font-size:12px;padding-left:22px}
+  .gdv-sub{display:none}
+  .week-select{display:inline-flex;align-items:center;gap:8px;margin-left:8px}
+  .week-select select{background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.3);
+    border-radius:8px;padding:5px 10px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;outline:none}
+  .week-select select option{color:var(--txt);background:#fff}
+  .empty{text-align:center; color:var(--mut); padding:24px 0; font-size:13.5px}
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;
+    z-index:999; padding:14px}
+  .modal{background:#fff;border-radius:14px;padding:18px;max-width:600px;width:100%;box-shadow:0 16px 40px rgba(0,0,0,.2)}
+  .modal h3{font-size:15px;font-weight:800;margin-bottom:12px;color:var(--navy)}
+  .btn2{flex:1;border:none;border-radius:10px;padding:11px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer}
+  .btn2.ghost{background:#f0f2f7;color:var(--txt)}
+  .loading{text-align:center;padding:40px;color:var(--mut)}
+  .loading::after{content:'...';animation:dots 1.5s steps(4,end) infinite}
+  @keyframes dots{0%{content:'.'}33%{content:'..'}66%{content:'...'}}
+  .store-link{color:var(--navy);text-decoration:none;font-weight:600}
+  .store-link:hover{text-decoration:underline}
 </style>
 </head>
 <body>
-
-<div class="topbar">
-  <h1>📊 Dashboard · Rà Soát Đối Thủ</h1>
-  <div class="sub"><span id="userName">---</span> · <span id="userRole">---</span></div>
-  <div class="ver">v1.1</div>
-</div>
-
-<!-- Login -->
-<div id="loginScreen">
-  <h2>🔒 Đăng nhập</h2>
-  <label>Email (không đuôi)</label>
-  <input type="text" id="usr" placeholder="VD: haodt301" onkeydown="if(event.key==='Enter')document.getElementById('pwd').focus()">
-  <label>Mã nhân viên</label>
-  <input type="password" id="pwd" placeholder="Nhập mã NV..." onkeydown="if(event.key==='Enter')login()">
-  <div class="err" id="loginErr">Sai thông tin đăng nhập!</div>
-  <button class="btn btn-primary" onclick="login()">Đăng nhập</button>
-</div>
-
-<!-- Dashboard -->
-<div id="dash" style="display:none;">
-  <div class="wrap">
-    <div class="kpi-row">
-      <div class="kpi"><div class="n" id="kTotal">0</div><div class="l">Đối thủ đang theo dõi</div></div>
-      <div class="kpi"><div class="n" id="kCh">0</div><div class="l">Cửa hàng có đối thủ</div></div>
-      <div class="kpi green"><div class="n" id="kUpdated">0</div><div class="l">Đã cập nhật</div></div>
-      <div class="kpi red"><div class="n" id="kPending">0</div><div class="l">Chưa cập nhật</div></div>
+<div class="wrap">
+  <div class="head">
+    <div class="hdr-acts">
+      <button class="hdr-btn" onclick="refreshData()" title="Đồng bộ dữ liệu mới nhất">🔄 Tải lại</button>
+      <button class="hdr-btn" onclick="exportDetail()">📥 Xuất chi tiết</button>
+      <button class="hdr-btn" onclick="exportMissing()">📤 Chưa KS</button>
     </div>
-
+    <h1>📊 Tiến độ Rà Soát Đối Thủ
+      <span class="week-select">
+        <select id="selWeek" onchange="onWeekChange()"><option value="">Đang tải...</option></select>
+      </span>
+    </h1>
+    <p>cập nhật: <span id="updated">--</span> · <b id="verTag">v2.0</b></p>
+  </div>
+  <div class="card">
+    <h2>📈 Tổng quan — <span id="weekLabel">Tuần hiện tại</span></h2>
+    <div class="kpis">
+      <div class="kpi"><div class="n" id="kTotal">—</div><div class="l">CH cần KS</div></div>
+      <div class="kpi green"><div class="n" id="kDone">—</div><div class="l">Đã KS tuần này</div></div>
+      <div class="kpi navy"><div class="n" id="kPct">—</div><div class="l">Tỷ lệ hoàn thành</div></div>
+      <div class="kpi red"><div class="n" id="kMissing">—</div><div class="l">Chưa khảo sát</div></div>
+      <div class="kpi"><div class="n" id="kDoiThu">—</div><div class="l">Đối thủ đã khai</div></div>
+    </div>
+    <div class="bar-wrap"><i id="barFill" style="width:0%"></i></div>
+  </div>
+  <div class="card">
+    <h2 style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <span>📋</span>
+      <button class="tab-btn active" id="tabGdv" onclick="switchTab('gdv')">Theo GĐV</button>
+      <button class="tab-btn" id="tabTopQlkv" onclick="switchTab('topQlkv')">Top 20 QLKV</button>
+    </h2>
+    <div id="gdvSection">Đang tải...</div>
+    <div id="topQlkvSection" style="display:none">Đang tải...</div>
+  </div>
+  <div class="card">
+    <h2>🎯 Lọc địa bàn</h2>
+    <div class="cas">
+      <div><label>Miền</label><select id="selMien" onchange="onFilterChange('mien')"><option value="">— Tất cả Miền —</option></select></div>
+      <div><label>Vùng (GĐV)</label><select id="selVung" onchange="onFilterChange('vung')"><option value="">— Tất cả GĐV —</option></select></div>
+      <div><label>QLKV</label><select id="selQlkv" onchange="onFilterChange('qlkv')"><option value="">— Tất cả QLKV —</option></select></div>
+    </div>
     <div class="filters">
-      <select id="fTuan" onchange="renderAll()"><option value="">— Tất cả Tuần —</option></select>
-      <select id="fMien" onchange="renderAll()"><option value="">— Tất cả Miền —</option></select>
-      <select id="fGdv" onchange="renderAll()"><option value="">— Tất cả GĐV —</option></select>
-      <select id="fNhom" onchange="renderAll()"><option value="">— Tất cả Nhóm —</option></select>
-    </div>
-
-    <div class="card">
-      <div class="card-head"><span class="dot"></span>Theo Nhóm đối thủ</div>
-      <div class="card-body"><table id="tNhom"><thead><tr><th>Nhóm</th><th class="num">Số lượng</th><th class="num">Tỷ lệ</th><th></th></tr></thead><tbody></tbody></table></div>
-    </div>
-
-    <div class="card">
-      <div class="card-head"><span class="dot"></span>Theo Miền</div>
-      <div class="card-body"><table id="tMien"><thead><tr><th>Miền</th><th class="num">Số lượng</th></tr></thead><tbody></tbody></table></div>
-    </div>
-
-    <div class="card">
-      <div class="card-head"><span class="dot"></span>Theo GĐV (Top 20)</div>
-      <div class="card-body"><table id="tGdv"><thead><tr><th>GĐV</th><th class="num">Số lượng</th><th class="num">Đã cập nhật</th></tr></thead><tbody></tbody></table></div>
+      <input id="fSearch" placeholder="Tìm mã SAP / tên CH..." oninput="renderTable()">
     </div>
   </div>
+  <div class="card">
+    <h2>📋 Danh sách khảo sát <span id="rowCount" style="color:var(--mut);font-weight:500"></span></h2>
+    <div id="tableWrap"><div class="loading">Đang tải dữ liệu</div></div>
+  </div>
+  <div class="foot">Dashboard · Rà Soát Đối Thủ <span style="color:var(--mut)">v2.0</span></div>
 </div>
 
-<div class="toast" id="toast"></div>
-
 <script>
-// ── USERS: email username → { pass: MNV, name, role, gdv } ──
-const USERS = {
-  'haodt301':  { pass:'301', name:'Trần Đăng Hảo', role:'admin' },
-  'dungdv':    { pass:'5357264283', name:'Đặng Văn Dũng', role:'gdv', gdv:'Đặng Văn Dũng' },
-  'thult':     { pass:'5300486951', name:'Lê Thị Hồng Thu', role:'gdv', gdv:'Lê Thị Hồng Thu' },
-  'sonnm':     { pass:'5787188225', name:'Nguyễn Mạnh Sơn', role:'gdv', gdv:'Nguyễn Mạnh Sơn' },
-  'tungd':     { pass:'1786581010', name:'Dương Tùng', role:'gdv', gdv:'Dương Tùng' },
-};
-// Thêm tất cả GĐV từ Storelist làm user (pass = MNV, role = gdv)
-function autoAddGdvUsers(stores){
-  const added = new Set(Object.keys(USERS));
-  stores.forEach(s => {
-    const key = s.gdv.toLowerCase().replace(/\s+/g,'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').substring(0,10);
-    if (!added.has(key) && s.gdv) {
-      USERS[key] = { pass: String(Math.floor(Math.random()*10000)), name: s.gdv, role: 'gdv', gdv: s.gdv };
-      added.add(key);
-    }
-  });
-}
+const SHEET_ID = '1UMtB9MOxGOaZvxN5VAUGAS1bPaAL2tVVFEViGANd4Tk';
+const STORE_GID = '164583655';
+const DOI_THU_GID = '320821145';
+const GV = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:csv';
 
-let currentUser = null;
-const DATA_CSV = 'https://docs.google.com/spreadsheets/d/1UMtB9MOxGOaZvxN5VAUGAS1bPaAL2tVVFEViGANd4Tk/gviz/tq?tqx=out:csv&gid=320821145';
-const STORELIST_CSV = 'https://docs.google.com/spreadsheets/d/1fMmEm1GC9aei_3oeu2vcadPVsUM9ms9eVhm99d7pF8A/gviz/tq?tqx=out:csv&gid=900581387';
+let STORES = [], ROWS = [], ALL_ROWS = [];
+let CURRENT_WEEK = null;
+let WEEKS = [];
 
-let rows = [];
-let stores = [];
-let toastTimer;
-function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2600); }
+const $ = id => document.getElementById(id);
+const esc = s => (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const distinct = a => [...new Set(a)].sort((x,y)=>String(x).localeCompare(String(y),'vi'));
 
-async function login(){
-  const usr = document.getElementById('usr').value.trim();
-  const pwd = document.getElementById('pwd').value.trim();
-  if(!usr || !pwd){ document.getElementById('loginErr').textContent='Nhập đủ Email và Mã NV!'; document.getElementById('loginErr').style.display='block'; return; }
-  
-  const u = USERS[usr];
-  if(!u || u.pass !== pwd){
-    document.getElementById('loginErr').textContent='Sai Email hoặc Mã NV!';
-    document.getElementById('loginErr').style.display='block'; return;
-  }
-  
-  currentUser = u;
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('dash').style.display = 'block';
-  document.getElementById('userName').textContent = u.name;
-  document.getElementById('userRole').textContent = u.role === 'admin' ? 'Admin' : 'GĐV';
-  await loadData();
-}
-
-async function loadData(){
-  try{
-    const res = await fetch(DATA_CSV);
-    const text = await res.text();
-    const parsed = parseCSV(text);
-    rows = parsed.filter(r => (r['Mã CH']||'').trim() !== '');
-    rows.forEach(r => { r._week = weekLabel(r['Ngày sửa'] || r['Ngày KT']); });
-    buildFilters();
-    renderAll();
-  }catch(e){
-    toast('⚠️ Không tải được dữ liệu');
-  }
-}
-
-function weekLabel(dateStr){
-  const m = String(dateStr||'').match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-  if(!m) return '';
-  const d = new Date(+m[3], +m[2]-1, +m[1]);
+function isoWeek(d) {
   const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
   const dayNum = date.getUTCDay() || 7;
   date.setUTCDate(date.getUTCDate() + 4 - dayNum);
   const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
-  const week = Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
-  const dow = (d.getDay() + 6) % 7; // 0 = Monday
-  const monday = new Date(d); monday.setDate(d.getDate() - dow);
-  const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
-  const f = x => String(x.getDate()).padStart(2,'0') + '/' + String(x.getMonth()+1).padStart(2,'0');
-  return 'W' + String(week).padStart(2,'0') + ' (' + f(monday) + '-' + f(sunday) + ')';
+  return Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
 }
 
-function parseCSV(text){
-  const rows=[]; let row=[],cur='',inQ=false;
-  for(let i=0;i<text.length;i++){
-    const c=text[i];
-    if(inQ){ if(c==='"'){ if(text[i+1]==='"'){cur+='"';i++;} else inQ=false; } else cur+=c; }
-    else if(c==='"') inQ=true;
-    else if(c===','){ row.push(cur); cur=''; }
-    else if(c==='\n'||c==='\r'){ if(c==='\r'&&text[i+1]==='\n')i++; row.push(cur); cur=''; if(row.length>1)rows.push(row); row=[]; }
-    else cur+=c;
+function parseDate(s) {
+  if (!s) return null;
+  // format: "DD/MM/YYYY HH:MM" or "DD/MM/YYYY" or ISO
+  const m = String(s).match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (m) return new Date(+m[3], +m[2] - 1, +m[1]);
+  return new Date(s);
+}
+
+async function fetchCSV(gid) {
+  const url = GV + '&gid=' + gid;
+  const resp = await fetch(url);
+  const text = await resp.text();
+  return parseCSV(text);
+}
+
+function parseCSV(text) {
+  const rows = [];
+  const lines = text.split('\n');
+  if (lines.length < 2) return rows;
+  const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g, '').trim());
+  for (let i = 1; i < lines.length; i++) {
+    const vals = parseCSVLine(lines[i]);
+    if (!vals.length || vals.every(v => !v)) continue;
+    const obj = {};
+    headers.forEach((h, j) => { obj[h] = vals[j] || ''; });
+    rows.push(obj);
   }
-  row.push(cur); if(row.length>1)rows.push(row);
-  if(rows.length<2) return [];
-  const hdr = rows[0].map(h=>h.trim());
-  return rows.slice(1).map(r=>{ const o={}; hdr.forEach((h,i)=>o[h]=r[i]); return o; });
+  return rows;
 }
 
-function filtered(){
-  const t = document.getElementById('fTuan').value;
-  const m = document.getElementById('fMien').value;
-  const g = document.getElementById('fGdv').value;
-  const n = document.getElementById('fNhom').value;
-  return rows.filter(r =>
-    (!t || r._week===t) && (!m || r['Miền']===m) && (!g || r['GĐV']===g) && (!n || r['Nhóm đối thủ']===n)
-  );
+function parseCSVLine(line) {
+  const result = [];
+  let current = '', inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inQuotes) {
+      if (ch === '"') {
+        if (i + 1 < line.length && line[i + 1] === '"') { current += '"'; i++; }
+        else inQuotes = false;
+      } else current += ch;
+    } else {
+      if (ch === '"') inQuotes = true;
+      else if (ch === ',') { result.push(current); current = ''; }
+      else current += ch;
+    }
+  }
+  result.push(current);
+  return result;
 }
 
-function buildFilters(){
-  const tuans = [...new Set(rows.map(r=>r._week).filter(Boolean))].sort();
-  const miens = [...new Set(rows.map(r=>r['Miền']).filter(Boolean))].sort();
-  const gdvs = [...new Set(rows.map(r=>r['GĐV']).filter(Boolean))].sort();
-  const nhoms = [...new Set(rows.map(r=>r['Nhóm đối thủ']).filter(Boolean))].sort();
-  const fTuan = document.getElementById('fTuan');
-  const fMien = document.getElementById('fMien');
-  const fGdv = document.getElementById('fGdv');
-  const fNhom = document.getElementById('fNhom');
-  fTuan.innerHTML = '<option value="">— Tất cả Tuần —</option>' + tuans.map(x=>`<option>${x}</option>`).join('');
-  fMien.innerHTML = '<option value="">— Tất cả Miền —</option>' + miens.map(x=>`<option>${x}</option>`).join('');
-  fGdv.innerHTML = '<option value="">— Tất cả GĐV —</option>' + gdvs.map(x=>`<option>${x}</option>`).join('');
-  fNhom.innerHTML = '<option value="">— Tất cả Nhóm —</option>' + nhoms.map(x=>`<option>${x}</option>`).join('');
+async function loadAll() {
+  try {
+    const [storeData, doiThuData] = await Promise.all([
+      fetchCSV(STORE_GID),
+      fetchCSV(DOI_THU_GID)
+    ]);
+
+    // Process stores
+    STORES = storeData.filter(r => {
+      const tt = (r['Tình Trạng'] || '').trim().toLowerCase();
+      return tt === 'đang hoạt động';
+    }).map(r => ({
+      sap: String(r['Mã SAP'] || '').trim(),
+      ten: (r['Tên cửa hàng'] || '').trim(),
+      mien: (r['Miền'] || '').trim(),
+      tinh: (r['Tỉnh/TP'] || '').trim(),
+      huyen: (r['Quận/huyện'] || '').trim(),
+      qlkv: (r['QLKV'] || '').trim(),
+      gdv: (r['GĐV'] || '').trim(),
+      khaiTruong: (r['Khai Trương'] || '').trim()
+    }));
+
+    // Process competitor survey data
+    ALL_ROWS = doiThuData.map(r => {
+      const tuanRaw = (r['Tuần'] || '').trim();
+      let tuan = tuanRaw ? parseInt(tuanRaw, 10) : 0;
+      const ngaySua = (r['Ngày sửa'] || '').trim();
+      if (!tuan && ngaySua) {
+        const d = parseDate(ngaySua);
+        if (d && !isNaN(d)) tuan = isoWeek(d);
+      }
+      return {
+        tuan: tuan || 0,
+        ngaySua: ngaySua,
+        mien: (r['Miền'] || '').trim(),
+        gdv: (r['GĐV'] || '').trim(),
+        qlkv: (r['QLKV'] || '').trim(),
+        sap: String(r['Mã CH'] || '').trim(),
+        tenCH: (r['Tên CH'] || '').trim(),
+        tinh: (r['Tỉnh/TP'] || '').trim(),
+        huyen: (r['Quận/Huyện'] || '').trim(),
+        nhomDT: (r['Nhóm đối thủ'] || '').trim(),
+        tenDT: (r['Tên đối thủ'] || '').trim(),
+        diaChi: (r['Địa chỉ'] || '').trim(),
+        lat: (r['Vĩ độ'] || '').trim(),
+        lng: (r['Kinh độ'] || '').trim(),
+        kc: (r['KC (km)'] || '').trim(),
+        ngayKT: (r['Ngày khai trương'] || '').trim(),
+        doanhSo: (r['Doanh số TB/ngày (trđ)'] || '').trim(),
+        luongKhach: (r['Khách TB/ngày'] || '').trim(),
+        mt: (r['MT (m)'] || '').trim(),
+        giaThue: (r['Giá thuê (tr/th)'] || '').trim(),
+        dienTich: (r['Diện tích (m²)'] || '').trim(),
+        maDT: (r['Mã ĐT'] || '').trim()
+      };
+    });
+
+    // Build week list
+    const weekSet = new Set();
+    ALL_ROWS.forEach(r => { if (r.tuan > 0) weekSet.add(r.tuan); });
+    WEEKS = [...weekSet].sort((a, b) => b - a);
+
+    // Set current week
+    const now = new Date();
+    const thisWeek = isoWeek(now);
+    CURRENT_WEEK = WEEKS.includes(thisWeek) ? thisWeek : (WEEKS[0] || thisWeek);
+
+    // Build week selector
+    buildWeekSelector();
+    buildFilters();
+    render();
+
+    $('updated').textContent = new Date().toLocaleString('vi-VN');
+    $('verTag').textContent = 'v2.0 · ' + ALL_ROWS.length + ' phiếu · ' + STORES.length + ' CH';
+  } catch (e) {
+    $('tableWrap').innerHTML = '<div class="empty" style="color:var(--red)">Lỗi tải dữ liệu: ' + esc(e.message) + '<br><button class="hdr-btn" style="color:var(--navy);background:#eef3fb;margin-top:10px" onclick="loadAll()">Thử lại</button></div>';
+  }
 }
 
-function renderAll(){
-  const f = filtered();
-  // KPIs
-  document.getElementById('kTotal').textContent = f.length;
-  document.getElementById('kCh').textContent = new Set(f.map(r=>r['Mã CH'])).size;
-  const updated = f.filter(r => (r['Ngày sửa']||'').trim() !== '').length;
-  document.getElementById('kUpdated').textContent = updated;
-  document.getElementById('kPending').textContent = f.length - updated;
-
-  // Theo nhóm
-  renderGroup('tNhom', 'Nhóm đối thủ', f, true);
-  // Theo miền
-  renderGroup('tMien', 'Miền', f, false);
-  // Theo GĐV
-  renderGdv(f);
-}
-
-function renderGroup(tableId, key, data, withBar){
-  const counts = {};
-  data.forEach(r => { const k = r[key] || '(trống)'; counts[k] = (counts[k]||0)+1; });
-  const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
-  const total = data.length;
-  const tbody = document.querySelector('#'+tableId+' tbody');
-  tbody.innerHTML = sorted.map(([k,v])=>{
-    const pct = total ? (v/total*100).toFixed(1) : '0';
-    const bar = withBar ? `<td><span class="bar" style="width:${Math.min(100,pct)}%"></span></td>` : '';
-    return `<tr><td>${k}</td><td class="num">${v}</td><td class="num">${pct}%</td>${bar}</tr>`;
-  }).join('');
-}
-
-function renderGdv(data){
-  const counts = {};
-  const updated = {};
-  data.forEach(r => {
-    const k = r['GĐV'] || '(trống)';
-    counts[k] = (counts[k]||0)+1;
-    if((r['Ngày sửa']||'').trim() !== '') updated[k] = (updated[k]||0)+1;
+function buildWeekSelector() {
+  const sel = $('selWeek');
+  let html = '';
+  WEEKS.forEach(w => {
+    // Compute date range for this week
+    const mon = mondayOfWeek(w);
+    const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+    const fmt = d => d.getDate() + '/' + (d.getMonth() + 1);
+    const label = 'Tuần ' + w + ' (' + fmt(mon) + '–' + fmt(sun) + ')';
+    const sel = w === CURRENT_WEEK ? ' selected' : '';
+    html += '<option value="' + w + '"' + sel + '>' + label + '</option>';
   });
-  const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,20);
-  const tbody = document.querySelector('#tGdv tbody');
-  tbody.innerHTML = sorted.map(([k,v])=>{
-    const up = updated[k]||0;
-    const pct = v ? Math.round(up/v*100) : 0;
-    const color = pct>=80 ? 'green' : (pct>=40 ? 'gold' : 'red');
-    return `<tr><td>${k}</td><td class="num">${v}</td><td class="num" style="color:var(--${color})">${up} (${pct}%)</td></tr>`;
-  }).join('');
+  // Add "all" option
+  html += '<option value="0">📋 Tất cả các tuần</option>';
+  sel.innerHTML = html;
+  sel.value = String(CURRENT_WEEK);
+
+  // Update week label
+  const mon = mondayOfWeek(CURRENT_WEEK);
+  const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+  $('weekLabel').textContent = 'Tuần ' + CURRENT_WEEK + ' · ' + mon.getDate() + '/' + (mon.getMonth()+1) + ' – ' + sun.getDate() + '/' + (sun.getMonth()+1);
 }
+
+function mondayOfWeek(w) {
+  // ISO week → Monday date
+  const jan4 = new Date(new Date().getFullYear(), 0, 4);
+  const jan4Day = jan4.getDay() || 7;
+  const firstMonday = new Date(jan4);
+  firstMonday.setDate(jan4.getDate() - (jan4Day - 1));
+  const d = new Date(firstMonday);
+  d.setDate(firstMonday.getDate() + (w - 1) * 7);
+  return d;
+}
+
+function onWeekChange() {
+  CURRENT_WEEK = parseInt($('selWeek').value, 10) || 0;
+  if (CURRENT_WEEK > 0) {
+    const mon = mondayOfWeek(CURRENT_WEEK);
+    const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+    $('weekLabel').textContent = 'Tuần ' + CURRENT_WEEK + ' · ' + mon.getDate() + '/' + (mon.getMonth()+1) + ' – ' + sun.getDate() + '/' + (sun.getMonth()+1);
+  } else {
+    $('weekLabel').textContent = 'Tất cả các tuần';
+  }
+  render();
+}
+
+function getFilteredRows() {
+  if (CURRENT_WEEK === 0) return ALL_ROWS;
+  return ALL_ROWS.filter(r => r.tuan === CURRENT_WEEK);
+}
+
+function buildFilters() {
+  const miens = distinct(STORES.map(s => s.mien).filter(Boolean));
+  $('selMien').innerHTML = '<option value="">— Tất cả Miền —</option>' + miens.map(m => '<option value="' + esc(m) + '">' + esc(m) + '</option>').join('');
+  buildGdvFilter();
+}
+
+function buildGdvFilter() {
+  const m = $('selMien').value;
+  const gdvs = distinct(STORES.filter(s => !m || s.mien === m).map(s => s.gdv).filter(Boolean));
+  $('selVung').innerHTML = '<option value="">— Tất cả GĐV —</option>' + gdvs.map(g => '<option value="' + esc(g) + '">' + esc(g) + '</option>').join('');
+  buildQlkvFilter();
+}
+
+function buildQlkvFilter() {
+  const m = $('selMien').value, v = $('selVung').value;
+  const qs = distinct(STORES.filter(s => (!m || s.mien === m) && (!v || s.gdv === v)).map(s => s.qlkv).filter(Boolean));
+  $('selQlkv').innerHTML = '<option value="">— Tất cả QLKV —</option>' + qs.map(q => '<option value="' + esc(q) + '">' + esc(q) + '</option>').join('');
+}
+
+function onFilterChange(level) {
+  if (level === 'mien') { buildGdvFilter(); }
+  else if (level === 'vung') { buildQlkvFilter(); }
+  render();
+}
+
+function scopeStores() {
+  const m = $('selMien').value, v = $('selVung').value, q = $('selQlkv').value;
+  return STORES.filter(s => (!m || s.mien === m) && (!v || s.gdv === v) && (!q || s.qlkv === q));
+}
+
+function render() {
+  ROWS = getFilteredRows();
+  const sInScope = scopeStores();
+  const scopeSaps = new Set(sInScope.map(s => s.sap));
+
+  // Done: CH in scope that have at least 1 entry in selected week
+  const doneSaps = new Set();
+  ROWS.forEach(r => { if (scopeSaps.has(r.sap)) doneSaps.add(r.sap); });
+
+  const total = scopeSaps.size;
+  const done = doneSaps.size;
+  const missing = total - done;
+  const pct = total ? Math.round(done / total * 100) : 0;
+  const doiThuCount = ROWS.filter(r => scopeSaps.has(r.sap)).length;
+
+  $('kTotal').textContent = total || '—';
+  $('kDone').textContent = done;
+  $('kPct').textContent = pct + '%';
+  $('kMissing').textContent = missing;
+  $('kDoiThu').textContent = doiThuCount;
+  $('barFill').style.width = Math.min(100, pct) + '%';
+
+  buildGdvSection();
+  buildTopQlkv();
+  renderTable();
+}
+
+// --- Sort state ---
+let SORT_G = {col: 'pct', asc: true}, SORT_T = {col: 'pct', asc: true};
+
+function sortArrow(col, st) {
+  if (st.col !== col) return '';
+  return st.asc ? ' ▲' : ' ▼';
+}
+
+function thSort(col, st, label) {
+  const arrow = sortArrow(col, st);
+  return '<th class="sortable col-' + col + '" onclick="sortBy(\'' + col + '\',\'' + (st === SORT_G ? 'G' : 'T') + '\')">' + label + '<span class="sort-arrow' + (arrow ? ' on' : '') + '">' + (arrow || ' ↕') + '</span></th>';
+}
+
+function computeGdvData() {
+  const sInScope = scopeStores();
+  const scopeSaps = new Set(sInScope.map(s => s.sap));
+  const doneSaps = new Set();
+  const doiThuBySap = {};
+  ROWS.forEach(r => {
+    if (scopeSaps.has(r.sap)) {
+      doneSaps.add(r.sap);
+      if (!doiThuBySap[r.sap]) doiThuBySap[r.sap] = 0;
+      doiThuBySap[r.sap]++;
+    }
+  });
+
+  const gdvMap = {};
+  sInScope.forEach(s => {
+    if (!gdvMap[s.gdv]) gdvMap[s.gdv] = { gdv: s.gdv, t: 0, d: 0, pct: 0, doi: 0, qlkvs: {} };
+    gdvMap[s.gdv].t++;
+    if (doneSaps.has(s.sap)) {
+      gdvMap[s.gdv].d++;
+      gdvMap[s.gdv].doi += (doiThuBySap[s.sap] || 0);
+    }
+  });
+
+  // Build QLKV sub-data
+  const gdvs = [];
+  Object.values(gdvMap).forEach(g => {
+    g.pct = g.t ? Math.round(g.d / g.t * 100) : 0;
+    const qlkvMap = {};
+    sInScope.filter(s => s.gdv === g.gdv).forEach(s => {
+      if (!qlkvMap[s.qlkv]) qlkvMap[s.qlkv] = { qlkv: s.qlkv, t: 0, d: 0, pct: 0, doi: 0 };
+      qlkvMap[s.qlkv].t++;
+      if (doneSaps.has(s.sap)) {
+        qlkvMap[s.qlkv].d++;
+        qlkvMap[s.qlkv].doi += (doiThuBySap[s.sap] || 0);
+      }
+    });
+    g.qlkvs = Object.values(qlkvMap).map(q => {
+      q.pct = q.t ? Math.round(q.d / q.t * 100) : 0;
+      return q;
+    }).sort((a, b) => String(a.qlkv).localeCompare(String(b.qlkv), 'vi'));
+    gdvs.push(g);
+  });
+  return gdvs;
+}
+
+const SORT_FNS = {
+  gdv: (a, b) => String(a.gdv).localeCompare(String(b.gdv), 'vi'),
+  t: (a, b) => a.t - b.t,
+  d: (a, b) => a.d - b.d,
+  pct: (a, b) => a.pct - b.pct,
+  doi: (a, b) => a.doi - b.doi
+};
+
+function sortBy(col, which) {
+  const st = which === 'G' ? SORT_G : SORT_T;
+  if (st.col === col) st.asc = !st.asc;
+  else { st.col = col; st.asc = (col === 'pct'); }
+  if (which === 'G') buildGdvSection();
+  else buildTopQlkv();
+}
+
+function buildGdvSection() {
+  const gdvs = computeGdvData();
+  if (!gdvs.length) { $('gdvSection').innerHTML = '<div class="empty">Chưa có dữ liệu</div>'; return; }
+  const sf = SORT_FNS[SORT_G.col] || SORT_FNS.pct;
+  gdvs.sort((a, b) => { const v = sf(a, b); return SORT_G.asc ? v : -v; });
+
+  let html = '<table class="gdv-table"><colgroup><col class="col-gdv"><col class="col-num"><col class="col-num"><col class="col-bar"><col class="col-pct"><col class="col-doi"></colgroup><thead><tr>';
+  html += thSort('gdv', SORT_G, 'GĐV') + thSort('t', SORT_G, 'CH KS') + thSort('d', SORT_G, 'Đã làm') + '<th class="bar-cell col-bar">Tỷ lệ</th>' + thSort('pct', SORT_G, '%') + thSort('doi', SORT_G, 'Đối thủ');
+  html += '</tr></thead><tbody>';
+  gdvs.forEach(g => {
+    const cls = 'sub-' + g.gdv.replace(/[^a-zA-Z0-9]/g, '_');
+    html += '<tr class="grow" onclick="toggleGdv(this,\'' + cls + '\')" style="cursor:pointer">';
+    html += '<td class="col-gdv"><span class="ar">▶</span> ' + esc(g.gdv) + '</td>';
+    html += '<td class="col-num">' + g.t + '</td><td class="col-num">' + g.d + '</td>';
+    html += '<td class="bar-cell col-bar"><i style="width:' + g.pct + '%"></i></td>';
+    html += '<td class="col-pct">' + g.pct + '%</td>';
+    html += '<td class="col-doi">' + (g.doi || '—') + '</td></tr>';
+    g.qlkvs.forEach(q => {
+      html += '<tr class="gdv-sub ' + cls + '" style="display:none">';
+      html += '<td class="col-gdv qlkv-name">' + esc(q.qlkv) + '</td>';
+      html += '<td class="col-num">' + q.t + '</td><td class="col-num">' + q.d + '</td>';
+      html += '<td class="bar-cell col-bar"><i style="width:' + q.pct + '%"></i></td>';
+      html += '<td class="col-pct">' + q.pct + '%</td>';
+      html += '<td class="col-doi">' + (q.doi || '—') + '</td></tr>';
+    });
+  });
+  html += '</tbody></table>';
+  $('gdvSection').innerHTML = html;
+}
+
+function buildTopQlkv() {
+  const gdvs = computeGdvData();
+  const all = [];
+  gdvs.forEach(g => { g.qlkvs.forEach(q => { all.push({ ...q, gdv: g.gdv }); }); });
+  if (!all.length) { $('topQlkvSection').innerHTML = '<div class="empty">Chưa có dữ liệu</div>'; return; }
+  const sf = SORT_FNS[SORT_T.col] || SORT_FNS.pct;
+  all.sort((a, b) => { const v = sf(a, b); return SORT_T.asc ? v : -v; });
+  const top = all.slice(0, 20);
+
+  let html = '<table class="gdv-table"><colgroup><col style="width:18%"><col style="width:18%"><col style="width:8%"><col style="width:8%"><col style="width:18%"><col style="width:6%"><col style="width:12%"></colgroup><thead><tr>';
+  html += thSort('gdv', SORT_T, 'GĐV') + '<th class="sortable col-gdv">QLKV</th>' + thSort('t', SORT_T, 'CH KS') + thSort('d', SORT_T, 'Đã làm') + '<th class="bar-cell col-bar">Tỷ lệ</th>' + thSort('pct', SORT_T, '%') + thSort('doi', SORT_T, 'Đối thủ');
+  html += '</tr></thead><tbody>';
+  top.forEach(q => {
+    html += '<tr><td class="col-gdv" style="font-weight:600">' + esc(q.gdv) + '</td>';
+    html += '<td class="col-gdv" style="padding-left:8px;font-weight:500">' + esc(q.qlkv) + '</td>';
+    html += '<td class="col-num">' + q.t + '</td><td class="col-num">' + q.d + '</td>';
+    html += '<td class="bar-cell col-bar"><i style="width:' + q.pct + '%"></i></td>';
+    html += '<td class="col-pct">' + q.pct + '%</td>';
+    html += '<td class="col-doi">' + (q.doi || '—') + '</td></tr>';
+  });
+  html += '<tr><td colspan="7" style="text-align:center;font-size:11px;color:var(--mut);padding:8px">Hiển thị ' + top.length + '/' + all.length + ' QLKV</td></tr>';
+  html += '</tbody></table>';
+  $('topQlkvSection').innerHTML = html;
+}
+
+function switchTab(tab) {
+  $('tabGdv').classList.toggle('active', tab === 'gdv');
+  $('tabTopQlkv').classList.toggle('active', tab === 'topQlkv');
+  $('gdvSection').style.display = tab === 'gdv' ? '' : 'none';
+  $('topQlkvSection').style.display = tab === 'topQlkv' ? '' : 'none';
+  if (tab === 'topQlkv') buildTopQlkv();
+  else buildGdvSection();
+}
+
+let gdvOpen = {};
+function toggleGdv(row, cls) {
+  const rows = document.querySelectorAll('.' + cls);
+  const ar = row.querySelector('.ar');
+  if (gdvOpen[cls]) {
+    rows.forEach(r => r.style.display = 'none');
+    if (ar) ar.classList.remove('open');
+  } else {
+    rows.forEach(r => r.style.display = 'table-row');
+    if (ar) ar.classList.add('open');
+  }
+  gdvOpen[cls] = !gdvOpen[cls];
+}
+
+function renderTable() {
+  const sInScope = scopeStores();
+  const scopeSaps = new Set(sInScope.map(s => s.sap));
+
+  // Build store lookup
+  const storeMap = {};
+  sInScope.forEach(s => { storeMap[s.sap] = s; });
+
+  // Filter rows in scope
+  let list = ROWS.filter(r => scopeSaps.has(r.sap));
+  const q = ($('fSearch').value || '').trim().toLowerCase();
+  if (q) {
+    list = list.filter(r =>
+      (r.sap || '').toLowerCase().includes(q) ||
+      (r.tenCH || '').toLowerCase().includes(q) ||
+      (r.qlkv || '').toLowerCase().includes(q) ||
+      (r.tenDT || '').toLowerCase().includes(q) ||
+      (r.nhomDT || '').toLowerCase().includes(q)
+    );
+  }
+
+  $('rowCount').textContent = '· ' + list.length + ' đối thủ được khai';
+
+  if (!list.length) {
+    $('tableWrap').innerHTML = '<div class="empty">Chưa có dữ liệu · ' + (CURRENT_WEEK ? ('Tuần ' + CURRENT_WEEK) : 'Tất cả') + '</div>';
+    return;
+  }
+
+  // Group by CH for the table
+  const bySap = {};
+  list.forEach(r => {
+    if (!bySap[r.sap]) bySap[r.sap] = [];
+    bySap[r.sap].push(r);
+  });
+
+  const sapList = Object.keys(bySap).sort((a, b) => {
+    const sa = storeMap[a], sb = storeMap[b];
+    const ga = sa ? sa.gdv : '', gb = sb ? sb.gdv : '';
+    return String(ga).localeCompare(String(gb), 'vi') || String(a).localeCompare(String(b));
+  });
+
+  let html = '<table><thead><tr><th>Mã CH</th><th>Tên CH</th><th>Tỉnh</th><th>GĐV</th><th>QLKV</th><th>Nhóm ĐT</th><th>Tên đối thủ</th><th>KC</th><th>Mã ĐT</th></tr></thead><tbody>';
+
+  sapList.forEach(sap => {
+    const store = storeMap[sap] || {};
+    const dts = bySap[sap];
+    dts.forEach((r, i) => {
+      const rowClass = i === 0 ? '' : ' style="border-top:1px dashed var(--line)"';
+      html += '<tr' + rowClass + '>';
+      if (i === 0) {
+        const rowSpan = dts.length > 1 ? ' rowspan="' + dts.length + '"' : '';
+        html += '<td' + rowSpan + '><span class="store-link">' + esc(sap) + '</span></td>';
+        html += '<td' + rowSpan + '>' + esc(store.ten || r.tenCH) + '</td>';
+        html += '<td' + rowSpan + '>' + esc(store.tinh || r.tinh) + '</td>';
+        html += '<td' + rowSpan + '>' + esc(store.gdv || r.gdv) + '</td>';
+        html += '<td' + rowSpan + '>' + esc(store.qlkv || r.qlkv) + '</td>';
+      }
+      html += '<td>' + esc(r.nhomDT) + '</td>';
+      html += '<td>' + esc(r.tenDT) + '</td>';
+      html += '<td class="num">' + (r.kc ? esc(r.kc) + ' km' : '—') + '</td>';
+      html += '<td>' + (r.maDT ? '<span class="tag ok">' + esc(r.maDT) + '</span>' : '—') + '</td>';
+      html += '</tr>';
+    });
+  });
+  html += '</tbody></table>';
+  $('tableWrap').innerHTML = '<div class="tbl-scroll">' + html + '</div>';
+}
+
+async function refreshData() {
+  $('updated').textContent = 'Đang tải...';
+  STORES = []; ALL_ROWS = []; ROWS = [];
+  await loadAll();
+}
+
+function exportDetail() {
+  const sInScope = scopeStores();
+  const scopeSaps = new Set(sInScope.map(s => s.sap));
+  const storeMap = {};
+  sInScope.forEach(s => { storeMap[s.sap] = s; });
+  let list = ROWS.filter(r => scopeSaps.has(r.sap));
+  const q = ($('fSearch').value || '').trim().toLowerCase();
+  if (q) list = list.filter(r => (r.sap||'').toLowerCase().includes(q) || (r.tenCH||'').toLowerCase().includes(q));
+
+  if (!list.length) { alert('Không có dữ liệu để xuất'); return; }
+
+  const hdr = ['Tuần','Ngày sửa','Mã CH','Tên CH','Tỉnh','GĐV','QLKV','Nhóm ĐT','Tên ĐT','Địa chỉ','KC (km)','Mã ĐT'];
+  const rows = list.map(r => {
+    const s = storeMap[r.sap] || {};
+    return [r.tuan, r.ngaySua, r.sap, s.ten||r.tenCH, s.tinh||r.tinh, s.gdv||r.gdv, s.qlkv||r.qlkv, r.nhomDT, r.tenDT, r.diaChi, r.kc, r.maDT];
+  });
+  downloadCSV('RaSoatDoiThu_' + (CURRENT_WEEK ? 'Tuan' + CURRENT_WEEK : 'TatCa') + '_' + new Date().toISOString().slice(0,10), hdr, rows);
+}
+
+function exportMissing() {
+  const sInScope = scopeStores();
+  const doneSaps = new Set();
+  ROWS.forEach(r => { if (sInScope.some(s => s.sap === r.sap)) doneSaps.add(r.sap); });
+  const missing = sInScope.filter(s => !doneSaps.has(s.sap));
+
+  if (!missing.length) { alert('✅ Tất cả CH đã được khảo sát trong tuần này!'); return; }
+
+  const hdr = ['Mã SAP','Tên CH','Tỉnh/TP','Huyện','QLKV','GĐV'];
+  const rows = missing.map(s => [s.sap, s.ten, s.tinh, s.huyen, s.qlkv, s.gdv]);
+  downloadCSV('CH_Chua_Khao_Sat_DoiThu_Tuan' + CURRENT_WEEK + '_' + new Date().toISOString().slice(0,10), hdr, rows);
+}
+
+function downloadCSV(filename, hdr, rows) {
+  const csv = '\uFEFF' + hdr.join(',') + '\n' + rows.map(r => r.map(v => '"' + (v || '').toString().replace(/"/g, '""') + '"').join(',')).join('\n');
+  const blob = new Blob([csv], {type: 'text/csv;charset=utf-8'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = filename + '.csv';
+  a.click(); URL.revokeObjectURL(a.href);
+}
+
+// Init
+loadAll();
 </script>
 </body>
 </html>
