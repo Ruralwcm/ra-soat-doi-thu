@@ -129,7 +129,7 @@ input.range-warn{border-color:var(--red);background:#fff5f5;}
 <div class="topbar">
   <div class="t-row">
     <div>
-      <div class="t-title">🔍 Rà Soát Đối Thủ <span class="vbadge">v2.1</span></div>
+      <div class="t-title">🔍 Rà Soát Đối Thủ <span class="vbadge">v2.2</span></div>
       <div class="t-sub">Khai báo & cập nhật đối thủ quanh cửa hàng</div>
     </div>
     <a href="dashboard.html" style="color:#fff;text-decoration:none;font-size:13px;font-weight:700;background:rgba(255,255,255,.18);padding:8px 14px;border-radius:8px;white-space:nowrap;">📊 Dashboard</a>
@@ -716,11 +716,10 @@ function mark(id, errId, ok){
 // ===== KIỂM TRA TRÙNG ĐỐI THỦ =====
 function checkDuplicate(nhom, ten, lat, lng, skipIdx){
   // Kiểm tra trùng trong competitorList (cùng nhóm + tên hoặc cùng vị trí < 100m)
-  const sameList = existingData.filter(c => c.ma_ch === selectedStore.ma);
-  const all = [...sameList, ...competitorList];
+  const all = competitorList;
   for(let i = 0; i < all.length; i++){
     const c = all[i];
-    if(skipIdx !== null && i === skipIdx + sameList.length) continue; // bỏ qua chính nó khi edit
+    if(skipIdx !== null && i === skipIdx) continue; // bỏ qua chính nó khi edit
     const sameName = c.ten && ten && c.ten.trim().toLowerCase() === ten.trim().toLowerCase();
     const sameGroup = c.nhom && nhom && c.nhom.trim().toLowerCase() === nhom.trim().toLowerCase();
     // Cùng nhóm + cùng tên
@@ -792,7 +791,7 @@ function doSaveForm(){
     // Check duplicate khi EDIT (bỏ qua chính nó)
     const dup = checkDuplicate(nhom, ten, curLat, curLng, editingIdx);
     if(dup){ toast('⚠️ ' + dup.msg); return; }
-    competitorList[editingIdx] = { ...data, _existing: true, _edited: true };
+    competitorList[editingIdx] = { ...competitorList[editingIdx], ...data, _existing: true, _edited: true };
     toast(`✅ Đã cập nhật "${ten}"`);
     editingIdx = null;
   } else {
