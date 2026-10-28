@@ -199,7 +199,7 @@ input.range-warn{border-color:var(--red);background:#fff5f5}
       <div>
         <h1>🔍 Rà Soát Đối Thủ</h1>
         <p>Khai báo & cập nhật đối thủ quanh cửa hàng WinMart+ Rural</p>
-        <span class="vbadge">📍 v2.12</span>
+        <span class="vbadge">📍 v2.11</span>
       </div>
     </div>
   </div>
@@ -1091,19 +1091,18 @@ function confirmNoChange(){
   isSubmitting = true;
   showLoading('Đang lưu...');
 
-  const changelogs = competitorList.map(c => ({
-    ma_ch: selectedStore.ma,
-    ma_dt: c.ma_dt || '',
+  // Gửi toàn bộ đối thủ hiện có với đầy đủ field + hanh_dong: 'Giữ nguyên'
+  const competitors = competitorList.map(c => ({
     nhom: c.nhom || '',
     ten: c.ten || '',
     diaChi: c.diaChi || '',
+    ngay: c.ngay || '',
     lat: c.lat || '', lng: c.lng || '',
     kc: c.kc || '',
-    ngayKT: c.ngay || '',
     doanhSo: c.doanhSo || '', luongKhach: c.luongKhach || '',
     mt: c.mt || '', giaThue: c.giaThue || '', dienTich: c.dienTich || '',
-    hanh_dong: 'Giữ nguyên',
-    ghi_chu: 'Không thay đổi'
+    ma_dt: c.ma_dt || '',
+    hanh_dong: 'Giữ nguyên'
   }));
 
   const batch = {
@@ -1112,8 +1111,7 @@ function confirmNoChange(){
     mien: selectedStore.mien, tinh: selectedStore.tinh, huyen: selectedStore.huyen,
     qlkv: selectedStore.qlkv, gdv: selectedStore.gdv,
     trang_thai: 'Đã làm',
-    competitors: changelogs,
-    action: 'nochange'
+    competitors: competitors
   };
 
   if(GAS_URL){
@@ -1123,7 +1121,7 @@ function confirmNoChange(){
   } else {
     const key = 'ra-soat-doi-thu-data';
     const arr = JSON.parse(localStorage.getItem(key)||'[]');
-    batch.competitors.forEach(c => { arr.push({ ...batch, ...c, competitors: undefined }); });
+    competitors.forEach(c => { arr.push({ ...batch, ...c, competitors: undefined }); });
     localStorage.setItem(key, JSON.stringify(arr));
     setTimeout(()=>{ isSubmitting = false; showSuccess(selectedStore.ma, selectedStore.ten, 'không đổi'); }, 600);
   }
