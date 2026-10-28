@@ -74,27 +74,20 @@ input.range-warn{border-color:var(--red);background:#fff5f5}
 /* Competitor list items (survey .sec style) */
 .comp-empty{text-align:center;color:var(--mut);font-size:13px;padding:16px 10px}
 .comp-item{
-  border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:10px;
-  background:#fff;display:flex;align-items:flex-start;gap:12px
+  display:flex;align-items:center;gap:8px;padding:10px 0;
+  border-bottom:1px solid var(--line);
 }
-.comp-item.existing{background:#f6f8fc;border-color:#dbeafe}
-.comp-item.edited{background:#fefce8;border-color:#fde68a}
-.comp-item .idx{
-  background:var(--navy);color:#fff;border-radius:50%;width:26px;height:26px;min-width:26px;
-  display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;margin-top:2px
-}
-.comp-item.existing .idx{background:#64748b}
-.comp-item .body{flex:1;min-width:0}
-.comp-item .t{font-weight:700;font-size:13.5px}
-.comp-item .t .badge{font-size:10px;font-weight:600;background:#dbeafe;color:#1d4ed8;border-radius:20px;padding:1px 7px;margin-left:6px;vertical-align:middle}
-.comp-item .t .badge.ed{background:#fde68a;color:#92400e}
-.comp-item .s{font-size:11px;color:var(--mut);margin-top:2px;word-break:break-word}
-.comp-item .acts{display:flex;flex-direction:column;gap:4px}
-.comp-item .act{background:none;border:none;cursor:pointer;padding:3px 8px;font-size:17px;border-radius:8px}
-.comp-item .act.edit{color:var(--navy)}
-.comp-item .act.edit:hover{background:#eef3fb}
-.comp-item .act.del{color:var(--red)}
-.comp-item .act.del:hover{background:#fdeeee}
+.comp-item:last-child{border-bottom:none}
+.comp-item.edited .comp-name{color:#92400e}
+.comp-item .comp-info{flex:1;min-width:0}
+.comp-item .comp-name{font-weight:700;font-size:13.5px;line-height:1.3}
+.comp-item .comp-name .ed-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gold);margin-right:4px;vertical-align:middle}
+.comp-item .comp-sub{font-size:11px;color:var(--mut);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.comp-item .comp-act{background:none;border:none;cursor:pointer;padding:6px 8px;font-size:16px;border-radius:8px;flex-shrink:0}
+.comp-item .comp-act.edit{color:var(--navy)}
+.comp-item .comp-act.edit:active{background:#eef3fb}
+.comp-item .comp-act.del{color:var(--red)}
+.comp-item .comp-act.del:active{background:#fdeeee}
 
 /* Location */
 .loc-input{position:relative}
@@ -207,7 +200,7 @@ input.range-warn{border-color:var(--red);background:#fff5f5}
       <div>
         <h1>🔍 Rà Soát Đối Thủ</h1>
         <p>Khai báo & cập nhật đối thủ quanh cửa hàng WinMart+ Rural</p>
-        <span class="vbadge">📍 v2.7</span>
+        <span class="vbadge">📍 v2.8</span>
       </div>
       <a href="dashboard.html" class="dash-link">📊 Dashboard</a>
     </div>
@@ -687,42 +680,34 @@ function toggleAddForm(forceShow){
 
 // ===== RENDER DANH SÁCH =====
 function itemHTML(c, i){
-  // 1 dòng liền mạch: "Update dd/mm/yy: Ngày KT dd/mm/yy. KC: xkm. DS xx tr, xx khách, MT xm, Giá xx tr, xxm²"
-  const parts = [];
-  if(c.sua) parts.push(`Update ${c.sua}: Ngày KT ${c.ngay||'-'}`);
-  else parts.push(`Ngày KT: ${c.ngay||'-'}`);
-  
-  if(c.kc) parts.push(`KC: ${c.kc}km`);
-  
-  const metrics = [];
-  if(c.doanhSo) metrics.push(`DS ${c.doanhSo}tr`);
-  if(c.luongKhach) metrics.push(`${c.luongKhach} khách`);
-  if(c.mt) metrics.push(`MT ${c.mt}m`);
-  if(c.giaThue) metrics.push(`Giá ${c.giaThue}tr`);
-  if(c.dienTich) metrics.push(`${c.dienTich}m²`);
-  if(metrics.length) parts.push(metrics.join(', '));
+  // Dòng gọn: "BHX — BHX Nguyễn Trãi" + sub info 1 dòng + nút ✏️
+  const name = c.nhom ? `${c.nhom} — ${c.ten}` : c.ten;
+  const isEdited = !!c._edited;
 
-  const sub = parts.join('. ') + (parts.length ? '.' : '');
+  const parts = [];
+  if(c.ngay) parts.push(`KT: ${c.ngay}`);
+  if(c.kc) parts.push(`KC: ${c.kc}km`);
+  if(c.doanhSo) parts.push(`DS ${c.doanhSo}tr`);
+  if(c.luongKhach) parts.push(`${c.luongKhach} khách`);
+  if(c.mt) parts.push(`MT ${c.mt}m`);
+  if(c.giaThue) parts.push(`Giá ${c.giaThue}tr`);
+  if(c.dienTich) parts.push(`${c.dienTich}m²`);
+  if(c.sua) parts.push(`Update: ${c.sua}`);
+  const sub = parts.join(' · ') || c.diaChi || '';
 
   const isExisting = !!c._existing;
-  const isEdited = !!c._edited;
-  const badge = isEdited ? '<span class="badge ed">đã sửa</span>' : (isExisting ? '<span class="badge">đã có</span>' : '');
-  const cls = isEdited ? 'edited' : (isExisting ? 'existing' : '');
+  const actBtn = isExisting
+    ? `<button class="comp-act edit" onclick="editCompetitor(${i})" title="Sửa">✏️</button>`
+    : `<button class="comp-act del" onclick="removeCompetitor(${i})" title="Xoá">✕</button>`;
 
-  const acts = isExisting
-    ? `<button class="act edit" onclick="editCompetitor(${i})" title="Sửa">✏️</button>`
-    : `<button class="act del" onclick="removeCompetitor(${i})" title="Xoá">✕</button>`;
+  const edDot = isEdited ? '<span class="ed-dot"></span>' : '';
 
-  const idxLabel = c.ma_dt || (isExisting ? '---' : 'Mới');
-  const idxStyle = c.ma_dt ? '' : 'style="font-size:9px;background:#94a3b8"';
-
-  return `<div class="comp-item ${cls}">
-    <div class="idx" ${idxStyle}>${idxLabel}</div>
-    <div class="body">
-      <div class="t">${c.nhom?c.nhom+' — ':''}${c.ten}${badge}</div>
-      <div class="s">${sub}</div>
+  return `<div class="comp-item${isEdited?' edited':''}">
+    <div class="comp-info">
+      <div class="comp-name">${edDot}${name}</div>
+      ${sub ? `<div class="comp-sub">${sub}</div>` : ''}
     </div>
-    <div class="acts">${acts}</div>
+    ${actBtn}
   </div>`;
 }
 function renderList(){
