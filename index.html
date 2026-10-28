@@ -200,7 +200,7 @@ input.range-warn{border-color:var(--red);background:#fff5f5}
       <div>
         <h1>🔍 Rà Soát Đối Thủ</h1>
         <p>Khai báo & cập nhật đối thủ quanh cửa hàng WinMart+ Rural</p>
-        <span class="vbadge">📍 v2.8</span>
+        <span class="vbadge">📍 v2.9</span>
       </div>
       <a href="dashboard.html" class="dash-link">📊 Dashboard</a>
     </div>
@@ -738,11 +738,17 @@ function refreshNoChangeBtn(){
     btnNC.dataset.mode = 'nochange';
   }
 }
-// Bấm nút Không đổi / Lưu thay đổi
+// Bấm nút Không đổi / Lưu thay đổi → popup xác nhận → push
 function onNoChangeBtn(){
   const newCount = competitorList.filter(c => !c._existing || c._edited).length;
-  if (newCount > 0) submitAll();
-  else confirmNoChange();
+  if (newCount > 0) {
+    // Liệt kê các thay đổi để xác nhận
+    const items = competitorList.filter(c => !c._existing || c._edited);
+    const lines = items.map(c => `• ${c.nhom||'?'} — ${c.ten}${c._edited?' (sửa)':' (mới)'}`).join('\n');
+    askConfirm(`📋 Xác nhận lưu ${items.length} thay đổi?\n\n${lines}\n\nPush lên Google Sheet?`, ()=>submitAll());
+  } else {
+    askConfirm('✅ Xác nhận không thay đổi?\n\nToàn bộ đối thủ hiện có sẽ được ghi nhận "Giữ nguyên" và push lên Google Sheet.', ()=>confirmNoChange());
+  }
 }
 function removeCompetitor(i){
   competitorList.splice(i,1);
