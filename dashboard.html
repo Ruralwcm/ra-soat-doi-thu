@@ -180,7 +180,8 @@ function parseDate(s) {
 
 async function fetchCSV(gid) {
   const url = GV + '&gid=' + gid;
-  const resp = await fetch(url);
+  const resp = await fetch(url, { cache:'no-store' });
+  if (!resp.ok) throw new Error('Không tải được sheet ' + gid + ' (HTTP ' + resp.status + ')');
   const text = await resp.text();
   return parseCSV(text);
 }
@@ -243,12 +244,13 @@ function parseCSVLine(line) {
 
 async function loadAll() {
   try {
-    const [storeData, gasData] = await Promise.all([
+    // Đọc trực tiếp 3 sheet CSV song song. Tránh chạy GAS doGet để tuần tự
+    // tải/serialize cả main và log trong mỗi lần mở dashboard.
+    const [storeData, doiThuData, trackData] = await Promise.all([
       fetchCSV(STORE_GID),
-      fetchGASData()
+      fetchCSV(DOI_THU_GID),
+      fetchCSV(TRACKLOG_GID)
     ]);
-    const doiThuData = rowsToObjects(gasData.main || []);
-    const trackData = rowsToObjects(gasData.log || []);
 
     // Process stores
     STORES = storeData.filter(r => {
