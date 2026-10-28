@@ -503,7 +503,7 @@ function computeGdvData() {
   const gdvMap = {};
   sInScope.forEach(s => {
     if (!gdvMap[s.gdv]) {
-      gdvMap[s.gdv] = { gdv: s.gdv, t: 0, d: 0, pct: 0, doi: 0, doiPrev: 0, delta: 0, missKT: 0, missInfo: 0, qlkvs: {} };
+      gdvMap[s.gdv] = { gdv: s.gdv, mien: s.mien || '', t: 0, d: 0, pct: 0, doi: 0, doiPrev: 0, delta: 0, missKT: 0, missInfo: 0, qlkvs: {} };
     }
     gdvMap[s.gdv].t++;
     if (doneSaps.has(s.sap)) {
@@ -575,7 +575,17 @@ function buildGdvSection() {
   const gdvs = computeGdvData();
   if (!gdvs.length) { $('gdvSection').innerHTML = '<div class="empty">Chưa có dữ liệu</div>'; return; }
   const sf = SORT_FNS[SORT_G.col] || SORT_FNS.pct;
-  gdvs.sort((a, b) => { const v = sf(a, b); return SORT_G.asc ? v : -v; });
+
+  // Group GĐV by Miền
+  const byMien = {};
+  gdvs.forEach(g => {
+    const m = g.mien || 'Khác';
+    if (!byMien[m]) byMien[m] = [];
+    byMien[m].push(g);
+  });
+  // Sort each miền's GĐVs
+  const mienOrder = ['Miền Bắc', 'Miền Trung', 'Miền Nam'];
+  Object.values(byMien).forEach(arr => arr.sort((a, b) => { const v = sf(a, b); return SORT_G.asc ? v : -v; }));
 
   function deltaHtml(d) {
     if (d > 0) return '<span class="delta-pos">+' + d + '</span>';
@@ -588,44 +598,89 @@ function buildGdvSection() {
   }
 
   const cols = '<colgroup><col class="col-gdv"><col class="col-num"><col class="col-num"><col class="col-bar"><col class="col-pct"><col class="col-doi"><col class="col-delta"><col class="col-miss"><col class="col-miss"></colgroup>';
-  let html = '<table class="gdv-table">' + cols + '<thead><tr>';
-  html += thSort('gdv', SORT_G, 'GĐV')
-    + thSort('t', SORT_G, 'CH KS')
-    + thSort('d', SORT_G, 'Đã làm')
-    + '<th class="bar-cell col-bar">Tỷ lệ</th>'
-    + thSort('pct', SORT_G, '%')
-    + thSort('doi', SORT_G, 'Đối thủ')
-    + thSort('delta', SORT_G, '+/- W-1')
-    + thSort('missKT', SORT_G, 'Thiếu KT')
-    + thSort('missInfo', SORT_G, 'Thiếu TT');
-  html += '</tr></thead><tbody>';
-  gdvs.forEach(g => {
-    const cls = 'sub-' + g.gdv.replace(/[^a-zA-Z0-9]/g, '_');
-    html += '<tr class="grow" onclick="toggleGdv(this,\'' + cls + '\')" style="cursor:pointer">';
-    html += '<td class="col-gdv"><span class="ar">▶</span> ' + esc(g.gdv) + '</td>';
-    html += '<td class="col-num">' + g.t + '</td>';
-    html += '<td class="col-num">' + g.d + '</td>';
-    html += '<td class="bar-cell col-bar"><i style="width:' + g.pct + '%"></i></td>';
-    html += '<td class="col-pct">' + g.pct + '%</td>';
-    html += '<td class="col-doi">' + (g.doi || '—') + '</td>';
-    html += '<td class="col-delta">' + deltaHtml(g.delta) + '</td>';
-    html += '<td class="col-miss">' + missHtml(g.missKT) + '</td>';
-    html += '<td class="col-miss">' + missHtml(g.missInfo) + '</td></tr>';
-    g.qlkvs.forEach(q => {
-      html += '<tr class="gdv-sub ' + cls + '" style="display:none">';
-      html += '<td class="col-gdv qlkv-name">' + esc(q.qlkv) + '</td>';
-      html += '<td class="col-num">' + q.t + '</td>';
-      html += '<td class="col-num">' + q.d + '</td>';
-      html += '<td class="bar-cell col-bar"><i style="width:' + q.pct + '%"></i></td>';
-      html += '<td class="col-pct">' + q.pct + '%</td>';
-      html += '<td class="col-doi">' + (q.doi || '—') + '</td>';
-      html += '<td class="col-delta">' + deltaHtml(q.delta) + '</td>';
-      html += '<td class="col-miss">' + missHtml(q.missKT) + '</td>';
-      html += '<td class="col-miss">' + missHtml(q.missInfo) + '</td></tr>';
+  let html = '';
+
+  mienOrder.forEach(mien => {
+    const arr = byMien[mien];
+    if (!arr || !arr.length) return;
+    // Miền totals
+    let mt = 0, md = 0, mdoi = 0, mdoiPrev = 0, mmissKT = 0, mmissInfo = 0;
+    arr.forEach(g => { mt += g.t; md += g.d; mdoi += g.doi; mdoiPrev += g.doiPrev; mmissKT += g.missKT; mmissInfo += g.missInfo; });
+    const mpct = mt ? Math.round(md / mt * 100) : 0;
+    const mdelta = mdoi - mdoiPrev;
+
+    html += '<div class="mien-section" style="margin-bottom:16px">';
+    html += '<div class="mien-header" style="display:flex;align-items:center;gap:12px;padding:8px 12px;background:linear-gradient(135deg,var(--navy),#2d5aa0);color:white;border-radius:8px 8px 0 0;font-weight:700;font-size:14px">';
+    html += '<span style="font-size:16px">' + (mien==='Miền Bắc'?'🏔️':mien==='Miền Trung'?'🏖️':mien==='Miền Nam'?'🌴':'📍') + '</span>';
+    html += '<span>' + esc(mien) + '</span>';
+    html += '<span style="font-weight:400;font-size:12px;opacity:0.85">' + arr.length + ' GĐV · ' + mt + ' CH · Đã làm ' + md + ' (' + mpct + '%) · Đối thủ ' + mdoi + '</span>';
+    html += '</div>';
+
+    html += '<table class="gdv-table" style="margin:0">' + cols + '<tbody>';
+    arr.forEach(g => {
+      const cls = 'sub-' + g.gdv.replace(/[^a-zA-Z0-9]/g, '_');
+      html += '<tr class="grow" onclick="toggleGdv(this,\'' + cls + '\')" style="cursor:pointer">';
+      html += '<td class="col-gdv"><span class="ar">▶</span> ' + esc(g.gdv) + '</td>';
+      html += '<td class="col-num">' + g.t + '</td>';
+      html += '<td class="col-num">' + g.d + '</td>';
+      html += '<td class="bar-cell col-bar"><i style="width:' + g.pct + '%"></i></td>';
+      html += '<td class="col-pct">' + g.pct + '%</td>';
+      html += '<td class="col-doi">' + (g.doi || '—') + '</td>';
+      html += '<td class="col-delta">' + deltaHtml(g.delta) + '</td>';
+      html += '<td class="col-miss">' + missHtml(g.missKT) + '</td>';
+      html += '<td class="col-miss">' + missHtml(g.missInfo) + '</td></tr>';
+      g.qlkvs.forEach(q => {
+        html += '<tr class="gdv-sub ' + cls + '" style="display:none">';
+        html += '<td class="col-gdv qlkv-name">' + esc(q.qlkv) + '</td>';
+        html += '<td class="col-num">' + q.t + '</td>';
+        html += '<td class="col-num">' + q.d + '</td>';
+        html += '<td class="bar-cell col-bar"><i style="width:' + q.pct + '%"></i></td>';
+        html += '<td class="col-pct">' + q.pct + '%</td>';
+        html += '<td class="col-doi">' + (q.doi || '—') + '</td>';
+        html += '<td class="col-delta">' + deltaHtml(q.delta) + '</td>';
+        html += '<td class="col-miss">' + missHtml(q.missKT) + '</td>';
+        html += '<td class="col-miss">' + missHtml(q.missInfo) + '</td></tr>';
+      });
     });
+    html += '</tbody></table></div>';
   });
-  html += '</tbody></table>';
-  $('gdvSection').innerHTML = html;
+
+  // Any GĐV not in a known miền
+  const remaining = Object.keys(byMien).filter(m => !mienOrder.includes(m));
+  remaining.forEach(mien => {
+    const arr = byMien[mien];
+    html += '<div class="mien-section" style="margin-bottom:16px">';
+    html += '<div class="mien-header" style="padding:8px 12px;background:var(--navy);color:white;border-radius:8px 8px 0 0;font-weight:700">📍 ' + esc(mien) + ' (' + arr.length + ' GĐV)</div>';
+    html += '<table class="gdv-table" style="margin:0">' + cols + '<tbody>';
+    arr.forEach(g => {
+      const cls = 'sub-' + g.gdv.replace(/[^a-zA-Z0-9]/g, '_');
+      html += '<tr class="grow" onclick="toggleGdv(this,\'' + cls + '\')" style="cursor:pointer">';
+      html += '<td class="col-gdv"><span class="ar">▶</span> ' + esc(g.gdv) + '</td>';
+      html += '<td class="col-num">' + g.t + '</td>';
+      html += '<td class="col-num">' + g.d + '</td>';
+      html += '<td class="bar-cell col-bar"><i style="width:' + g.pct + '%"></i></td>';
+      html += '<td class="col-pct">' + g.pct + '%</td>';
+      html += '<td class="col-doi">' + (g.doi || '—') + '</td>';
+      html += '<td class="col-delta">' + deltaHtml(g.delta) + '</td>';
+      html += '<td class="col-miss">' + missHtml(g.missKT) + '</td>';
+      html += '<td class="col-miss">' + missHtml(g.missInfo) + '</td></tr>';
+      g.qlkvs.forEach(q => {
+        html += '<tr class="gdv-sub ' + cls + '" style="display:none">';
+        html += '<td class="col-gdv qlkv-name">' + esc(q.qlkv) + '</td>';
+        html += '<td class="col-num">' + q.t + '</td>';
+        html += '<td class="col-num">' + q.d + '</td>';
+        html += '<td class="bar-cell col-bar"><i style="width:' + q.pct + '%"></i></td>';
+        html += '<td class="col-pct">' + q.pct + '%</td>';
+        html += '<td class="col-doi">' + (q.doi || '—') + '</td>';
+        html += '<td class="col-delta">' + deltaHtml(q.delta) + '</td>';
+        html += '<td class="col-miss">' + missHtml(q.missKT) + '</td>';
+        html += '<td class="col-miss">' + missHtml(q.missInfo) + '</td></tr>';
+      });
+    });
+    html += '</tbody></table></div>';
+  });
+
+  $('gdvSection').innerHTML = html || '<div class="empty">Chưa có dữ liệu</div>';
 }
 
 function buildTopQlkv() {
