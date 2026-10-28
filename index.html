@@ -475,19 +475,49 @@ function getISOWeekNumber(d){
 }
 
 async function loadTracklogs(){
-  // Chỉ đọc sheet Tracklogs, không gọi GAS action=data để tải cả sheet hiện trạng.
+  const curWeek = getISOWeekNumber(new Date());
+
+  // Prefer the small Tracklogs CSV to avoid downloading the full main sheet.
+  // Fall back to the existing GAS endpoint if this tab is not publicly readable.
   try{
     const res = await fetch(TRACKLOG_CSV, { cache:'no-store' });
     if(!res.ok) throw new Error('HTTP ' + res.status);
     const rows = parseCSV(await res.text());
-    const curWeek = getISOWeekNumber(new Date());
+    if(!rows.length || !('Tuần' in rows[0]) || !('Mã CH' in rows[0])) {
+      throw new Error('CSV Tracklogs thiếu header cần thiết');
+    }
     trackWeekCHs = new Set();
     rows.forEach(r => {
       const tuan = parseInt(String(r['Tuần'] || '').trim(), 10);
       const ma = String(r['Mã CH'] || '').trim();
       if(tuan === curWeek && ma) trackWeekCHs.add(ma);
     });
-  }catch(e){ console.warn('Không load được tracklogs:', e); }
+    return;
+  }catch(csvErr){
+    console.warn('Không đọc được CSV Tracklogs, chuyển sang GAS:', csvErr);
+  }
+
+  try{
+    const res = await fetch(GAS_URL + '?action=data', { cache:'no-store' });
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if(!data || data.ok === false) throw new Error((data && data.error) || 'Phản hồi GAS không hợp lệ');
+    const log = data.log || [];
+    if(!log.length) { trackWeekCHs = new Set(); return; }
+    const header = log[0].map(h => String(h || '').trim());
+    const iTuan = header.indexOf('Tuần'), iMaCH = header.indexOf('Mã CH');
+    if(iTuan < 0 || iMaCH < 0) throw new Error('Thiếu cột Tuần/Mã CH trong Tracklogs');
+    trackWeekCHs = new Set();
+    for(let i=1; i<log.length; i++){
+      const r = log[i] || [];
+      const tuan = parseInt(String(r[iTuan] || '').trim(), 10);
+      const ma = String(r[iMaCH] || '').trim();
+      if(tuan === curWeek && ma) trackWeekCHs.add(ma);
+    }
+  }catch(err){
+    console.warn('Không load được Tracklogs qua CSV hoặc GAS:', err);
+    toast('⚠️ Chưa tải được lịch sử khảo sát');
+  }
 }
 function parseCSV(text){
   const rows = []; let row=[], cur='', inQ=false;
