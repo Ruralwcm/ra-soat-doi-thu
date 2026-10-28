@@ -199,7 +199,7 @@ input.range-warn{border-color:var(--red);background:#fff5f5}
       <div>
         <h1>🔍 Rà Soát Đối Thủ</h1>
         <p>Khai báo & cập nhật đối thủ quanh cửa hàng WinMart+ Rural</p>
-        <span class="vbadge">📍 v3.0</span>
+        <span class="vbadge">📍 v2.11</span>
       </div>
     </div>
   </div>
@@ -1155,6 +1155,7 @@ function confirmNoChange(){
     ma_ch: selectedStore.ma, ten_ch: selectedStore.ten,
     mien: selectedStore.mien, tinh: selectedStore.tinh, huyen: selectedStore.huyen,
     qlkv: selectedStore.qlkv, gdv: selectedStore.gdv,
+    so_doi_thu: competitorList.length,
     competitors: competitors
   };
 
@@ -1224,6 +1225,7 @@ function submitAll(){
     ma_ch: selectedStore.ma, ten_ch: selectedStore.ten,
     mien: selectedStore.mien, tinh: selectedStore.tinh, huyen: selectedStore.huyen,
     qlkv: selectedStore.qlkv, gdv: selectedStore.gdv,
+    so_doi_thu: competitorList.length,
     competitors: toSave.map(c => ({ ...c, _existing: undefined, _edited: undefined }))
   };
 
