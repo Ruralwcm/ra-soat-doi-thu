@@ -475,26 +475,21 @@ function getISOWeekNumber(d){
 }
 
 async function loadTracklogs(){
+  // Đọc trực tiếp sheet Tracklogs; tránh gọi GAS action=data vốn trả cả
+  // dữ liệu đối thủ đầy đủ dù trang này chỉ cần mã CH đã khảo sát trong tuần.
   try{
-    const res = await fetch(GAS_URL + '?action=data', {cache:'no-store'});
-    const data = await res.json();
-    const log = (data && data.log) || [];
-    if(!log.length){ console.warn('Tracklogs rỗng'); return; }
-    const header = log[0].map(h => String(h||'').trim());
-    const iTuan = header.indexOf('Tuần');
-    const iMaCH = header.indexOf('Mã CH');
-    if(iTuan < 0 || iMaCH < 0){ console.warn('Thiếu cột Tuần/Mã CH'); return; }
+    const res = await fetch(TRACKLOG_CSV);
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const rows = parseCSV(await res.text());
     const curWeek = getISOWeekNumber(new Date());
     trackWeekCHs = new Set();
-    for(let i=1; i<log.length; i++){
-      const r = log[i] || [];
-      const tuan = parseInt(String(r[iTuan]||'').trim(), 10);
-      const ma = String(r[iMaCH]||'').trim();
+    rows.forEach(r => {
+      const tuan = parseInt(String(r['Tuần'] || '').trim(), 10);
+      const ma = String(r['Mã CH'] || '').trim();
       if(tuan === curWeek && ma) trackWeekCHs.add(ma);
-    }
+    });
   }catch(e){ console.warn('Không load được tracklogs:', e); }
 }
-
 function parseCSV(text){
   const rows = []; let row=[], cur='', inQ=false;
   for(let i=0;i<text.length;i++){
