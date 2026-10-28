@@ -217,8 +217,31 @@ function rowsToObjects(rows) {
 
 async function fetchGASData() {
   const resp = await fetch(GAS_URL + '?action=data', {cache: 'no-store'});
+  if (!resp.ok) throw new Error('GAS trả HTTP ' + resp.status);
   const j = await resp.json();
+  if (!j || j.ok === false) throw new Error((j && j.error) || 'GAS trả phản hồi không hợp lệ');
   return j;
+}
+
+// CSV first for smaller/faster responses; keep the prior GAS path as a safe fallback
+// for tabs that Google does not expose through the CSV endpoint.
+let gasFallbackPromise = null;
+async function fetchGasDataset(key) {
+  if (!gasFallbackPromise) gasFallbackPromise = fetchGASData();
+  const data = await gasFallbackPromise;
+  return rowsToObjects(data[key] || []);
+}
+async function fetchSheetCSVOrGas(gid, requiredHeaders, gasKey) {
+  try {
+    const rows = await fetchCSV(gid);
+    if (rows.length && requiredHeaders.every(h => Object.prototype.hasOwnProperty.call(rows[0], h))) {
+      return rows;
+    }
+    throw new Error('CSV thiếu dữ liệu hoặc header: ' + requiredHeaders.join(', '));
+  } catch (csvErr) {
+    console.warn('Không đọc được CSV sheet ' + gid + ', chuyển sang GAS:', csvErr);
+    return fetchGasDataset(gasKey);
+  }
 }
 
 function parseCSV(text) {
@@ -262,8 +285,8 @@ async function loadAll() {
     // tải/serialize cả main và log trong mỗi lần mở dashboard.
     const [storeData, doiThuData, trackData] = await Promise.all([
       fetchCSV(STORE_GID),
-      fetchCSV(DOI_THU_GID),
-      fetchCSV(TRACKLOG_GID)
+      fetchSheetCSVOrGas(DOI_THU_GID, ['Mã ĐT', 'Mã CH', 'Tên đối thủ'], 'main'),
+      fetchSheetCSVOrGas(TRACKLOG_GID, ['Tuần', 'Mã CH', 'Hành động'], 'log')
     ]);
 
     // Process stores
