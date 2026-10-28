@@ -4,304 +4,314 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Rà Soát Đối Thủ · WinMart+ Rural</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
-  --red:#d71920;
-  --blue:#1a3c6e;
-  --gold:#ffc107;
-  --green:#16a34a;
-  --bg:#f4f5f7;
-  --card:#ffffff;
-  --txt:#1f2937;
-  --muted:#6b7280;
-  --border:#e5e7eb;
+  --red:#d71920; --navy:#1a3c6e; --gold:#ffc107; --green:#1e8e4e;
+  --bg:#f4f6fb; --card:#ffffff; --line:#e5e9f2; --txt:#1c2434; --mut:#6b7280;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 body{
-  font-family:'Be Vietnam Pro',-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
-  background:var(--bg);color:var(--txt);line-height:1.5;padding-bottom:90px;
+  font-family:'Be Vietnam Pro',system-ui,sans-serif;
+  background:var(--bg);color:var(--txt);min-height:100vh;padding:16px;
+  -webkit-font-smoothing:antialiased;padding-bottom:100px;
 }
-.topbar{background:linear-gradient(135deg,var(--red),#a31016);color:#fff;padding:10px 14px;}
-.topbar .t-row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
-.topbar .t-title{font-size:16px;font-weight:800;line-height:1.2;}
-.topbar .t-title .vbadge{font-size:11px;font-weight:700;background:rgba(255,255,255,.22);color:#fff;padding:2px 8px;border-radius:20px;margin-left:6px;vertical-align:middle;}
-.topbar .t-sub{font-size:11px;opacity:.85;margin-top:1px;}
-.topbar .t-ver{font-size:12px;opacity:.95;white-space:nowrap;font-weight:600;}
+.wrap{max-width:560px;margin:0 auto}
 
-.wrap{max-width:640px;margin:0 auto;padding:0 12px;}
-.card{background:var(--card);border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-top:14px;overflow:hidden;}
-.card-head{display:flex;align-items:center;gap:8px;padding:14px 16px;font-weight:700;font-size:15px;border-bottom:1px solid var(--border);}
-.card-head .dot{width:10px;height:10px;border-radius:50%;background:var(--red);flex-shrink:0;}
-.card-head.opt .dot{background:var(--gold);}
-.card-head .tag{margin-left:auto;font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;background:#fef3c7;color:#92400e;white-space:nowrap;}
-.card-head .tag.req{background:#fee2e2;color:#991b1b;}
-.card-body{padding:14px 16px;}
+/* Header */
+.head{
+  background:linear-gradient(135deg,var(--navy),#2c4a8a);
+  color:#fff;border-radius:16px;padding:18px 20px 20px;
+  box-shadow:0 8px 24px rgba(26,60,110,.18);margin-bottom:14px;
+}
+.head h1{font-size:20px;font-weight:800;line-height:1.3}
+.head p{font-size:13px;opacity:.85;margin-top:4px}
+.head .head-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.head .vbadge{display:inline-block;background:rgba(255,255,255,.18);padding:4px 10px;border-radius:20px;font-size:11.5px;font-weight:600;margin-top:8px}
+.head .dash-link{color:#fff;text-decoration:none;font-size:12.5px;font-weight:700;background:rgba(255,255,255,.16);padding:8px 14px;border-radius:10px;white-space:nowrap}
 
-label{display:block;font-size:12px;font-weight:600;color:#374151;margin:10px 0 4px;}
-label:first-child{margin-top:0;}
-label .req-star{color:var(--red);}
+/* Card */
+.card{
+  background:var(--card);border-radius:14px;padding:18px;margin-top:14px;
+  box-shadow:0 2px 10px rgba(20,30,60,.06);border:1px solid var(--line);
+}
+.card h2{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.card h2 .dot{width:8px;height:8px;border-radius:50%;background:var(--red);flex-shrink:0;margin-top:2px}
+.card h2 .tag{margin-left:auto;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:#fef3c7;color:#92400e;white-space:nowrap}
+
+/* Form elements */
+label{font-size:12.5px;font-weight:600;color:var(--mut);display:block;margin:12px 0 6px}
+label:first-child{margin-top:0}
+label .req-star{color:var(--red)}
 input,select,textarea{
-  width:100%;padding:10px 11px;border:1px solid var(--border);border-radius:9px;
-  font-size:15px;font-family:inherit;background:#fff;color:var(--txt);
-  transition:border-color .15s, box-shadow .15s;
+  width:100%;font-size:15px;font-family:inherit;padding:11px 13px;
+  border:1.5px solid var(--line);border-radius:10px;background:#fafbfd;color:var(--txt);
+  outline:none;transition:border .15s;
 }
-input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,60,110,.12);}
-.row{display:flex;gap:8px;}
-.row > div{flex:1;min-width:0;}
-.row5{display:flex;gap:5px;}
-.row5 > div{flex:1;min-width:0;}
-.row5 label{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.row5 input{padding:9px 6px;font-size:14px;}
-.opt-label{font-size:12px;font-weight:700;color:var(--muted);margin:14px 0 6px;border-top:1px dashed var(--border);padding-top:12px;}
-.hint{font-size:12px;color:var(--muted);margin-top:4px;}
-.err{color:var(--red);font-size:11px;margin-top:3px;display:none;}
-input.invalid{border-color:var(--red);}
-.warn-hint{font-size:10px;color:#b71c1c;margin-top:2px;font-weight:600;}
-input.range-warn{border-color:var(--red);background:#fff5f5;}
+input:focus,select:focus{border-color:var(--navy);background:#fff}
+.row{display:flex;gap:8px}
+.row>div{flex:1;min-width:0}
+.row5{display:flex;gap:5px}
+.row5>div{flex:1;min-width:0}
+.row5 label{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row5 input{padding:9px 6px;font-size:14px}
+.opt-label{font-size:12px;font-weight:700;color:var(--mut);margin:14px 0 6px;border-top:1px dashed var(--line);padding-top:12px}
+.hint{font-size:12px;color:var(--mut);margin-top:4px}
+.err{color:var(--red);font-size:11px;margin-top:3px;display:none}
+input.invalid{border-color:var(--red)}
+.warn-hint{font-size:10px;color:#b71c1c;margin-top:2px;font-weight:600}
+input.range-warn{border-color:var(--red);background:#fff5f5}
 
-.pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
-.pill{font-size:12px;padding:4px 10px;border-radius:20px;background:#eef2f7;color:#374151;font-weight:500;}
-.pill b{color:var(--blue);}
+/* Store info grid */
+.store-info{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;
+}
+.store-info .it{background:#f6f8fc;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.store-info .it .k{font-size:11px;color:var(--mut);margin-bottom:2px}
+.store-info .it .v{font-size:14px;font-weight:600}
 
-.loc-input{position:relative;}
-.loc-input input{padding-right:48px;}
+/* Competitor list items (survey .sec style) */
+.comp-empty{text-align:center;color:var(--mut);font-size:14px;padding:16px 10px}
+.comp-item{
+  border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:10px;
+  background:#fff;display:flex;align-items:flex-start;gap:12px
+}
+.comp-item.existing{background:#f6f8fc;border-color:#dbeafe}
+.comp-item.edited{background:#fefce8;border-color:#fde68a}
+.comp-item .idx{
+  background:var(--navy);color:#fff;border-radius:50%;width:26px;height:26px;min-width:26px;
+  display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;margin-top:2px
+}
+.comp-item.existing .idx{background:#64748b}
+.comp-item .body{flex:1;min-width:0}
+.comp-item .t{font-weight:700;font-size:14.5px}
+.comp-item .t .badge{font-size:10px;font-weight:600;background:#dbeafe;color:#1d4ed8;border-radius:20px;padding:1px 7px;margin-left:6px;vertical-align:middle}
+.comp-item .t .badge.ed{background:#fde68a;color:#92400e}
+.comp-item .s{font-size:12px;color:var(--mut);margin-top:2px;word-break:break-word}
+.comp-item .acts{display:flex;flex-direction:column;gap:4px}
+.comp-item .act{background:none;border:none;cursor:pointer;padding:3px 8px;font-size:17px;border-radius:8px}
+.comp-item .act.edit{color:var(--navy)}
+.comp-item .act.edit:hover{background:#eef3fb}
+.comp-item .act.del{color:var(--red)}
+.comp-item .act.del:hover{background:#fdeeee}
+
+/* Location */
+.loc-input{position:relative}
+.loc-input input{padding-right:48px}
 .loc-input .gps-btn{
   position:absolute;right:6px;top:50%;transform:translateY(-50%);
-  background:var(--blue);color:#fff;border:none;border-radius:7px;padding:7px 10px;
-  font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;
+  background:var(--navy);color:#fff;border:none;border-radius:8px;padding:7px 10px;
+  font-size:13px;font-weight:700;cursor:pointer;font-family:inherit
 }
-.loc-input .gps-btn:disabled{opacity:.5;cursor:not-allowed;}
+.loc-input .gps-btn:disabled{opacity:.5}
 
-.dist-result{margin-top:10px;padding:10px 12px;border-radius:9px;font-size:14px;font-weight:600;display:none;}
-.dist-result.ok{display:block;background:#ecfdf5;color:#065f46;}
-.dist-result.bad{display:block;background:#fee2e2;color:#991b1b;}
+.dist-result{margin-top:10px;padding:10px 12px;border-radius:9px;font-size:14px;font-weight:600;display:none}
+.dist-result.ok{display:block;background:#ecfdf5;color:#065f46}
+.dist-result.bad{display:block;background:#fee2e2;color:#991b1b}
 
+/* Buttons */
 .btn{
   display:inline-flex;align-items:center;justify-content:center;gap:6px;
-  padding:11px 14px;border-radius:9px;border:none;font-size:14px;font-weight:700;
-  cursor:pointer;transition:opacity .15s, transform .05s;font-family:inherit;
+  padding:13px 16px;border-radius:12px;border:none;font-size:14.5px;font-weight:700;
+  cursor:pointer;transition:opacity .15s,transform .05s;font-family:inherit
 }
-.btn:active{transform:scale(.98);}
-.btn-primary{background:var(--red);color:#fff;}
-.btn-blue{background:var(--blue);color:#fff;}
-.btn-ghost{background:#fff;color:var(--blue);border:1.5px solid var(--blue);}
-.btn-block{width:100%;margin-top:12px;}
-.btn:disabled{opacity:.5;cursor:not-allowed;}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--red);color:#fff;box-shadow:0 6px 18px rgba(215,25,32,.3)}
+.btn-blue{background:var(--navy);color:#fff;box-shadow:0 4px 14px rgba(26,60,110,.25)}
+.btn-ghost{background:#fff;color:var(--navy);border:1.5px solid var(--line)}
+.btn-block{width:100%;margin-top:12px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
 
-.comp-empty{text-align:center;color:var(--muted);font-size:14px;padding:16px 10px;}
-.comp-item{border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-top:8px;display:flex;align-items:flex-start;gap:10px;background:#fafbfc;}
-.comp-item.existing{background:#f0f7ff;border-color:#dbeafe;}
-.comp-item.edited{background:#fefce8;border-color:#fde68a;}
-.comp-item .idx{background:var(--blue);color:#fff;border-radius:50%;width:24px;height:24px;min-width:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin-top:2px;}
-.comp-item.existing .idx{background:#64748b;}
-.comp-item .body{flex:1;min-width:0;}
-.comp-item .t{font-weight:700;font-size:14px;}
-.comp-item .t .badge{font-size:10px;font-weight:600;background:#dbeafe;color:#1d4ed8;border-radius:20px;padding:1px 7px;margin-left:6px;vertical-align:middle;}
-.comp-item .t .badge.ed{background:#fde68a;color:#92400e;}
-.comp-item .s{font-size:12px;color:var(--muted);margin-top:2px;word-break:break-word;}
-.comp-item .acts{display:flex;flex-direction:column;gap:4px;}
-.comp-item .act{background:none;border:none;cursor:pointer;padding:2px 6px;font-size:16px;}
-.comp-item .act.edit{color:var(--blue);}
-.comp-item .act.del{color:var(--red);}
-
+/* Fixed bottom bar */
 .submit-bar{
-  position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--border);
-  padding:10px 14px;display:flex;gap:10px;z-index:100;max-width:640px;margin:0 auto;
-  box-shadow:0 -2px 10px rgba(0,0,0,.05);
+  position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);
+  padding:10px 14px;display:flex;gap:10px;z-index:100;max-width:560px;margin:0 auto;
+  box-shadow:0 -2px 10px rgba(0,0,0,.05)
 }
-.submit-bar .btn{flex:1;padding:13px;font-size:15px;}
+.submit-bar .btn{flex:1;padding:13px;font-size:15px}
 
+/* Toast */
 .toast{
-  position:fixed;top:16px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;
-  padding:12px 18px;border-radius:10px;font-size:14px;z-index:200;opacity:0;transition:opacity .3s;
-  pointer-events:none;max-width:90vw;text-align:center;
+  position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(80px);
+  background:#166534;color:#fff;padding:13px 22px;border-radius:12px;font-weight:600;
+  font-size:14px;transition:.3s;box-shadow:0 8px 24px rgba(0,0,0,.2);z-index:200
 }
-.toast.show{opacity:1;}
-.confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:300;}
-.confirm-box{background:#fff;border-radius:14px;padding:20px 18px;max-width:320px;width:90%;box-shadow:0 8px 30px rgba(0,0,0,.25);}
-.confirm-msg{font-size:14px;font-weight:600;margin-bottom:16px;line-height:1.5;}
-.confirm-actions{display:flex;gap:10px;}
-.confirm-actions .btn{flex:1;}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* Confirm overlay */
+.confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:300}
+.confirm-box{background:#fff;border-radius:14px;padding:20px 18px;max-width:320px;width:90%;box-shadow:0 8px 30px rgba(0,0,0,.25)}
+.confirm-msg{font-size:14px;font-weight:600;margin-bottom:16px;line-height:1.5}
+.confirm-actions{display:flex;gap:10px}
+.confirm-actions .btn{flex:1}
+
+/* Completed box */
+.completed-box{
+  background:#d1fae5;border:2px solid #16a34a;border-radius:14px;padding:18px;
+  margin:14px 0;text-align:center;animation:fadeIn .3s ease
+}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.completed-box .big-icon{font-size:32px;margin-bottom:4px}
+.completed-box .msg{font-size:16px;font-weight:800;color:#166534;margin-bottom:2px}
+.completed-box .detail{font-size:13px;color:#065f46;margin-bottom:6px}
+.completed-box .status-tag{font-size:12px;color:#047857;background:#a7f3d0;display:inline-block;padding:3px 12px;border-radius:20px;font-weight:600}
+.completed-box .reset-btn{background:var(--navy);color:#fff;border:none;padding:10px 24px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;margin-top:12px;font-family:inherit}
+
+/* Add form card */
+.add-card-header{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;color:var(--navy);margin-bottom:14px}
+.add-card-header .dot{width:8px;height:8px;border-radius:50%;background:var(--gold);flex-shrink:0}
 
 /* Edit modal */
-.edit-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:flex-start;justify-content:center;z-index:400;overflow-y:auto;padding:20px 12px;}
-.edit-modal{background:#fff;border-radius:14px;width:100%;max-width:500px;box-shadow:0 8px 30px rgba(0,0,0,.3);margin-top:10px;overflow:hidden;}
-.edit-modal-head{background:linear-gradient(135deg,var(--blue),#0f2444);color:#fff;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
-.edit-modal-head .m-title{font-size:16px;font-weight:800;}
-.edit-modal-head .m-close{background:rgba(255,255,255,.2);border:none;color:#fff;font-size:20px;width:32px;height:32px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;}
-.edit-modal-body{padding:14px 16px;max-height:70vh;overflow-y:auto;}
-.edit-modal-body label{display:block;font-size:12px;font-weight:600;color:#374151;margin:10px 0 4px;}
-.edit-modal-body label:first-child{margin-top:0;}
-.edit-modal-body input, .edit-modal-body select{width:100%;padding:10px 11px;border:1px solid var(--border);border-radius:9px;font-size:15px;font-family:inherit;}
-.edit-modal-body input:focus, .edit-modal-body select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,60,110,.12);}
-.edit-modal-body .row{display:flex;gap:8px;}
-.edit-modal-body .row>div{flex:1;min-width:0;}
-.edit-modal-body .row5{display:flex;gap:5px;}
-.edit-modal-body .row5>div{flex:1;min-width:0;}
-.edit-modal-body .row5 label{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.edit-modal-body .row5 input{padding:9px 6px;font-size:14px;}
-.edit-modal-body .opt-label{font-size:12px;font-weight:700;color:var(--muted);margin:14px 0 6px;border-top:1px dashed var(--border);padding-top:12px;}
-.edit-modal-body .hint{font-size:12px;color:var(--muted);margin-top:4px;}
-.edit-modal-body .loc-input{position:relative;}
-.edit-modal-body .loc-input input{padding-right:48px;}
-.edit-modal-body .gps-btn{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:var(--blue);color:#fff;border:none;border-radius:7px;padding:7px 10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
-.edit-modal-body .err{color:var(--red);font-size:11px;margin-top:3px;display:none;}
-.edit-modal-body input.invalid{border-color:var(--red);}
-.edit-modal-body .warn-hint{font-size:10px;color:#b71c1c;margin-top:2px;font-weight:600;}
-.edit-modal-body input.range-warn{border-color:var(--red);background:#fff5f5;}
-.edit-modal-body .dist-result{margin-top:10px;padding:10px 12px;border-radius:9px;font-size:14px;font-weight:600;display:none;}
-.edit-modal-body .dist-result.ok{display:block;background:#ecfdf5;color:#065f46;}
-.edit-modal-body .dist-result.bad{display:block;background:#fee2e2;color:#991b1b;}
-.edit-modal-foot{padding:14px 16px;border-top:1px solid var(--border);display:flex;gap:10px;}
-.edit-modal-foot .btn{flex:1;padding:13px;font-size:15px;}
+.edit-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:flex-start;justify-content:center;z-index:400;overflow-y:auto;padding:20px 12px}
+.edit-modal{background:#fff;border-radius:16px;width:100%;max-width:500px;box-shadow:0 8px 30px rgba(0,0,0,.3);margin-top:10px;overflow:hidden}
+.edit-modal-head{background:linear-gradient(135deg,var(--navy),#2c4a8a);color:#fff;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.edit-modal-head .m-title{font-size:16px;font-weight:800}
+.edit-modal-head .m-close{background:rgba(255,255,255,.2);border:none;color:#fff;font-size:20px;width:32px;height:32px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+.edit-modal-body{padding:14px 16px;max-height:70vh;overflow-y:auto}
+.edit-modal-body label{display:block;font-size:12px;font-weight:600;color:var(--mut);margin:10px 0 4px}
+.edit-modal-body label:first-child{margin-top:0}
+.edit-modal-body input,.edit-modal-body select{width:100%;padding:10px 11px;border:1.5px solid var(--line);border-radius:10px;font-size:15px;font-family:inherit;background:#fafbfd}
+.edit-modal-body input:focus,.edit-modal-body select:focus{outline:none;border-color:var(--navy);background:#fff}
+.edit-modal-body .row{display:flex;gap:8px}
+.edit-modal-body .row>div{flex:1;min-width:0}
+.edit-modal-body .row5{display:flex;gap:5px}
+.edit-modal-body .row5>div{flex:1;min-width:0}
+.edit-modal-body .row5 label{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.edit-modal-body .row5 input{padding:9px 6px;font-size:14px}
+.edit-modal-body .opt-label{font-size:12px;font-weight:700;color:var(--mut);margin:14px 0 6px;border-top:1px dashed var(--line);padding-top:12px}
+.edit-modal-body .hint{font-size:12px;color:var(--mut);margin-top:4px}
+.edit-modal-body .loc-input{position:relative}
+.edit-modal-body .loc-input input{padding-right:48px}
+.edit-modal-body .gps-btn{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:var(--navy);color:#fff;border:none;border-radius:8px;padding:7px 10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
+.edit-modal-body .err{color:var(--red);font-size:11px;margin-top:3px;display:none}
+.edit-modal-body input.invalid{border-color:var(--red)}
+.edit-modal-body .warn-hint{font-size:10px;color:#b71c1c;margin-top:2px;font-weight:600}
+.edit-modal-body input.range-warn{border-color:var(--red);background:#fff5f5}
+.edit-modal-body .dist-result{margin-top:10px;padding:10px 12px;border-radius:9px;font-size:14px;font-weight:600;display:none}
+.edit-modal-body .dist-result.ok{display:block;background:#ecfdf5;color:#065f46}
+.edit-modal-body .dist-result.bad{display:block;background:#fee2e2;color:#991b1b}
+.edit-modal-foot{padding:14px 16px;border-top:1px solid var(--line);display:flex;gap:10px}
+.edit-modal-foot .btn{flex:1;padding:13px;font-size:15px}
+
+.foot{text-align:center;color:var(--mut);font-size:11.5px;margin-top:20px}
+.foot a{color:var(--navy);font-weight:600;text-decoration:none}
 </style>
 </head>
 <body>
-
-<div class="topbar">
-  <div class="t-row">
-    <div>
-      <div class="t-title">🔍 Rà Soát Đối Thủ <span class="vbadge">v2.4</span></div>
-      <div class="t-sub">Khai báo & cập nhật đối thủ quanh cửa hàng</div>
-    </div>
-    <a href="dashboard.html" style="color:#fff;text-decoration:none;font-size:13px;font-weight:700;background:rgba(255,255,255,.18);padding:8px 14px;border-radius:8px;white-space:nowrap;">📊 Dashboard</a>
-  </div>
-</div>
-
 <div class="wrap">
 
-  <!-- ===== CH khảo sát ===== -->
+  <!-- Header -->
+  <div class="head">
+    <div class="head-row">
+      <div>
+        <h1>🔍 Rà Soát Đối Thủ</h1>
+        <p>Khai báo & cập nhật đối thủ quanh cửa hàng WinMart+ Rural</p>
+        <span class="vbadge">📍 v2.5</span>
+      </div>
+      <a href="dashboard.html" class="dash-link">📊 Dashboard</a>
+    </div>
+  </div>
+
+  <!-- ① Cửa hàng khảo sát -->
   <div class="card">
-    <div class="card-head"><span class="dot"></span>① Cửa hàng khảo sát</div>
-    <div class="card-body">
-      <div class="row" style="gap:6px;">
-        <div>
-          <label>Miền <span class="req-star">*</span></label>
-          <select id="selMien"><option value="">— Miền —</option></select>
-        </div>
-        <div>
-          <label>GĐV <span class="req-star">*</span></label>
-          <select id="selGdv"><option value="">— GĐV —</option></select>
-        </div>
-        <div>
-          <label>QLKV <span class="req-star">*</span></label>
-          <select id="selQlkv"><option value="">— QLKV —</option></select>
-        </div>
+    <h2><span class="dot"></span>1️⃣ Chọn cửa hàng</h2>
+    <div class="row">
+      <div>
+        <label>Miền <span class="req-star">*</span></label>
+        <select id="selMien"><option value="">— Miền —</option></select>
       </div>
-      <label>Cửa hàng <span class="req-star">*</span></label>
-      <select id="selCh"><option value="">— Chọn Cửa hàng —</option></select>
-      <div class="pills" id="chInfo" style="display:none;">
-        <span class="pill">Tỉnh: <b id="pTinh">-</b></span>
-        <span class="pill">Huyện: <b id="pHuyen">-</b></span>
-        <span class="pill">GĐV: <b id="pGdv">-</b></span>
+      <div>
+        <label>GĐV <span class="req-star">*</span></label>
+        <select id="selGdv"><option value="">— GĐV —</option></select>
       </div>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <div>
+        <label>QLKV <span class="req-star">*</span></label>
+        <select id="selQlkv"><option value="">— QLKV —</option></select>
+      </div>
+      <div>
+        <label>Cửa hàng <span class="req-star">*</span></label>
+        <select id="selCh"><option value="">— Chọn Cửa hàng —</option></select>
+      </div>
+    </div>
+    <div class="store-info" id="chInfo" style="display:none">
+      <div class="it"><div class="k">Tỉnh/TP</div><div class="v" id="pTinh">-</div></div>
+      <div class="it"><div class="k">Quận/Huyện</div><div class="v" id="pHuyen">-</div></div>
+      <div class="it"><div class="k">QLKV</div><div class="v" id="pQlkv">-</div></div>
+      <div class="it"><div class="k">GĐV</div><div class="v" id="pGdv">-</div></div>
     </div>
   </div>
 
-  <!-- ===== Danh sách đối thủ ===== -->
+  <!-- ② Danh sách đối thủ -->
   <div class="card">
-    <div class="card-head"><span class="dot"></span>② Danh sách đối thủ <span class="tag" id="tagCount">0 đối thủ</span></div>
-    <div class="card-body">
-      <div id="compList"><div class="comp-empty">Chọn cửa hàng để xem đối thủ đã có.</div></div>
-      <div style="display:flex;gap:8px;margin-top:8px;" id="confirmBar">
-        <button class="btn btn-ghost" id="btnNoChange" onclick="onNoChangeBtn()" disabled style="flex:1;border-color:var(--green);color:var(--green);">✅ Không thay đổi</button>
-        <button class="btn btn-blue" id="btnAddNew" onclick="toggleAddForm()" disabled style="flex:1;">➕ Thêm</button>
-      </div>
+    <h2><span class="dot"></span>2️⃣ Danh sách đối thủ <span class="tag" id="tagCount">0 đối thủ</span></h2>
+    <div id="compList"><div class="comp-empty">Chọn cửa hàng để xem đối thủ đã có.</div></div>
+    <div style="display:flex;gap:8px;margin-top:12px" id="confirmBar">
+      <button class="btn btn-ghost" id="btnNoChange" onclick="onNoChangeBtn()" disabled style="flex:1;border-color:var(--green);color:var(--green)">✅ Không thay đổi</button>
+      <button class="btn btn-blue" id="btnAddNew" onclick="toggleAddForm()" disabled style="flex:1">➕ Thêm</button>
     </div>
   </div>
 
-  <!-- ===== Form thêm/sửa đối thủ ===== -->
-  <div class="card" id="addCard" style="display:none;">
-    <div class="card-head opt"><span class="dot"></span>③ <span id="formTitle">Thêm đối thủ</span></div>
-    <div class="card-body">
-      <div class="row">
-        <div style="flex:0 0 40%;">
-          <label>Nhóm đối thủ <span class="req-star">*</span></label>
-          <select id="nhom">
-            <option value="">— Chọn nhóm —</option>
-            <option>BHX (Bách Hoá Xanh)</option>
-            <option>Coopmart</option>
-            <option>Maxidi</option>
-            <option>KingFood Mart</option>
-            <option>Satrafoods</option>
-            <option>TataMart</option>
-            <option>Siêu thị lớn (GO/Aeon...)</option>
-            <option>Tạp hóa/Khác</option>
-          </select>
-        </div>
-        <div style="flex:1;">
-          <label>Tên đối thủ <span class="req-star">*</span></label>
-          <input type="text" id="tenDoiThu" placeholder="VD: BHX - 2/3 Lê Quang Hoà">
+  <!-- ③ Form thêm đối thủ -->
+  <div class="card" id="addCard" style="display:none">
+    <div class="add-card-header"><span class="dot"></span><span id="formTitle">Thêm đối thủ mới</span></div>
+    <div class="row">
+      <div style="flex:0 0 40%">
+        <label>Nhóm đối thủ <span class="req-star">*</span></label>
+        <select id="nhom">
+          <option value="">— Chọn nhóm —</option>
+          <option>BHX (Bách Hoá Xanh)</option><option>Coopmart</option><option>Maxidi</option>
+          <option>KingFood Mart</option><option>Satrafoods</option><option>TataMart</option>
+          <option>Siêu thị lớn (GO/Aeon...)</option><option>Tạp hóa/Khác</option>
+        </select>
+      </div>
+      <div style="flex:1">
+        <label>Tên đối thủ <span class="req-star">*</span></label>
+        <input type="text" id="tenDoiThu" placeholder="VD: BHX - 2/3 Lê Quang Hoà">
+      </div>
+    </div>
+    <label>Địa chỉ <span class="req-star">*</span></label>
+    <input type="text" id="diaChi" placeholder="VD: 2/3 Lê Quang Hoà, Khu phố 17, Thới An, Q.12">
+    <div class="row">
+      <div style="flex:0 0 42%">
+        <label>Ngày KT đối thủ <span class="req-star">*</span></label>
+        <input type="date" id="ngayKhaiTruong" onchange="validateNgay()">
+        <div class="hint" id="ngayResult" style="display:none;color:var(--red);font-weight:600"></div>
+      </div>
+      <div style="flex:1">
+        <label>Định vị <span class="req-star">*</span></label>
+        <div class="loc-input">
+          <input type="text" id="locInput" placeholder="Link Maps / lat,lng...">
+          <button class="gps-btn" id="btnLoc" onclick="getLocation()">📍</button>
         </div>
       </div>
-
-      <label>Địa chỉ <span class="req-star">*</span></label>
-      <input type="text" id="diaChi" placeholder="VD: 2/3 Lê Quang Hoà, Khu phố 17, Thới An, Q.12">
-
-      <div class="row">
-        <div style="flex:0 0 42%;">
-          <label>Ngày khai trương đối thủ <span class="req-star">*</span></label>
-          <input type="date" id="ngayKhaiTruong" onchange="validateNgay()">
-          <div class="hint" id="ngayResult" style="display:none;color:var(--red);font-weight:600;"></div>
-        </div>
-        <div style="flex:1;">
-          <label>Định vị <span class="req-star">*</span></label>
-          <div class="loc-input">
-            <input type="text" id="locInput" placeholder="Link Maps / lat,lng...">
-            <button class="gps-btn" id="btnLoc" onclick="getLocation()">📍</button>
-          </div>
-        </div>
-      </div>
-      <div class="hint">Định vị: dán link Google Maps hoặc toạ độ → tự nhận diện + tính khoảng cách tới CH.</div>
-      <div class="dist-result" id="distResult"></div>
-
-      <div class="opt-label">Thông tin bổ sung (tuỳ chọn)</div>
-      <div class="row5">
-        <div>
-          <label>DS/ngày (trđ)</label>
-          <input type="text" id="doanhSo" inputmode="decimal" placeholder="" oninput="validateRange()">
-          <div class="err" id="errDoanhSo">Số</div>
-          <div class="warn-hint" id="warnDoanhSo" style="display:none"></div>
-        </div>
-        <div>
-          <label>Khách/ngày</label>
-          <input type="text" id="luongKhach" inputmode="decimal" placeholder="" oninput="validateRange()">
-          <div class="err" id="errKhach">Số</div>
-          <div class="warn-hint" id="warnKhach" style="display:none"></div>
-        </div>
-        <div>
-          <label>MT (m)</label>
-          <input type="text" id="mt" inputmode="decimal" placeholder="" oninput="validateRange()">
-          <div class="err" id="errMt">Số</div>
-          <div class="warn-hint" id="warnMt" style="display:none"></div>
-        </div>
-        <div>
-          <label>Giá thuê (tr)</label>
-          <input type="text" id="giaThue" inputmode="decimal" placeholder="" oninput="validateRange()">
-          <div class="err" id="errGia">Số</div>
-          <div class="warn-hint" id="warnGia" style="display:none"></div>
-        </div>
-        <div>
-          <label>DT (m²)</label>
-          <input type="text" id="dienTich" inputmode="decimal" placeholder="" oninput="validateRange()">
-          <div class="err" id="errDt">Số</div>
-          <div class="warn-hint" id="warnDt" style="display:none"></div>
-        </div>
-      </div>
-
-      <div style="display:flex;gap:8px;margin-top:14px;">
-        <button class="btn btn-blue" id="btnSaveForm" onclick="saveForm()" style="flex:1;">➕ Thêm vào danh sách</button>
-        <button class="btn btn-ghost" id="btnCancelEdit" onclick="cancelEdit()" style="display:none;">Huỷ</button>
-      </div>
+    </div>
+    <div class="hint">Dán link Google Maps hoặc toạ độ → tự nhận diện + tính khoảng cách tới CH.</div>
+    <div class="dist-result" id="distResult"></div>
+    <div class="opt-label">Thông tin bổ sung (tuỳ chọn)</div>
+    <div class="row5">
+      <div><label>DS/ngày (trđ)</label><input type="text" id="doanhSo" inputmode="decimal" oninput="validateRange()"><div class="err" id="errDoanhSo">Số</div><div class="warn-hint" id="warnDoanhSo" style="display:none"></div></div>
+      <div><label>Khách/ngày</label><input type="text" id="luongKhach" inputmode="decimal" oninput="validateRange()"><div class="err" id="errKhach">Số</div><div class="warn-hint" id="warnKhach" style="display:none"></div></div>
+      <div><label>MT (m)</label><input type="text" id="mt" inputmode="decimal" oninput="validateRange()"><div class="err" id="errMt">Số</div><div class="warn-hint" id="warnMt" style="display:none"></div></div>
+      <div><label>Giá thuê (tr)</label><input type="text" id="giaThue" inputmode="decimal" oninput="validateRange()"><div class="err" id="errGia">Số</div><div class="warn-hint" id="warnGia" style="display:none"></div></div>
+      <div><label>DT (m²)</label><input type="text" id="dienTich" inputmode="decimal" oninput="validateRange()"><div class="err" id="errDt">Số</div><div class="warn-hint" id="warnDt" style="display:none"></div></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button class="btn btn-blue btn-block" id="btnSaveForm" onclick="saveForm()">➕ Thêm vào danh sách</button>
+      <button class="btn btn-ghost" id="btnCancelEdit" onclick="cancelEdit()" style="display:none;flex:0">Huỷ</button>
     </div>
   </div>
 
+  <div class="foot">Rà Soát Đối Thủ · WinMart+ Rural · <a href="dashboard.html">📊 Dashboard</a></div>
 </div>
 
+<!-- Toast -->
 <div class="toast" id="toast"></div>
 
-<!-- ===== EDIT MODAL ===== -->
-<div class="edit-modal-overlay" id="editModalOverlay" style="display:none;">
+<!-- Edit Modal -->
+<div class="edit-modal-overlay" id="editModalOverlay" style="display:none">
   <div class="edit-modal">
     <div class="edit-modal-head">
       <span class="m-title">✏️ Sửa đối thủ</span>
@@ -309,21 +319,16 @@ input.range-warn{border-color:var(--red);background:#fff5f5;}
     </div>
     <div class="edit-modal-body">
       <div class="row">
-        <div style="flex:0 0 40%;">
+        <div style="flex:0 0 40%">
           <label>Nhóm đối thủ <span class="req-star">*</span></label>
           <select id="emNhom">
             <option value="">— Chọn nhóm —</option>
-            <option>BHX (Bách Hoá Xanh)</option>
-            <option>Coopmart</option>
-            <option>Maxidi</option>
-            <option>KingFood Mart</option>
-            <option>Satrafoods</option>
-            <option>TataMart</option>
-            <option>Siêu thị lớn (GO/Aeon...)</option>
-            <option>Tạp hóa/Khác</option>
+            <option>BHX (Bách Hoá Xanh)</option><option>Coopmart</option><option>Maxidi</option>
+            <option>KingFood Mart</option><option>Satrafoods</option><option>TataMart</option>
+            <option>Siêu thị lớn (GO/Aeon...)</option><option>Tạp hóa/Khác</option>
           </select>
         </div>
-        <div style="flex:1;">
+        <div style="flex:1">
           <label>Tên đối thủ <span class="req-star">*</span></label>
           <input type="text" id="emTen" placeholder="VD: BHX - 2/3 Lê Quang Hoà">
         </div>
@@ -331,12 +336,12 @@ input.range-warn{border-color:var(--red);background:#fff5f5;}
       <label>Địa chỉ <span class="req-star">*</span></label>
       <input type="text" id="emDiaChi" placeholder="VD: 2/3 Lê Quang Hoà, Khu phố 17, Thới An, Q.12">
       <div class="row">
-        <div style="flex:0 0 42%;">
-          <label>Ngày khai trương đối thủ <span class="req-star">*</span></label>
+        <div style="flex:0 0 42%">
+          <label>Ngày KT đối thủ <span class="req-star">*</span></label>
           <input type="date" id="emNgayKT" onchange="emValidateNgay()">
-          <div class="hint" id="emNgayResult" style="display:none;color:var(--red);font-weight:600;"></div>
+          <div class="hint" id="emNgayResult" style="display:none;color:var(--red);font-weight:600"></div>
         </div>
-        <div style="flex:1;">
+        <div style="flex:1">
           <label>Định vị <span class="req-star">*</span></label>
           <div class="loc-input">
             <input type="text" id="emLoc" placeholder="Link Maps / lat,lng...">
@@ -344,15 +349,15 @@ input.range-warn{border-color:var(--red);background:#fff5f5;}
           </div>
         </div>
       </div>
-      <div class="hint">Định vị: dán link Google Maps hoặc toạ độ → tự nhận diện + tính khoảng cách tới CH.</div>
+      <div class="hint">Dán link Google Maps hoặc toạ độ → tự nhận diện + tính khoảng cách tới CH.</div>
       <div class="dist-result" id="emDistResult"></div>
       <div class="opt-label">Thông tin bổ sung (tuỳ chọn)</div>
       <div class="row5">
-        <div><label>DS/ngày (trđ)</label><input type="text" id="emDoanhSo" inputmode="decimal" placeholder="" oninput="emValidateRange()"><div class="err" id="emErrDS">Số</div><div class="warn-hint" id="emWarnDS" style="display:none"></div></div>
-        <div><label>Khách/ngày</label><input type="text" id="emKhach" inputmode="decimal" placeholder="" oninput="emValidateRange()"><div class="err" id="emErrKhach">Số</div><div class="warn-hint" id="emWarnKhach" style="display:none"></div></div>
-        <div><label>MT (m)</label><input type="text" id="emMT" inputmode="decimal" placeholder="" oninput="emValidateRange()"><div class="err" id="emErrMT">Số</div><div class="warn-hint" id="emWarnMT" style="display:none"></div></div>
-        <div><label>Giá thuê (tr)</label><input type="text" id="emGiaThue" inputmode="decimal" placeholder="" oninput="emValidateRange()"><div class="err" id="emErrGia">Số</div><div class="warn-hint" id="emWarnGia" style="display:none"></div></div>
-        <div><label>DT (m²)</label><input type="text" id="emDT" inputmode="decimal" placeholder="" oninput="emValidateRange()"><div class="err" id="emErrDT">Số</div><div class="warn-hint" id="emWarnDT" style="display:none"></div></div>
+        <div><label>DS/ngày (trđ)</label><input type="text" id="emDoanhSo" inputmode="decimal" oninput="emValidateRange()"><div class="err" id="emErrDS">Số</div><div class="warn-hint" id="emWarnDS" style="display:none"></div></div>
+        <div><label>Khách/ngày</label><input type="text" id="emKhach" inputmode="decimal" oninput="emValidateRange()"><div class="err" id="emErrKhach">Số</div><div class="warn-hint" id="emWarnKhach" style="display:none"></div></div>
+        <div><label>MT (m)</label><input type="text" id="emMT" inputmode="decimal" oninput="emValidateRange()"><div class="err" id="emErrMT">Số</div><div class="warn-hint" id="emWarnMT" style="display:none"></div></div>
+        <div><label>Giá thuê (tr)</label><input type="text" id="emGiaThue" inputmode="decimal" oninput="emValidateRange()"><div class="err" id="emErrGia">Số</div><div class="warn-hint" id="emWarnGia" style="display:none"></div></div>
+        <div><label>DT (m²)</label><input type="text" id="emDT" inputmode="decimal" oninput="emValidateRange()"><div class="err" id="emErrDT">Số</div><div class="warn-hint" id="emWarnDT" style="display:none"></div></div>
       </div>
     </div>
     <div class="edit-modal-foot">
@@ -362,7 +367,8 @@ input.range-warn{border-color:var(--red);background:#fff5f5;}
   </div>
 </div>
 
-<div class="confirm-overlay" id="confirmOverlay" style="display:none;">
+<!-- Confirm overlay -->
+<div class="confirm-overlay" id="confirmOverlay" style="display:none">
   <div class="confirm-box">
     <div class="confirm-msg" id="confirmMsg">⚠️ Khoảng cách bất thường. Vẫn tiếp tục?</div>
     <div class="confirm-actions">
@@ -370,9 +376,7 @@ input.range-warn{border-color:var(--red);background:#fff5f5;}
       <button class="btn btn-primary" id="confirmOk">✅ Xác nhận</button>
     </div>
   </div>
-</div>
-
-<script>
+</div><script>
 // ===== CẤU HÌNH =====
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbwhPoI7RroB-c0HJZGw3mgcO5J55rO8pLl9vL6pSJJKevg-O6QLFtj5xj9cqMSui2Cm/exec';
 const STORELIST_CSV = 'https://docs.google.com/spreadsheets/d/1fMmEm1GC9aei_3oeu2vcadPVsUM9ms9eVhm99d7pF8A/gviz/tq?tqx=out:csv&gid=900581387';
@@ -521,8 +525,9 @@ selCh.addEventListener('change', ()=>{
   if(selectedStore){
     document.getElementById('pTinh').textContent = selectedStore.tinh||'-';
     document.getElementById('pHuyen').textContent = selectedStore.huyen||'-';
+    document.getElementById('pQlkv').textContent = selectedStore.qlkv||'-';
     document.getElementById('pGdv').textContent = selectedStore.gdv||'-';
-    document.getElementById('chInfo').style.display='flex';
+    document.getElementById('chInfo').style.display='grid';
     document.getElementById('btnAddNew').disabled = false;
     document.getElementById('btnNoChange').disabled = false;
   }
@@ -1154,38 +1159,26 @@ function confirmNoChange(){
   }
 }
 function showCompletedBox(ma, ten, trangThai){
-  // Tạo textbox "Đã hoàn thành" hiển thị cố định trên giao diện
   const old = document.getElementById('completedBox');
   if(old) old.remove();
   
   const box = document.createElement('div');
   box.id = 'completedBox';
-  box.style.cssText = 'background:#d1fae5;border:2px solid #16a34a;border-radius:12px;padding:16px 18px;margin:12px 0;text-align:center;animation:fadeIn 0.3s ease';
+  box.className = 'completed-box';
   box.innerHTML = `
-    <div style="font-size:28px;margin-bottom:4px">✅</div>
-    <div style="font-size:16px;font-weight:800;color:#166534;margin-bottom:2px">Đã hoàn thành khảo sát!</div>
-    <div style="font-size:13px;color:#065f46;margin-bottom:6px">${ma} — ${ten}</div>
-    <div style="font-size:12px;color:#047857;background:#a7f3d0;display:inline-block;padding:3px 12px;border-radius:20px;font-weight:600">Trạng thái: ${trangThai === 'không đổi' ? 'Không thay đổi (giữ nguyên)' : 'Đã cập nhật'}</div>
-    <div style="margin-top:10px">
-      <button onclick="resetCompletedBox()" style="background:var(--blue);color:#fff;border:none;padding:8px 22px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">🔍 Khảo sát cửa hàng khác</button>
-    </div>
+    <div class="big-icon">✅</div>
+    <div class="msg">Đã hoàn thành khảo sát!</div>
+    <div class="detail">${ma} — ${ten}</div>
+    <div class="status-tag">Trạng thái: ${trangThai === 'không đổi' ? 'Không thay đổi (giữ nguyên)' : 'Đã cập nhật'}</div>
+    <div><button class="reset-btn" onclick="resetCompletedBox()">🔍 Khảo sát cửa hàng khác</button></div>
   `;
   
-  // Chèn vào sau phần danh sách đối thủ (tìm card chứa list)
   const cards = document.querySelectorAll('.card');
-  let inserted = false;
   for(const card of cards){
     if(card.textContent.includes('Danh sách đối thủ')){
-      card.appendChild(box); inserted = true; break;
+      card.appendChild(box); break;
     }
   }
-  if(!inserted) {
-    // Fallback: chèn vào cuối container
-    const container = document.querySelector('.container') || document.body;
-    container.appendChild(box);
-  }
-  
-  // Scroll đến box
   box.scrollIntoView({behavior:'smooth',block:'center'});
 }
 function resetCompletedBox(){
