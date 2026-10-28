@@ -96,13 +96,23 @@ function doPost(e) {
         var c = competitors[j] || {};
         var maDT = String(c.ma_dt || '').trim();
         var validId = maDT.match(/^DT-(\d+)$/);
+        var rowNumber = validId ? mapDT[maDT] : null;
 
-        if (!validId) {
+        // A valid-looking ID is not enough to update a row: it must already
+        // exist and belong to this store. Otherwise issue a fresh unique ID.
+        if (rowNumber && rowNumber <= lastMain) {
+          var storedRow = existingRows[rowNumber - 2];
+          if (!storedRow || String(storedRow[1] || '').trim() !== ma_ch) rowNumber = null;
+        } else if (rowNumber) {
+          var stagedRow = newRows[rowNumber - lastMain - 1];
+          if (!stagedRow || String(stagedRow[1] || '').trim() !== ma_ch) rowNumber = null;
+        }
+
+        if (!rowNumber) {
           while (mapDT[DT_PREFIX + pad4(nextDT)]) nextDT++;
           maDT = DT_PREFIX + pad4(nextDT);
           nextDT++;
         } else {
-          // If a client sends an unused but valid ID, do not later allocate it again.
           nextDT = Math.max(nextDT, parseInt(validId[1], 10) + 1);
         }
 
@@ -121,7 +131,6 @@ function doPost(e) {
           '', ts
         ];
 
-        var rowNumber = mapDT[maDT];
         if (rowNumber) {
           var oldRow = rowNumber <= lastMain
             ? existingRows[rowNumber - 2]
