@@ -139,16 +139,18 @@
     <h2>📋 Danh sách khảo sát <span id="rowCount" style="color:var(--mut);font-weight:500"></span></h2>
     <div id="tableWrap"><div class="loading">Đang tải dữ liệu</div></div>
   </div>
-  <div class="foot">Dashboard · Rà Soát Đối Thủ <span style="color:var(--mut)">v2.0</span></div>
+  <div class="foot">Dashboard · Rà Soát Đối Thủ <span style="color:var(--mut)">v3.0</span></div>
 </div>
 
 <script>
 const SHEET_ID = '1UMtB9MOxGOaZvxN5VAUGAS1bPaAL2tVVFEViGANd4Tk';
 const STORE_GID = '164583655';
 const DOI_THU_GID = '320821145';
+const TRACKLOG_GID = '545054306';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwhPoI7RroB-c0HJZGw3mgcO5J55rO8pLl9vL6pSJJKevg-O6QLFtj5xj9cqMSui2Cm/exec';
 const GV = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:csv';
 
-let STORES = [], ROWS = [], ALL_ROWS = [];
+let STORES = [], ROWS = [], ALL_ROWS = [], TRACK_DATA = [];
 let CURRENT_WEEK = null;
 let WEEKS = [];
 
@@ -177,6 +179,27 @@ async function fetchCSV(gid) {
   const resp = await fetch(url);
   const text = await resp.text();
   return parseCSV(text);
+}
+
+function rowsToObjects(rows) {
+  // rows = 2D array [header, ...data] → array of {col: value}
+  if (!rows || rows.length < 2) return [];
+  const headers = (rows[0] || []).map(h => String(h == null ? '' : h).trim());
+  const out = [];
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i] || [];
+    if (!r.length || r.every(v => !v)) continue;
+    const obj = {};
+    headers.forEach((h, j) => { obj[h] = (r[j] == null ? '' : String(r[j])); });
+    out.push(obj);
+  }
+  return out;
+}
+
+async function fetchGASData() {
+  const resp = await fetch(GAS_URL + '?action=data', {cache: 'no-store'});
+  const j = await resp.json();
+  return j;
 }
 
 function parseCSV(text) {
@@ -216,10 +239,12 @@ function parseCSVLine(line) {
 
 async function loadAll() {
   try {
-    const [storeData, doiThuData] = await Promise.all([
+    const [storeData, gasData] = await Promise.all([
       fetchCSV(STORE_GID),
-      fetchCSV(DOI_THU_GID)
+      fetchGASData()
     ]);
+    const doiThuData = rowsToObjects(gasData.main || []);
+    const trackData = rowsToObjects(gasData.log || []);
 
     // Process stores
     STORES = storeData.filter(r => {
@@ -271,9 +296,17 @@ async function loadAll() {
       };
     });
 
-    // Build week list
+    // Process tracklog data
+    TRACK_DATA = trackData.map(r => ({
+      tuan: parseInt((r['Tuần']||'').trim(), 10) || 0,
+      ma_ch: String(r['Mã CH']||'').trim(),
+      action: (r['Hành động']||'').trim(),
+      soDoiThu: parseInt((r['Số đối thủ']||'').trim(), 10) || 0
+    })).filter(r => r.ma_ch && r.tuan);
+
+    // Build week list from tracklogs
     const weekSet = new Set();
-    ALL_ROWS.forEach(r => { if (r.tuan > 0) weekSet.add(r.tuan); });
+    TRACK_DATA.forEach(r => { if (r.tuan > 0) weekSet.add(r.tuan); });
     WEEKS = [...weekSet].sort((a, b) => b - a);
 
     // Set current week
@@ -287,7 +320,7 @@ async function loadAll() {
     render();
 
     $('updated').textContent = new Date().toLocaleString('vi-VN');
-    $('verTag').textContent = 'v2.2 · ' + ALL_ROWS.length + ' phiếu · ' + STORES.length + ' CH';
+    $('verTag').textContent = 'v3.0 · ' + ALL_ROWS.length + ' phiếu · ' + STORES.length + ' CH';
   } catch (e) {
     $('tableWrap').innerHTML = '<div class="empty" style="color:var(--red)">Lỗi tải dữ liệu: ' + esc(e.message) + '<br><button class="hdr-btn" style="color:var(--navy);background:#eef3fb;margin-top:10px" onclick="loadAll()">Thử lại</button></div>';
   }
@@ -374,20 +407,21 @@ function scopeStores() {
   return STORES.filter(s => (!m || s.mien === m) && (!v || s.gdv === v) && (!q || s.qlkv === q));
 }
 
+function getDoneSapsForWeek(week) {
+  const s = new Set();
+  TRACK_DATA.forEach(r => { if (r.tuan === week) s.add(r.ma_ch); });
+  return s;
+}
+
 function render() {
   ROWS = getFilteredRows();
   const sInScope = scopeStores();
   const scopeSaps = new Set(sInScope.map(s => s.sap));
 
-  // Done: CH in scope that have at least 1 entry in selected week
-  const doneSaps = new Set();
-  ROWS.forEach(r => { if (scopeSaps.has(r.sap)) doneSaps.add(r.sap); });
-
-  // Bổ sung từ localStorage submissions (cùng domain)
-  try{
-    const subs = JSON.parse(localStorage.getItem('rsdt_submissions')||'[]');
-    subs.forEach(s => { if(scopeSaps.has(s.ma_ch)) doneSaps.add(s.ma_ch); });
-  }catch(e){}
+  // Done: CH in scope có bản ghi Tracklog trong tuần đang chọn
+  const doneSaps = getDoneSapsForWeek(CURRENT_WEEK);
+  // Chỉ giữ CH nằm trong scope
+  [...doneSaps].forEach(sap => { if (!scopeSaps.has(sap)) doneSaps.delete(sap); });
 
   const total = scopeSaps.size;
   const done = doneSaps.size;
@@ -425,60 +459,37 @@ function computeGdvData() {
   const sInScope = scopeStores();
   const scopeSaps = new Set(sInScope.map(s => s.sap));
 
-  // --- Current week ---
-  const doneSaps = new Set();
-  const doiThuBySap = {};
-  const missKTBySap = {};    // CH thiếu Ngày KT
-  const missInfoBySap = {};  // CH thiếu thông tin khác (doanhSo, luongKhach, mt, giaThue, dienTich)
-  ROWS.forEach(r => {
+  // --- Done tuần hiện tại (từ Tracklogs) ---
+  const doneSaps = getDoneSapsForWeek(CURRENT_WEEK);
+  [...doneSaps].forEach(sap => { if (!scopeSaps.has(sap)) doneSaps.delete(sap); });
+
+  // --- Số đối thủ tuần hiện tại (từ Tracklogs "Số đối thủ") ---
+  const doiCurBySap = {};
+  TRACK_DATA.forEach(r => {
+    if (r.tuan === CURRENT_WEEK && scopeSaps.has(r.ma_ch)) {
+      doiCurBySap[r.ma_ch] = (doiCurBySap[r.ma_ch] || 0) + r.soDoiThu;
+    }
+  });
+
+  // --- Thiếu thông tin (từ sheet hiện trạng) ---
+  const missKTBySap = {};
+  const missInfoBySap = {};
+  ALL_ROWS.forEach(r => {
     if (scopeSaps.has(r.sap)) {
-      doneSaps.add(r.sap);
-      if (!doiThuBySap[r.sap]) doiThuBySap[r.sap] = 0;
-      doiThuBySap[r.sap]++;
-
-      // Check missing Ngày KT
       if (!r.ngayKT) missKTBySap[r.sap] = true;
-
-      // Check missing other info (any of these fields empty)
       if (!r.doanhSo || !r.luongKhach || !r.mt || !r.giaThue || !r.dienTich) {
         missInfoBySap[r.sap] = true;
       }
     }
   });
-  // Bổ sung từ localStorage submissions
-  try{
-    const subs = JSON.parse(localStorage.getItem('rsdt_submissions')||'[]');
-    subs.forEach(s => { if(scopeSaps.has(s.ma_ch) && !doneSaps.has(s.ma_ch)) doneSaps.add(s.ma_ch); });
-  }catch(e){}
 
-  // --- Cumulative total competitors (all time) ---
-  const totalDoiBySap = {};
-  ALL_ROWS.forEach(r => {
-    if (scopeSaps.has(r.sap)) {
-      if (!totalDoiBySap[r.sap]) totalDoiBySap[r.sap] = 0;
-      totalDoiBySap[r.sap]++;
-    }
-  });
-
-  // --- Previous week (W-1) for delta ---
+  // --- Tuần trước (W-1) ---
   const prevWeek = CURRENT_WEEK - 1;
-  const prevRows = prevWeek > 0 ? ALL_ROWS.filter(r => r.tuan === prevWeek) : [];
-  const prevDoneSaps = new Set();
-  const prevDoiBySap = {};
-  prevRows.forEach(r => {
-    if (scopeSaps.has(r.sap)) {
-      prevDoneSaps.add(r.sap);
-      if (!prevDoiBySap[r.sap]) prevDoiBySap[r.sap] = 0;
-      prevDoiBySap[r.sap]++;
-    }
-  });
-
-  // --- Cumulative at W-1 ---
-  const totalDoiPrevBySap = {};
-  ALL_ROWS.filter(r => r.tuan <= prevWeek).forEach(r => {
-    if (scopeSaps.has(r.sap)) {
-      if (!totalDoiPrevBySap[r.sap]) totalDoiPrevBySap[r.sap] = 0;
-      totalDoiPrevBySap[r.sap]++;
+  const prevDoneSaps = getDoneSapsForWeek(prevWeek);
+  const doiPrevBySap = {};
+  TRACK_DATA.forEach(r => {
+    if (r.tuan === prevWeek && scopeSaps.has(r.ma_ch)) {
+      doiPrevBySap[r.ma_ch] = (doiPrevBySap[r.ma_ch] || 0) + r.soDoiThu;
     }
   });
 
@@ -490,10 +501,10 @@ function computeGdvData() {
     gdvMap[s.gdv].t++;
     if (doneSaps.has(s.sap)) {
       gdvMap[s.gdv].d++;
-      gdvMap[s.gdv].doi += (totalDoiBySap[s.sap] || 0);
+      gdvMap[s.gdv].doi += (doiCurBySap[s.sap] || 0);
     }
     if (prevDoneSaps.has(s.sap)) {
-      gdvMap[s.gdv].doiPrev += (totalDoiPrevBySap[s.sap] || 0);
+      gdvMap[s.gdv].doiPrev += (doiPrevBySap[s.sap] || 0);
     }
     if (missKTBySap[s.sap]) gdvMap[s.gdv].missKT++;
     if (missInfoBySap[s.sap]) gdvMap[s.gdv].missInfo++;
@@ -512,10 +523,10 @@ function computeGdvData() {
       qlkvMap[s.qlkv].t++;
       if (doneSaps.has(s.sap)) {
         qlkvMap[s.qlkv].d++;
-        qlkvMap[s.qlkv].doi += (totalDoiBySap[s.sap] || 0);
+        qlkvMap[s.qlkv].doi += (doiCurBySap[s.sap] || 0);
       }
       if (prevDoneSaps.has(s.sap)) {
-        qlkvMap[s.qlkv].doiPrev += (totalDoiPrevBySap[s.sap] || 0);
+        qlkvMap[s.qlkv].doiPrev += (doiPrevBySap[s.sap] || 0);
       }
       if (missKTBySap[s.sap]) qlkvMap[s.qlkv].missKT++;
       if (missInfoBySap[s.sap]) qlkvMap[s.qlkv].missInfo++;
