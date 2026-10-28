@@ -502,7 +502,7 @@ function render() {
 }
 
 // --- Sort state ---
-let SORT_G = {col: 'pct', asc: true}, SORT_T = {col: 'pct', asc: true}, SORT_L = {col: 'cnt', asc: false};
+let SORT_G = {col: 'pct', asc: true}, SORT_T = {col: 'pct', asc: true};
 
 function sortArrow(col, st) {
   if (st.col !== col) return '';
@@ -612,10 +612,7 @@ const SORT_FNS = {
   doi: (a, b) => a.doi - b.doi,
   delta: (a, b) => a.delta - b.delta,
   missKT: (a, b) => a.missKT - b.missKT,
-  missInfo: (a, b) => a.missInfo - b.missInfo,
-  cnt: (a, b) => a.cnt - b.cnt,
-  ch: (a, b) => a.ch - b.ch,
-  name: (a, b) => String(a.name).localeCompare(String(b.name), 'vi')
+  missInfo: (a, b) => a.missInfo - b.missInfo
 };
 
 function sortBy(col, which) {
