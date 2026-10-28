@@ -139,17 +139,19 @@ input.range-warn{border-color:var(--red);background:#fff5f5}
 .confirm-actions{display:flex;gap:10px}
 .confirm-actions .btn{flex:1}
 
-/* Completed box */
-.completed-box{
-  background:#d1fae5;border:2px solid #16a34a;border-radius:14px;padding:18px;
-  margin:14px 0;text-align:center;animation:fadeIn .3s ease
-}
+/* Completed box - inline removed, now uses status overlay */
+
+/* Status overlay (loading + success) */
+.status-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:500}
+.status-popup{background:#fff;border-radius:16px;padding:24px 20px;max-width:300px;width:90%;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.3);animation:fadeIn .3s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-.completed-box .big-icon{font-size:32px;margin-bottom:4px}
-.completed-box .msg{font-size:15px;font-weight:800;color:#166534;margin-bottom:2px}
-.completed-box .detail{font-size:12px;color:#065f46;margin-bottom:6px}
-.completed-box .status-tag{font-size:12px;color:#047857;background:#a7f3d0;display:inline-block;padding:3px 12px;border-radius:20px;font-weight:600}
-.completed-box .reset-btn{background:var(--navy);color:#fff;border:none;padding:9px 20px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;margin-top:12px;font-family:inherit}
+.status-popup .spinner{width:40px;height:40px;border:4px solid var(--line);border-top-color:var(--navy);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.status-popup .s-icon{font-size:44px;margin-bottom:8px}
+.status-popup .s-title{font-size:17px;font-weight:800;color:var(--txt);margin-bottom:4px}
+.status-popup .s-sub{font-size:13px;color:var(--mut);margin-bottom:16px}
+.status-popup .s-btn{background:var(--navy);color:#fff;border:none;padding:11px 32px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+.status-popup .s-btn.ghost{background:transparent;color:var(--mut);font-weight:600}
 
 /* Add form card */
 .add-card-header{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:var(--navy);margin-bottom:14px}
@@ -200,7 +202,7 @@ input.range-warn{border-color:var(--red);background:#fff5f5}
       <div>
         <h1>🔍 Rà Soát Đối Thủ</h1>
         <p>Khai báo & cập nhật đối thủ quanh cửa hàng WinMart+ Rural</p>
-        <span class="vbadge">📍 v2.9</span>
+        <span class="vbadge">📍 v2.10</span>
       </div>
       <a href="dashboard.html" class="dash-link">📊 Dashboard</a>
     </div>
@@ -1065,14 +1067,38 @@ function resetCompetitorFields(){
   ['warnDoanhSo','warnKhach','warnMt','warnGia','warnDt'].forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
 }
 
+// ===== STATUS POPUP =====
+function showLoading(msg){
+  document.getElementById('statusPopup').innerHTML = `
+    <div class="spinner"></div>
+    <div class="s-title">${msg||'Đang cập nhật...'}</div>
+    <div class="s-sub">Vui lòng đợi trong giây lát</div>
+  `;
+  document.getElementById('statusOverlay').style.display = 'flex';
+}
+function showSuccess(ma, ten, trangThai){
+  const isNoChange = trangThai === 'không đổi';
+  document.getElementById('statusPopup').innerHTML = `
+    <div class="s-icon">✅</div>
+    <div class="s-title">Đã hoàn thành!</div>
+    <div class="s-sub">${ma} — ${ten}<br>${isNoChange ? 'Không thay đổi (giữ nguyên)' : 'Đã cập nhật'}</div>
+    <button class="s-btn" onclick="closeStatusAndReset()">✕ Đóng</button>
+  `;
+  document.getElementById('statusOverlay').style.display = 'flex';
+}
+function closeStatusAndReset(){
+  document.getElementById('statusOverlay').style.display = 'none';
+  resetCompletedBox();
+}
+
 // ===== XÁC NHẬN KHÔNG ĐỔI =====
 function confirmNoChange(){
   if(!selectedStore){ toast('⚠️ Chọn cửa hàng trước'); return; }
-  if(isSubmitting){ return; } // Chống double-submit
+  if(isSubmitting){ return; }
   
-  const btnNC = document.getElementById('btnNoChange');
-  
-  // Build changelogs cho từng đối thủ hiện có (giữ nguyên)
+  isSubmitting = true;
+  showLoading('Đang lưu...');
+
   const changelogs = competitorList.map(c => ({
     ma_ch: selectedStore.ma,
     ma_dt: c.ma_dt || '',
@@ -1098,85 +1124,50 @@ function confirmNoChange(){
     action: 'nochange'
   };
 
-  isSubmitting = true;
-  btnNC.textContent = '⏳ Đang lưu...';
-  btnNC.disabled = true;
-
-  const saveAndShow = () => {
-    showCompletedBox(selectedStore.ma, selectedStore.ten, 'không đổi');
-    isSubmitting = false;
-  };
-
   if(GAS_URL){
     fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(batch) })
-      .then(() => saveAndShow())
-      .catch(() => { toast('⚠️ Lỗi ghi log, thử lại'); isSubmitting = false; btnNC.disabled = false; btnNC.textContent = '✅ Không thay đổi'; });
+      .then(() => { isSubmitting = false; showSuccess(selectedStore.ma, selectedStore.ten, 'không đổi'); })
+      .catch(() => { document.getElementById('statusOverlay').style.display = 'none'; isSubmitting = false; toast('⚠️ Lỗi, thử lại'); });
   } else {
     const key = 'ra-soat-doi-thu-data';
     const arr = JSON.parse(localStorage.getItem(key)||'[]');
     batch.competitors.forEach(c => { arr.push({ ...batch, ...c, competitors: undefined }); });
     localStorage.setItem(key, JSON.stringify(arr));
-    saveAndShow();
+    setTimeout(()=>{ isSubmitting = false; showSuccess(selectedStore.ma, selectedStore.ten, 'không đổi'); }, 600);
   }
 }
-function showCompletedBox(ma, ten, trangThai){
-  const old = document.getElementById('completedBox');
-  if(old) old.remove();
-  
-  const box = document.createElement('div');
-  box.id = 'completedBox';
-  box.className = 'completed-box';
-  box.innerHTML = `
-    <div class="big-icon">✅</div>
-    <div class="msg">Đã hoàn thành khảo sát!</div>
-    <div class="detail">${ma} — ${ten}</div>
-    <div class="status-tag">Trạng thái: ${trangThai === 'không đổi' ? 'Không thay đổi (giữ nguyên)' : 'Đã cập nhật'}</div>
-    <div><button class="reset-btn" onclick="resetCompletedBox()">🔍 Khảo sát cửa hàng khác</button></div>
-  `;
-  
-  const cards = document.querySelectorAll('.card');
-  for(const card of cards){
-    if(card.textContent.includes('Danh sách đối thủ')){
-      card.appendChild(box); break;
-    }
-  }
-  box.scrollIntoView({behavior:'smooth',block:'center'});
+function markSaved(){
+  competitorList.forEach(c => { c._existing = true; c._edited = false; });
+  editingIdx = null;
+  renderList();
 }
+
 function resetCompletedBox(){
-  // Reset lại toàn bộ trang về trạng thái ban đầu
-  const box = document.getElementById('completedBox');
-  if(box) box.remove();
-  
-  // Reset store selection
+  // Reset sau khi hoàn thành 1 CH
   selectedStore = null;
   document.getElementById('btnNoChange').disabled = true;
   document.getElementById('btnNoChange').textContent = '✅ Không thay đổi';
   document.getElementById('btnAddNew').disabled = true;
   
-  // Reset form fields
   resetCompetitorFields();
   document.getElementById('ngayKhaiTruong').value = '';
   
-  // Reset competitor list
   competitorList = [];
   editingIdx = null;
   isSubmitting = false;
   renderList();
   
-  // Ẩn form thêm/sửa nếu đang mở
   document.getElementById('addCard').style.display = 'none';
-  document.getElementById('formTitle').textContent = 'Thêm đối thủ';
+  document.getElementById('formTitle').textContent = 'Thêm đối thủ mới';
   document.getElementById('btnSaveForm').textContent = '➕ Thêm vào danh sách';
   document.getElementById('btnCancelEdit').style.display = 'none';
   
-  // Reset dropdown
   document.getElementById('selMien').value = '';
   document.getElementById('selGdv').innerHTML = '<option value="">— GĐV —</option>';
   document.getElementById('selQlkv').innerHTML = '<option value="">— QLKV —</option>';
   document.getElementById('selCh').innerHTML = '<option value="">— Chọn Cửa hàng —</option>';
   clearStoreInfo();
   
-  // Scroll lên đầu trang
   window.scrollTo({top: 0, behavior: 'smooth'});
 }
 
@@ -1187,43 +1178,41 @@ function submitAll(){
   const toSave = competitorList.filter(c => !c._existing || c._edited);
   if(toSave.length===0){ toast('⚠️ Thêm hoặc sửa ít nhất 1 đối thủ'); return; }
 
-  // Check trùng chéo giữa các mục mới trong cùng batch
   for(let i=0; i<toSave.length; i++){
     for(let j=i+1; j<toSave.length; j++){
       const a=toSave[i], b=toSave[j];
       const sameName = a.ten && b.ten && a.ten.trim().toLowerCase() === b.ten.trim().toLowerCase();
       const sameGroup = a.nhom && b.nhom && a.nhom.trim().toLowerCase() === b.nhom.trim().toLowerCase();
       if(sameName && sameGroup){
-        toast(`⚠️ Trùng lặp trong danh sách: "${a.ten}" (${a.nhom}) xuất hiện ${i+1} lần`);
+        toast(`⚠️ Trùng lặp: "${a.ten}" (${a.nhom}) xuất hiện ${i+1} lần`);
         return;
       }
     }
   }
 
   isSubmitting = true;
-  document.getElementById('btnNoChange').textContent = '⏳ Đang lưu...';
+  showLoading('Đang cập nhật...');
 
   const batch = {
     timestamp: new Date().toISOString(),
     ma_ch: selectedStore.ma, ten_ch: selectedStore.ten,
     mien: selectedStore.mien, tinh: selectedStore.tinh, huyen: selectedStore.huyen,
     qlkv: selectedStore.qlkv, gdv: selectedStore.gdv,
+    trang_thai: 'Đã làm',
     competitors: toSave.map(c => ({ ...c, _existing: undefined, _edited: undefined }))
   };
 
   if(GAS_URL){
     fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(batch) })
-      .then(()=>{ showCompletedBox(selectedStore.ma, selectedStore.ten, 'đã cập nhật'); markSaved(); })
-      .catch(()=>{ toast('⚠️ Lưu thất bại, thử lại nhé'); isSubmitting = false; })
-      .finally(()=>{ updateSubmitButton(); });
+      .then(()=>{ markSaved(); isSubmitting = false; showSuccess(selectedStore.ma, selectedStore.ten, 'đã cập nhật'); })
+      .catch(()=>{ document.getElementById('statusOverlay').style.display = 'none'; isSubmitting = false; toast('⚠️ Lưu thất bại, thử lại nhé'); });
   } else {
     const key = 'ra-soat-doi-thu-data';
     const arr = JSON.parse(localStorage.getItem(key)||'[]');
     batch.competitors.forEach(c=>{ arr.push({ ...batch, ...c, competitors: undefined }); });
     localStorage.setItem(key, JSON.stringify(arr));
-    toast(`⚠️ Chưa lưu gas — ${toSave.length} đối thủ chỉ lưu tạm trên máy`);
     markSaved();
-    updateSubmitButton();
+    setTimeout(()=>{ isSubmitting = false; showSuccess(selectedStore.ma, selectedStore.ten, 'đã cập nhật'); }, 600);
   }
 }
 function updateSubmitButton(){
@@ -1242,5 +1231,10 @@ function markSaved(){
   loadExistingData();
 })();
 </script>
+<!-- Status overlay (loading/success) -->
+<div class="status-overlay" id="statusOverlay" style="display:none">
+  <div class="status-popup" id="statusPopup"></div>
+</div>
+
 </body>
 </html>
