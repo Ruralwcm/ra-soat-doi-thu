@@ -517,7 +517,7 @@ function thSort(col, st, label) {
     name:'col-gdv', cnt:'col-num', ch:'col-num'
   })[col] || '';
   const which = st === SORT_G ? 'G' : 'T';
-  return '<th class="sortable ' + colClass + '" onclick="sortBy(\\'' + col + '\\',\\'' + which + '\\')">' + label + '<span class="sort-arrow' + (arrow ? ' on' : '') + '">' + (arrow || ' ↕') + '</span></th>';
+  return `<th class="sortable ${colClass}" onclick="sortBy('${col}','${which}')">${label}<span class="sort-arrow${arrow ? ' on' : ''}">${arrow || ' ↕'}</span></th>`;
 }
 
 function computeGdvData() {
