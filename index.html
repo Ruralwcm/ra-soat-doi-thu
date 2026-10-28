@@ -122,6 +122,38 @@ input.range-warn{border-color:var(--red);background:#fff5f5;}
 .confirm-msg{font-size:14px;font-weight:600;margin-bottom:16px;line-height:1.5;}
 .confirm-actions{display:flex;gap:10px;}
 .confirm-actions .btn{flex:1;}
+
+/* Edit modal */
+.edit-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:flex-start;justify-content:center;z-index:400;overflow-y:auto;padding:20px 12px;}
+.edit-modal{background:#fff;border-radius:14px;width:100%;max-width:500px;box-shadow:0 8px 30px rgba(0,0,0,.3);margin-top:10px;overflow:hidden;}
+.edit-modal-head{background:linear-gradient(135deg,var(--blue),#0f2444);color:#fff;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.edit-modal-head .m-title{font-size:16px;font-weight:800;}
+.edit-modal-head .m-close{background:rgba(255,255,255,.2);border:none;color:#fff;font-size:20px;width:32px;height:32px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;}
+.edit-modal-body{padding:14px 16px;max-height:70vh;overflow-y:auto;}
+.edit-modal-body label{display:block;font-size:12px;font-weight:600;color:#374151;margin:10px 0 4px;}
+.edit-modal-body label:first-child{margin-top:0;}
+.edit-modal-body input, .edit-modal-body select{width:100%;padding:10px 11px;border:1px solid var(--border);border-radius:9px;font-size:15px;font-family:inherit;}
+.edit-modal-body input:focus, .edit-modal-body select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,60,110,.12);}
+.edit-modal-body .row{display:flex;gap:8px;}
+.edit-modal-body .row>div{flex:1;min-width:0;}
+.edit-modal-body .row5{display:flex;gap:5px;}
+.edit-modal-body .row5>div{flex:1;min-width:0;}
+.edit-modal-body .row5 label{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.edit-modal-body .row5 input{padding:9px 6px;font-size:14px;}
+.edit-modal-body .opt-label{font-size:12px;font-weight:700;color:var(--muted);margin:14px 0 6px;border-top:1px dashed var(--border);padding-top:12px;}
+.edit-modal-body .hint{font-size:12px;color:var(--muted);margin-top:4px;}
+.edit-modal-body .loc-input{position:relative;}
+.edit-modal-body .loc-input input{padding-right:48px;}
+.edit-modal-body .gps-btn{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:var(--blue);color:#fff;border:none;border-radius:7px;padding:7px 10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
+.edit-modal-body .err{color:var(--red);font-size:11px;margin-top:3px;display:none;}
+.edit-modal-body input.invalid{border-color:var(--red);}
+.edit-modal-body .warn-hint{font-size:10px;color:#b71c1c;margin-top:2px;font-weight:600;}
+.edit-modal-body input.range-warn{border-color:var(--red);background:#fff5f5;}
+.edit-modal-body .dist-result{margin-top:10px;padding:10px 12px;border-radius:9px;font-size:14px;font-weight:600;display:none;}
+.edit-modal-body .dist-result.ok{display:block;background:#ecfdf5;color:#065f46;}
+.edit-modal-body .dist-result.bad{display:block;background:#fee2e2;color:#991b1b;}
+.edit-modal-foot{padding:14px 16px;border-top:1px solid var(--border);display:flex;gap:10px;}
+.edit-modal-foot .btn{flex:1;padding:13px;font-size:15px;}
 </style>
 </head>
 <body>
@@ -129,7 +161,7 @@ input.range-warn{border-color:var(--red);background:#fff5f5;}
 <div class="topbar">
   <div class="t-row">
     <div>
-      <div class="t-title">🔍 Rà Soát Đối Thủ <span class="vbadge">v2.3</span></div>
+      <div class="t-title">🔍 Rà Soát Đối Thủ <span class="vbadge">v2.4</span></div>
       <div class="t-sub">Khai báo & cập nhật đối thủ quanh cửa hàng</div>
     </div>
     <a href="dashboard.html" style="color:#fff;text-decoration:none;font-size:13px;font-weight:700;background:rgba(255,255,255,.18);padding:8px 14px;border-radius:8px;white-space:nowrap;">📊 Dashboard</a>
@@ -267,6 +299,68 @@ input.range-warn{border-color:var(--red);background:#fff5f5;}
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- ===== EDIT MODAL ===== -->
+<div class="edit-modal-overlay" id="editModalOverlay" style="display:none;">
+  <div class="edit-modal">
+    <div class="edit-modal-head">
+      <span class="m-title">✏️ Sửa đối thủ</span>
+      <button class="m-close" onclick="closeEditModal()">&times;</button>
+    </div>
+    <div class="edit-modal-body">
+      <div class="row">
+        <div style="flex:0 0 40%;">
+          <label>Nhóm đối thủ <span class="req-star">*</span></label>
+          <select id="emNhom">
+            <option value="">— Chọn nhóm —</option>
+            <option>BHX (Bách Hoá Xanh)</option>
+            <option>Coopmart</option>
+            <option>Maxidi</option>
+            <option>KingFood Mart</option>
+            <option>Satrafoods</option>
+            <option>TataMart</option>
+            <option>Siêu thị lớn (GO/Aeon...)</option>
+            <option>Tạp hóa/Khác</option>
+          </select>
+        </div>
+        <div style="flex:1;">
+          <label>Tên đối thủ <span class="req-star">*</span></label>
+          <input type="text" id="emTen" placeholder="VD: BHX - 2/3 Lê Quang Hoà">
+        </div>
+      </div>
+      <label>Địa chỉ <span class="req-star">*</span></label>
+      <input type="text" id="emDiaChi" placeholder="VD: 2/3 Lê Quang Hoà, Khu phố 17, Thới An, Q.12">
+      <div class="row">
+        <div style="flex:0 0 42%;">
+          <label>Ngày khai trương đối thủ <span class="req-star">*</span></label>
+          <input type="date" id="emNgayKT" onchange="emValidateNgay()">
+          <div class="hint" id="emNgayResult" style="display:none;color:var(--red);font-weight:600;"></div>
+        </div>
+        <div style="flex:1;">
+          <label>Định vị <span class="req-star">*</span></label>
+          <div class="loc-input">
+            <input type="text" id="emLoc" placeholder="Link Maps / lat,lng...">
+            <button class="gps-btn" id="emBtnLoc" onclick="emGetLocation()">📍</button>
+          </div>
+        </div>
+      </div>
+      <div class="hint">Định vị: dán link Google Maps hoặc toạ độ → tự nhận diện + tính khoảng cách tới CH.</div>
+      <div class="dist-result" id="emDistResult"></div>
+      <div class="opt-label">Thông tin bổ sung (tuỳ chọn)</div>
+      <div class="row5">
+        <div><label>DS/ngày (trđ)</label><input type="text" id="emDoanhSo" inputmode="decimal" placeholder="" oninput="emValidateRange()"><div class="err" id="emErrDS">Số</div><div class="warn-hint" id="emWarnDS" style="display:none"></div></div>
+        <div><label>Khách/ngày</label><input type="text" id="emKhach" inputmode="decimal" placeholder="" oninput="emValidateRange()"><div class="err" id="emErrKhach">Số</div><div class="warn-hint" id="emWarnKhach" style="display:none"></div></div>
+        <div><label>MT (m)</label><input type="text" id="emMT" inputmode="decimal" placeholder="" oninput="emValidateRange()"><div class="err" id="emErrMT">Số</div><div class="warn-hint" id="emWarnMT" style="display:none"></div></div>
+        <div><label>Giá thuê (tr)</label><input type="text" id="emGiaThue" inputmode="decimal" placeholder="" oninput="emValidateRange()"><div class="err" id="emErrGia">Số</div><div class="warn-hint" id="emWarnGia" style="display:none"></div></div>
+        <div><label>DT (m²)</label><input type="text" id="emDT" inputmode="decimal" placeholder="" oninput="emValidateRange()"><div class="err" id="emErrDT">Số</div><div class="warn-hint" id="emWarnDT" style="display:none"></div></div>
+      </div>
+    </div>
+    <div class="edit-modal-foot">
+      <button class="btn btn-ghost" onclick="closeEditModal()">Huỷ</button>
+      <button class="btn btn-primary" id="emBtnSave" onclick="saveEditModal()">💾 Lưu thay đổi</button>
+    </div>
+  </div>
+</div>
 
 <div class="confirm-overlay" id="confirmOverlay" style="display:none;">
   <div class="confirm-box">
@@ -665,44 +759,217 @@ function removeCompetitor(i){
   renderList();
 }
 
-// ===== EDIT COMPETITOR (fill xuống form) =====
+// ===== EDIT COMPETITOR (modal popup) =====
+let emEditIdx = null;      // index đang sửa trong competitorList
+let emCurLat = null, emCurLng = null;
+let emDistanceWarn = false, emDistanceBlock = false, emNgayWarn = false, emRangeWarn = false;
+let emIsSubmitting = false;
+
 function toISO(d){ const m=String(d||'').match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/); return m ? `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}` : d; }
 function toVN(d){ const m=String(d||'').match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? `${m[3]}/${m[2]}/${m[1]}` : d; }
+
 function editCompetitor(i){
   const c = competitorList[i];
   if(!c) return;
-  editingIdx = i;
-  document.getElementById('nhom').value = c.nhom || '';
-  document.getElementById('tenDoiThu').value = c.ten || '';
-  document.getElementById('diaChi').value = c.diaChi || '';
-  document.getElementById('ngayKhaiTruong').value = toISO(c.ngay);
-  validateNgay();
-  document.getElementById('locInput').value = (c.lat && c.lng) ? `${c.lat}, ${c.lng}` : '';
-  document.getElementById('doanhSo').value = c.doanhSo || '';
-  document.getElementById('luongKhach').value = c.luongKhach || '';
-  document.getElementById('mt').value = c.mt || '';
-  document.getElementById('giaThue').value = c.giaThue || '';
-  document.getElementById('dienTich').value = c.dienTich || '';
-  curLat = parseFloat(c.lat) || null;
-  curLng = parseFloat(c.lng) || null;
-  validateRange();
-
-  document.getElementById('formTitle').textContent = 'Sửa đối thủ';
-  document.getElementById('btnSaveForm').textContent = '💾 Cập nhật';
-  document.getElementById('btnCancelEdit').style.display = 'inline-flex';
-  document.getElementById('addCard').style.display = 'block';
-  document.getElementById('addCard').scrollIntoView({ behavior:'smooth', block:'start' });
-  validateDistance();
-  refreshNoChangeBtn();
+  emEditIdx = i;
+  emCurLat = parseFloat(c.lat) || null;
+  emCurLng = parseFloat(c.lng) || null;
+  document.getElementById('emNhom').value = c.nhom || '';
+  document.getElementById('emTen').value = c.ten || '';
+  document.getElementById('emDiaChi').value = c.diaChi || '';
+  document.getElementById('emNgayKT').value = toISO(c.ngay);
+  document.getElementById('emLoc').value = (c.lat && c.lng) ? `${c.lat}, ${c.lng}` : '';
+  document.getElementById('emDoanhSo').value = c.doanhSo || '';
+  document.getElementById('emKhach').value = c.luongKhach || '';
+  document.getElementById('emMT').value = c.mt || '';
+  document.getElementById('emGiaThue').value = c.giaThue || '';
+  document.getElementById('emDT').value = c.dienTich || '';
+  emValidateNgay();
+  emValidateRange();
+  emValidateDistance();
+  emIsSubmitting = false;
+  document.getElementById('emBtnSave').disabled = false;
+  document.getElementById('emBtnSave').textContent = '💾 Lưu thay đổi';
+  document.getElementById('editModalOverlay').style.display = 'flex';
 }
-function cancelEdit(){
-  editingIdx = null;
-  resetCompetitorFields();
-  document.getElementById('addCard').style.display = 'none';
-  document.getElementById('formTitle').textContent = 'Thêm đối thủ';
-  document.getElementById('btnSaveForm').textContent = '➕ Thêm vào danh sách';
-  document.getElementById('btnCancelEdit').style.display = 'none';
-  refreshNoChangeBtn();
+
+function closeEditModal(){
+  emEditIdx = null;
+  emCurLat = null; emCurLng = null;
+  emDistanceWarn = false; emDistanceBlock = false;
+  emNgayWarn = false; emRangeWarn = false;
+  emIsSubmitting = false;
+  emResetFields();
+  document.getElementById('editModalOverlay').style.display = 'none';
+}
+
+function emResetFields(){
+  ['emTen','emDiaChi','emLoc','emDoanhSo','emKhach','emMT','emGiaThue','emDT'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('emNhom').value = '';
+  document.getElementById('emNgayKT').value = '';
+  document.getElementById('emDistResult').style.display = 'none';
+  document.getElementById('emNgayResult').style.display = 'none';
+  ['emDoanhSo','emKhach','emMT','emGiaThue','emDT'].forEach(id=>{ const el=document.getElementById(id); if(el){ el.classList.remove('invalid','range-warn'); } });
+  ['emErrDS','emErrKhach','emErrMT','emErrGia','emErrDT'].forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
+  ['emWarnDS','emWarnKhach','emWarnMT','emWarnGia','emWarnDT'].forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; });
+}
+
+// Modal location parsing
+document.getElementById('emLoc').addEventListener('input', ()=>{
+  const c = parseLocation(document.getElementById('emLoc').value);
+  if(c){ emCurLat=c[0]; emCurLng=c[1]; emValidateDistance(); }
+  else { emCurLat=null; emCurLng=null; document.getElementById('emDistResult').style.display='none'; }
+});
+function emGetLocation(){
+  const btn = document.getElementById('emBtnLoc');
+  if(!navigator.geolocation){ toast('Thiết bị không hỗ trợ định vị'); return; }
+  btn.disabled = true; btn.textContent='⏳';
+  navigator.geolocation.getCurrentPosition(
+    pos=>{
+      emCurLat = pos.coords.latitude; emCurLng = pos.coords.longitude;
+      document.getElementById('emLoc').value = emCurLat.toFixed(6)+', '+emCurLng.toFixed(6);
+      btn.disabled=false; btn.textContent='📍';
+      emValidateDistance(); toast('✅ Đã lấy định vị');
+    },
+    err=>{ btn.disabled=false; btn.textContent='📍'; toast('⚠️ Không lấy được GPS, dán link/toạ độ nhé'); },
+    { enableHighAccuracy:true, timeout:12000, maximumAge:30000 }
+  );
+}
+function emValidateDistance(){
+  const el = document.getElementById('emDistResult');
+  if(!selectedStore || !emCurLat || !emCurLng || !selectedStore.lat || !selectedStore.lng){ el.style.display='none'; emDistanceWarn=false; emDistanceBlock=false; return; }
+  const km = haversine(emCurLat, emCurLng, selectedStore.lat, selectedStore.lng);
+  const m = km * 1000;
+  el.style.display='block';
+  emDistanceWarn = false; emDistanceBlock = false;
+  if(m < WARN_NEAR_M){
+    el.className='dist-result bad';
+    el.textContent = `⚠️ Quá gần: ${m.toFixed(0)}m (<${WARN_NEAR_M}m) — kiểm tra lại!`;
+    emDistanceWarn = true;
+  } else if(km > BLOCK_FAR_KM){
+    el.className='dist-result bad';
+    el.textContent = `🚫 Không hợp lệ: ${km.toFixed(1)} km (>${BLOCK_FAR_KM}km) — quá xa!`;
+    emDistanceBlock = true;
+  } else if(km > WARN_FAR_KM){
+    el.className='dist-result bad';
+    el.textContent = `⚠️ Khá xa: ${km.toFixed(2)} km (>${WARN_FAR_KM}km) — kiểm tra lại!`;
+    emDistanceWarn = true;
+  } else {
+    el.className='dist-result ok';
+    el.textContent = `✅ Khoảng cách tới CH: ${km.toFixed(2)} km — hợp lệ`;
+  }
+}
+function emValidateNgay(){
+  const el = document.getElementById('emNgayResult');
+  const v = document.getElementById('emNgayKT').value;
+  if(!v){ el.style.display='none'; emNgayWarn=false; return; }
+  const d = new Date(v + 'T00:00:00');
+  const now = new Date(); now.setHours(0,0,0,0);
+  const oneYearAgo = new Date(now); oneYearAgo.setFullYear(now.getFullYear() - 1);
+  let msg = '';
+  if(d > now){ msg = '⚠️ Ngày khai trương là ngày tương lai!'; emNgayWarn = true; }
+  else if(d < oneYearAgo){ msg = '⚠️ Ngày khai trương quá 12 tháng so với hiện tại!'; emNgayWarn = true; }
+  else { emNgayWarn = false; }
+  if(msg){ el.textContent = msg; el.style.display='block'; }
+  else { el.style.display='none'; }
+}
+function emValidateRange(){
+  emRangeWarn = false;
+  const map = { emDoanhSo:'emWarnDS', emKhach:'emWarnKhach', emMT:'emWarnMT', emGiaThue:'emWarnGia', emDT:'emWarnDT' };
+  const ranges = { emDoanhSo:RANGES.doanhSo, emKhach:RANGES.luongKhach, emMT:RANGES.mt, emGiaThue:RANGES.giaThue, emDT:RANGES.dienTich };
+  Object.entries(map).forEach(([id, warnId]) => {
+    const el = document.getElementById(id);
+    const warnEl = document.getElementById(warnId);
+    const v = (el.value||'').trim();
+    if(!v || !isNum(v)){ el.classList.remove('range-warn'); if(warnEl) warnEl.style.display='none'; return; }
+    const n = parseFloat(v.replace(',','.'));
+    const r = ranges[id];
+    let msg = '';
+    if(n < r.min) msg = `⚠️ ${r.name} quá thấp (<${r.min} ${r.unit})`;
+    else if(n > r.max) msg = `⚠️ ${r.name} quá cao (${n.toLocaleString()} ${r.unit})`;
+    if(msg){ el.classList.add('range-warn'); warnEl.textContent = msg; warnEl.style.display='block'; emRangeWarn = true; }
+    else { el.classList.remove('range-warn'); if(warnEl) warnEl.style.display='none'; }
+  });
+}
+
+// ===== SAVE EDIT MODAL → push thẳng GAS =====
+function saveEditModal(){
+  if(!selectedStore){ toast('⚠️ Chọn cửa hàng trước'); return; }
+  if(emIsSubmitting) return;
+  if(emDistanceBlock){ toast('🚫 Khoảng cách không hợp lệ (>10km) — kiểm tra lại tọa độ!'); return; }
+  if(emDistanceWarn){ askConfirm('⚠️ Khoảng cách bất thường. Vẫn tiếp tục?', emDoSave); return; }
+  if(emNgayWarn){ askConfirm('⚠️ Ngày khai trương bất thường. Vẫn tiếp tục?', emDoSave); return; }
+  if(emRangeWarn){ toast('⚠️ Số liệu ngoài khoảng hợp lệ — kiểm tra lại các field báo đỏ'); return; }
+  emDoSave();
+}
+
+function emDoSave(){
+  const nhom = document.getElementById('emNhom').value;
+  const ten = document.getElementById('emTen').value.trim();
+  const diaChi = document.getElementById('emDiaChi').value.trim();
+  const ngay = toVN(document.getElementById('emNgayKT').value);
+  if(!nhom){ toast('⚠️ Chọn nhóm đối thủ'); return; }
+  if(!ten){ toast('⚠️ Nhập tên đối thủ'); return; }
+  if(!diaChi){ toast('⚠️ Nhập địa chỉ'); return; }
+  if(!ngay){ toast('⚠️ Chọn ngày khai trương'); return; }
+  if(!emCurLat || !emCurLng){ toast('⚠️ Nhập định vị'); return; }
+
+  const fields = [['emDoanhSo','emErrDS'],['emKhach','emErrKhach'],['emMT','emErrMT'],['emDT','emErrDT'],['emGiaThue','emErrGia']];
+  for(const [id, errId] of fields){
+    if(!isNum(document.getElementById(id).value.trim())){ mark(id, errId, false); toast('⚠️ Kiểm tra lại số liệu'); return; }
+    mark(id, errId, true);
+  }
+
+  // Check duplicate (bỏ qua chính nó)
+  const dup = checkDuplicate(nhom, ten, emCurLat, emCurLng, emEditIdx);
+  if(dup){ toast('⚠️ ' + dup.msg); return; }
+
+  const kc = selectedStore.lat && selectedStore.lng ? haversine(emCurLat, emCurLng, selectedStore.lat, selectedStore.lng).toFixed(2) : null;
+  const data = {
+    nhom, ten, diaChi, ngay,
+    lat: emCurLat, lng: emCurLng, kc,
+    doanhSo: document.getElementById('emDoanhSo').value.trim(),
+    luongKhach: document.getElementById('emKhach').value.trim(),
+    mt: document.getElementById('emMT').value.trim(),
+    giaThue: document.getElementById('emGiaThue').value.trim(),
+    dienTich: document.getElementById('emDT').value.trim()
+  };
+
+  // Update local list
+  competitorList[emEditIdx] = { ...competitorList[emEditIdx], ...data, _existing: true, _edited: true };
+
+  // Push trực tiếp lên GAS
+  const payload = {
+    timestamp: new Date().toISOString(),
+    ma_ch: selectedStore.ma, ten_ch: selectedStore.ten,
+    mien: selectedStore.mien, tinh: selectedStore.tinh, huyen: selectedStore.huyen,
+    qlkv: selectedStore.qlkv, gdv: selectedStore.gdv,
+    trang_thai: 'Đã làm',
+    competitors: [{ ...data, ma_dt: competitorList[emEditIdx].ma_dt || '', hanh_dong: 'Cập nhật' }],
+    action: 'edit_single'
+  };
+
+  emIsSubmitting = true;
+  document.getElementById('emBtnSave').disabled = true;
+  document.getElementById('emBtnSave').textContent = '⏳ Đang lưu...';
+
+  const onDone = () => {
+    closeEditModal();
+    markSaved();
+    showCompletedBox(selectedStore.ma, selectedStore.ten, 'đã cập nhật');
+  };
+
+  if(GAS_URL){
+    fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(payload) })
+      .then(() => onDone())
+      .catch(() => { toast('⚠️ Lỗi lưu, thử lại'); emIsSubmitting = false; document.getElementById('emBtnSave').disabled = false; document.getElementById('emBtnSave').textContent = '💾 Lưu thay đổi'; });
+  } else {
+    const key = 'ra-soat-doi-thu-data';
+    const arr = JSON.parse(localStorage.getItem(key)||'[]');
+    arr.push({ ...payload, competitors: undefined, ...data });
+    localStorage.setItem(key, JSON.stringify(arr));
+    onDone();
+  }
 }
 
 // ===== VALIDATE SỐ =====
