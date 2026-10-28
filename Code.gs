@@ -23,6 +23,7 @@ function doPost(e) {
   } catch (err) {
     return out({ ok: false, error: 'Dữ liệu không hợp lệ' });
   }
+  if (!data || typeof data !== 'object' || Array.isArray(data)) data = {};
 
   var ma_ch = String(data.ma_ch || '').trim();
   if (!ma_ch) return out({ ok: false, error: 'Thiếu ma_ch' });
