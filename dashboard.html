@@ -522,12 +522,9 @@ function thSort(col, st, label) {
   };
   const colIndex = colMap[col];
   const colClass = colIndex == null ? '' : GDV_COLUMN_CLASSES[colIndex];
-  const widthStyle = colIndex == null ? '' : ' style="width:' + GDV_COLUMN_WIDTHS[colIndex] + '%"';
+  const width = colIndex == null ? '' : GDV_COLUMN_WIDTHS[colIndex] + '%';
   const which = st === SORT_G ? 'G' : 'T';
-  return '<th class="sortable ' + colClass + '"' + widthStyle +
-    ' onclick="sortBy(\\'' + col + '\\',\\'' + which + '\\')">' +
-    label + '<span class="sort-arrow' + (arrow ? ' on' : '') + '">' +
-    (arrow || ' ↕') + '</span></th>';
+  return `<th class="sortable ${colClass}" style="width:${width}" onclick="sortBy('${col}','${which}')">${label}<span class="sort-arrow${arrow ? ' on' : ''}">${arrow || ' ↕'}</span></th>`;
 }
 
 function computeGdvData() {
@@ -699,7 +696,7 @@ function buildGdvSection(gdvs) {
       out += '<td class="col-miss" style="width:12%">' + missHtml(g.missInfo) + '</td></tr>';
       g.qlkvs.forEach(q => {
         out += '<tr class="gdv-sub ' + cls + '" style="display:none">';
-        out += '<td class="col-gdv qlkv-name">' + esc(q.qlkv) + '</td>';
+        out += '<td class="col-gdv qlkv-name" style="width:24%">' + esc(q.qlkv) + '</td>';
         out += '<td class="col-num" style="width:8%">' + q.t + '</td>';
         out += '<td class="col-num" style="width:8%">' + q.d + '</td>';
         out += '<td class="bar-cell col-bar" style="width:11%"><i style="width:' + q.pct + '%"></i></td>';
