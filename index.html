@@ -207,7 +207,7 @@ input.range-warn{border-color:var(--red);background:#fff5f5}
       <div>
         <h1>🔍 Rà Soát Đối Thủ</h1>
         <p>Khai báo & cập nhật đối thủ quanh cửa hàng WinMart+ Rural</p>
-        <span class="vbadge">📍 v2.5</span>
+        <span class="vbadge">📍 v2.6</span>
       </div>
       <a href="dashboard.html" class="dash-link">📊 Dashboard</a>
     </div>
@@ -897,10 +897,9 @@ function emValidateRange(){
   });
 }
 
-// ===== SAVE EDIT MODAL → push thẳng GAS =====
+// ===== SAVE EDIT MODAL → lưu local, chưa push GAS =====
 function saveEditModal(){
   if(!selectedStore){ toast('⚠️ Chọn cửa hàng trước'); return; }
-  if(emIsSubmitting) return;
   if(emDistanceBlock){ toast('🚫 Khoảng cách không hợp lệ (>10km) — kiểm tra lại tọa độ!'); return; }
   if(emDistanceWarn){ askConfirm('⚠️ Khoảng cách bất thường. Vẫn tiếp tục?', emDoSave); return; }
   if(emNgayWarn){ askConfirm('⚠️ Ngày khai trương bất thường. Vẫn tiếp tục?', emDoSave); return; }
@@ -940,41 +939,12 @@ function emDoSave(){
     dienTich: document.getElementById('emDT').value.trim()
   };
 
-  // Update local list
+  // Chỉ lưu local, KHÔNG push GAS. Sẽ push khi bấm "Lưu thay đổi"
   competitorList[emEditIdx] = { ...competitorList[emEditIdx], ...data, _existing: true, _edited: true };
-
-  // Push trực tiếp lên GAS
-  const payload = {
-    timestamp: new Date().toISOString(),
-    ma_ch: selectedStore.ma, ten_ch: selectedStore.ten,
-    mien: selectedStore.mien, tinh: selectedStore.tinh, huyen: selectedStore.huyen,
-    qlkv: selectedStore.qlkv, gdv: selectedStore.gdv,
-    trang_thai: 'Đã làm',
-    competitors: [{ ...data, ma_dt: competitorList[emEditIdx].ma_dt || '', hanh_dong: 'Cập nhật' }],
-    action: 'edit_single'
-  };
-
-  emIsSubmitting = true;
-  document.getElementById('emBtnSave').disabled = true;
-  document.getElementById('emBtnSave').textContent = '⏳ Đang lưu...';
-
-  const onDone = () => {
-    closeEditModal();
-    markSaved();
-    showCompletedBox(selectedStore.ma, selectedStore.ten, 'đã cập nhật');
-  };
-
-  if(GAS_URL){
-    fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(payload) })
-      .then(() => onDone())
-      .catch(() => { toast('⚠️ Lỗi lưu, thử lại'); emIsSubmitting = false; document.getElementById('emBtnSave').disabled = false; document.getElementById('emBtnSave').textContent = '💾 Lưu thay đổi'; });
-  } else {
-    const key = 'ra-soat-doi-thu-data';
-    const arr = JSON.parse(localStorage.getItem(key)||'[]');
-    arr.push({ ...payload, competitors: undefined, ...data });
-    localStorage.setItem(key, JSON.stringify(arr));
-    onDone();
-  }
+  
+  closeEditModal();
+  renderList();
+  toast(`✅ Đã cập nhật "${ten}" — bấm "Lưu thay đổi" để gửi`);
 }
 
 // ===== VALIDATE SỐ =====
