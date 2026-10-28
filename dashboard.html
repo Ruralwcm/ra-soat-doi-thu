@@ -135,7 +135,7 @@
       <div><label>QLKV</label><select id="selQlkv" onchange="onFilterChange('qlkv')"><option value="">— Tất cả QLKV —</option></select></div>
     </div>
     <div class="filters">
-      <input id="fSearch" placeholder="Tìm mã SAP / tên CH..." oninput="renderTable()">
+      <input id="fSearch" placeholder="Tìm mã SAP / tên CH..." oninput="showAllDetail=false;renderTable()">
     </div>
   </div>
   <div class="card">
@@ -156,6 +156,7 @@ const GV = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=
 let STORES = [], ROWS = [], ALL_ROWS = [], TRACK_DATA = [];
 let CURRENT_WEEK = null;
 let WEEKS = [];
+let showAllDetail = false;
 
 const $ = id => document.getElementById(id);
 const esc = s => (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -444,6 +445,7 @@ function render() {
 
   buildGdvSection();
   buildTopQlkv();
+  showAllDetail = false;
   renderTable();
 }
 
@@ -771,6 +773,19 @@ function renderTable() {
 
   $('rowCount').textContent = '· ' + list.length + ' đối thủ được khai';
 
+  // Sort by ngày update mới nhất, limit 30
+  list.sort((a, b) => (b.ngayUpdate || '').localeCompare(a.ngayUpdate || ''));
+  const totalCount = list.length;
+  let truncated = false;
+  if (!showAllDetail && totalCount > 30) {
+    list = list.slice(0, 30);
+    truncated = true;
+  }
+
+  let countText = '· ' + totalCount + ' đối thủ được khai';
+  if (truncated) countText = '· Mới nhất 30/' + totalCount + ' đối thủ';
+  $('rowCount').textContent = countText;
+
   if (!list.length) {
     $('tableWrap').innerHTML = '<div class="empty">Chưa có dữ liệu · ' + (CURRENT_WEEK ? ('Tuần ' + CURRENT_WEEK) : 'Tất cả') + '</div>';
     return;
@@ -812,6 +827,9 @@ function renderTable() {
       html += '</tr>';
     });
   });
+  if (truncated) {
+    html += '<tr><td colspan="9" style="text-align:center;padding:12px"><button id="btnShowMore" onclick="showAllDetail=true;renderTable()" style="cursor:pointer;font-weight:600;font-size:13px;padding:8px 20px;border:2px solid var(--navy);color:var(--navy);border-radius:6px;background:white">📋 Xem thêm ' + (totalCount - 30) + ' đối thủ...</button></td></tr>';
+  }
   html += '</tbody></table>';
   $('tableWrap').innerHTML = '<div class="tbl-scroll">' + html + '</div>';
 }
