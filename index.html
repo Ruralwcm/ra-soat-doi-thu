@@ -637,7 +637,7 @@ function validateDistance(){
   distanceBlock = false;
   if(m < WARN_NEAR_M){
     el.className='dist-result bad';
-    el.textContent = `⚠️ Quá gần: ${m.toFixed(0)}m (<${WARN_NEAR_M}m) — kiểm tra lại!`;
+    el.textContent = `⚠️ Quá gần: ${m.toFixed(0)}m (<${WARN_NEAR_M}m)  `;
     distanceWarn = true;
   } else if(km > BLOCK_FAR_KM){
     el.className='dist-result bad';
@@ -645,7 +645,7 @@ function validateDistance(){
     distanceBlock = true;
   } else if(km > WARN_FAR_KM){
     el.className='dist-result bad';
-    el.textContent = `⚠️ Khá xa: ${km.toFixed(2)} km (>${WARN_FAR_KM}km) — kiểm tra lại!`;
+    el.textContent = `⚠️ Khá xa: ${km.toFixed(2)} km (>${WARN_FAR_KM}km)  `;
     distanceWarn = true;
   } else {
     el.className='dist-result ok';
@@ -889,7 +889,7 @@ function emValidateDistance(){
   emDistanceWarn = false; emDistanceBlock = false;
   if(m < WARN_NEAR_M){
     el.className='dist-result bad';
-    el.textContent = `⚠️ Quá gần: ${m.toFixed(0)}m (<${WARN_NEAR_M}m) — kiểm tra lại!`;
+    el.textContent = `⚠️ Quá gần: ${m.toFixed(0)}m (<${WARN_NEAR_M}m)  `;
     emDistanceWarn = true;
   } else if(km > BLOCK_FAR_KM){
     el.className='dist-result bad';
@@ -897,7 +897,7 @@ function emValidateDistance(){
     emDistanceBlock = true;
   } else if(km > WARN_FAR_KM){
     el.className='dist-result bad';
-    el.textContent = `⚠️ Khá xa: ${km.toFixed(2)} km (>${WARN_FAR_KM}km) — kiểm tra lại!`;
+    el.textContent = `⚠️ Khá xa: ${km.toFixed(2)} km (>${WARN_FAR_KM}km)  `;
     emDistanceWarn = true;
   } else {
     el.className='dist-result ok';
@@ -940,10 +940,8 @@ function emValidateRange(){
 // ===== SAVE EDIT MODAL → lưu local, chưa push GAS =====
 function saveEditModal(){
   if(!selectedStore){ toast('⚠️ Chọn cửa hàng trước'); return; }
-  if(emDistanceBlock){ toast('🚫 Khoảng cách không hợp lệ (>10km) — kiểm tra lại tọa độ!'); return; }
-  if(emDistanceWarn){ askConfirm('⚠️ Khoảng cách bất thường. Vẫn tiếp tục?', emDoSave); return; }
-  if(emNgayWarn){ askConfirm('⚠️ Ngày khai trương bất thường. Vẫn tiếp tục?', emDoSave); return; }
-  if(emRangeWarn){ toast('⚠️ Số liệu ngoài khoảng hợp lệ — kiểm tra lại các field báo đỏ'); return; }
+  if(emDistanceBlock) toast('⚠️ Khoảng cách rất xa (>10km)');
+  if(emRangeWarn) toast('⚠️ Số liệu ngoài khoảng hợp lệ');
   emDoSave();
 }
 
@@ -1021,22 +1019,8 @@ function checkDuplicate(nhom, ten, lat, lng, skipIdx){
 // ===== SAVE FORM (thêm mới hoặc cập nhật) =====
 function saveForm(){
   if(!selectedStore){ toast('⚠️ Chọn cửa hàng trước'); return; }
-  if(distanceBlock){
-    toast('🚫 Khoảng cách không hợp lệ (>10km) — kiểm tra lại tọa độ!');
-    return;
-  }
-  if(distanceWarn){
-    askConfirm('⚠️ Khoảng cách bất thường (quá gần <10m hoặc khá xa >3km). Vẫn tiếp tục?', doSaveForm);
-    return;
-  }
-  if(ngayWarn){
-    askConfirm('⚠️ Ngày khai trương bất thường (ngày tương lai hoặc quá 12 tháng). Vẫn tiếp tục?', doSaveForm);
-    return;
-  }
-  if(rangeWarn){
-    toast('⚠️ Số liệu ngoài khoảng hợp lệ — kiểm tra lại các field báo đỏ');
-    return;
-  }
+  if(distanceBlock) toast('⚠️ Khoảng cách rất xa (>10km)');
+  if(rangeWarn) toast('⚠️ Số liệu ngoài khoảng hợp lệ');
   doSaveForm();
 }
 
