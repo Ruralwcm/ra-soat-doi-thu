@@ -509,15 +509,22 @@ function sortArrow(col, st) {
   return st.asc ? ' ▲' : ' ▼';
 }
 
+const GDV_COLUMN_WIDTHS = [24, 8, 8, 11, 6, 9, 10, 12, 12];
+const GDV_COLUMN_CLASSES = [
+  'col-gdv', 'col-num', 'col-num', 'col-bar',
+  'col-pct', 'col-doi', 'col-delta', 'col-miss', 'col-miss'
+];
+
 function thSort(col, st, label) {
   const arrow = sortArrow(col, st);
-  const colClass = ({
-    gdv:'col-gdv', t:'col-num', d:'col-num', pct:'col-pct',
-    doi:'col-doi', delta:'col-delta', missKT:'col-miss', missInfo:'col-miss',
-    name:'col-gdv', cnt:'col-num', ch:'col-num'
-  })[col] || '';
+  const colMap = {
+    gdv:0, t:1, d:2, pct:4, doi:5, delta:6, missKT:7, missInfo:8
+  };
+  const colIndex = colMap[col];
+  const colClass = colIndex == null ? '' : GDV_COLUMN_CLASSES[colIndex];
+  const width = colIndex == null ? '' : GDV_COLUMN_WIDTHS[colIndex] + '%';
   const which = st === SORT_G ? 'G' : 'T';
-  return `<th class="sortable ${colClass}" onclick="sortBy('${col}','${which}')">${label}<span class="sort-arrow${arrow ? ' on' : ''}">${arrow || ' ↕'}</span></th>`;
+  return `<th class="sortable ${colClass}" style="width:${width}" onclick="sortBy('${col}','${which}')">${label}<span class="sort-arrow${arrow ? ' on' : ''}">${arrow || ' ↕'}</span></th>`;
 }
 
 function computeGdvData() {
@@ -650,7 +657,8 @@ function buildGdvSection(gdvs) {
     return '<span class="miss-ok">0</span>';
   }
 
-  const cols = '<colgroup><col class="col-gdv"><col class="col-num"><col class="col-num"><col class="col-bar"><col class="col-pct"><col class="col-doi"><col class="col-delta"><col class="col-miss"><col class="col-miss"></colgroup>';
+  // Lock the same explicit widths for parent GĐV rows and expanded QLKV rows.
+  const cols = '<colgroup>' + GDV_COLUMN_WIDTHS.map(w => '<col style="width:' + w + '%">').join('') + '</colgroup>';
 
   // Single shared table with header — all miền inside, columns aligned
   let html = '<table class="gdv-table">' + cols;
@@ -658,7 +666,7 @@ function buildGdvSection(gdvs) {
   html += thSort('gdv', SORT_G, 'GĐV')
     + thSort('t', SORT_G, 'CH KS')
     + thSort('d', SORT_G, 'Đã làm')
-    + '<th class="bar-cell col-bar">Tỷ lệ</th>'
+    + '<th class="bar-cell col-bar" style="width:11%" style="width:11%">Tỷ lệ</th>'
     + thSort('pct', SORT_G, '%')
     + thSort('doi', SORT_G, 'Đối thủ')
     + thSort('delta', SORT_G, '+/- W-1')
@@ -677,26 +685,26 @@ function buildGdvSection(gdvs) {
     arr.forEach(g => {
       const cls = 'sub-' + g.gdv.replace(/[^a-zA-Z0-9]/g, '_');
       out += '<tr class="grow" onclick="toggleGdv(this,\'' + cls + '\')" style="cursor:pointer">';
-      out += '<td class="col-gdv"><span class="ar">▶</span> ' + esc(g.gdv) + '</td>';
-      out += '<td class="col-num">' + g.t + '</td>';
-      out += '<td class="col-num">' + g.d + '</td>';
-      out += '<td class="bar-cell col-bar"><i style="width:' + g.pct + '%"></i></td>';
-      out += '<td class="col-pct">' + g.pct + '%</td>';
-      out += '<td class="col-doi">' + (g.doi || '—') + '</td>';
-      out += '<td class="col-delta">' + deltaHtml(g.delta) + '</td>';
-      out += '<td class="col-miss">' + missHtml(g.missKT) + '</td>';
-      out += '<td class="col-miss">' + missHtml(g.missInfo) + '</td></tr>';
+      out += '<td class="col-gdv" style="width:24%"><span class="ar">▶</span> ' + esc(g.gdv) + '</td>';
+      out += '<td class="col-num" style="width:8%">' + g.t + '</td>';
+      out += '<td class="col-num" style="width:8%">' + g.d + '</td>';
+      out += '<td class="bar-cell col-bar" style="width:11%"><i style="width:' + g.pct + '%"></i></td>';
+      out += '<td class="col-pct" style="width:6%">' + g.pct + '%</td>';
+      out += '<td class="col-doi" style="width:9%">' + (g.doi || '—') + '</td>';
+      out += '<td class="col-delta" style="width:10%">' + deltaHtml(g.delta) + '</td>';
+      out += '<td class="col-miss" style="width:12%">' + missHtml(g.missKT) + '</td>';
+      out += '<td class="col-miss" style="width:12%">' + missHtml(g.missInfo) + '</td></tr>';
       g.qlkvs.forEach(q => {
         out += '<tr class="gdv-sub ' + cls + '" style="display:none">';
-        out += '<td class="col-gdv qlkv-name">' + esc(q.qlkv) + '</td>';
-        out += '<td class="col-num">' + q.t + '</td>';
-        out += '<td class="col-num">' + q.d + '</td>';
-        out += '<td class="bar-cell col-bar"><i style="width:' + q.pct + '%"></i></td>';
-        out += '<td class="col-pct">' + q.pct + '%</td>';
-        out += '<td class="col-doi">' + (q.doi || '—') + '</td>';
-        out += '<td class="col-delta">' + deltaHtml(q.delta) + '</td>';
-        out += '<td class="col-miss">' + missHtml(q.missKT) + '</td>';
-        out += '<td class="col-miss">' + missHtml(q.missInfo) + '</td></tr>';
+        out += '<td class="col-gdv qlkv-name" style="width:24%">' + esc(q.qlkv) + '</td>';
+        out += '<td class="col-num" style="width:8%">' + q.t + '</td>';
+        out += '<td class="col-num" style="width:8%">' + q.d + '</td>';
+        out += '<td class="bar-cell col-bar" style="width:11%"><i style="width:' + q.pct + '%"></i></td>';
+        out += '<td class="col-pct" style="width:6%">' + q.pct + '%</td>';
+        out += '<td class="col-doi" style="width:9%">' + (q.doi || '—') + '</td>';
+        out += '<td class="col-delta" style="width:10%">' + deltaHtml(q.delta) + '</td>';
+        out += '<td class="col-miss" style="width:12%">' + missHtml(q.missKT) + '</td>';
+        out += '<td class="col-miss" style="width:12%">' + missHtml(q.missInfo) + '</td></tr>';
       });
     });
     return out;
