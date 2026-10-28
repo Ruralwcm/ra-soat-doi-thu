@@ -178,6 +178,20 @@ function parseDate(s) {
   return new Date(s);
 }
 
+// Gviz CSV exposes sheet dates as locale-formatted text (e.g. DD/MM/YYYY),
+// so normalize the sort-only value to ISO to keep "newest first" semantics.
+function dateSortKey(value) {
+  const s = String(value || '').trim();
+  if (!s) return '';
+  const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if (m) {
+    return m[3] + '-' + m[2].padStart(2, '0') + '-' + m[1].padStart(2, '0') +
+      'T' + String(m[4] || '00').padStart(2, '0') + ':' + (m[5] || '00') + ':' + (m[6] || '00');
+  }
+  const d = new Date(s);
+  return isNaN(d.getTime()) ? s : d.toISOString();
+}
+
 async function fetchCSV(gid) {
   const url = GV + '&gid=' + gid;
   const resp = await fetch(url, { cache:'no-store' });
@@ -300,7 +314,8 @@ async function loadAll() {
         dienTich: (r['Diện tích (m²)'] || '').trim(),
         maDT: (r['Mã ĐT'] || '').trim(),
         ngayKhaiBao: (r['Ngày khai báo'] || '').trim(),
-        ngayUpdate: (r['Ngày update'] || '').trim()
+        ngayUpdate: (r['Ngày update'] || '').trim(),
+        ngayUpdateSort: dateSortKey(r['Ngày update'])
       };
     });
 
@@ -810,7 +825,7 @@ function renderTable() {
   $('rowCount').textContent = '· ' + list.length + ' đối thủ được khai';
 
   // Sort by ngày update mới nhất, limit 30
-  list.sort((a, b) => (b.ngayUpdate || '').localeCompare(a.ngayUpdate || ''));
+  list.sort((a, b) => (b.ngayUpdateSort || b.ngayUpdate || '').localeCompare(a.ngayUpdateSort || a.ngayUpdate || ''));
   const totalCount = list.length;
   let truncated = false;
   if (!showAllDetail && totalCount > 30) {
