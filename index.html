@@ -839,12 +839,30 @@ function confirmNoChange(){
   
   const btnNC = document.getElementById('btnNoChange');
   
-  const track = {
+  // Build changelogs cho từng đối thủ hiện có (giữ nguyên)
+  const changelogs = competitorList.map(c => ({
+    ma_ch: selectedStore.ma,
+    ma_dt: c.ma_dt || '',
+    nhom: c.nhom || '',
+    ten: c.ten || '',
+    diaChi: c.diaChi || '',
+    lat: c.lat || '', lng: c.lng || '',
+    kc: c.kc || '',
+    ngayKT: c.ngay || '',
+    doanhSo: c.doanhSo || '', luongKhach: c.luongKhach || '',
+    mt: c.mt || '', giaThue: c.giaThue || '', dienTich: c.dienTich || '',
+    hanh_dong: 'Giữ nguyên',
+    ghi_chu: 'Không thay đổi'
+  }));
+
+  const batch = {
     timestamp: new Date().toISOString(),
     ma_ch: selectedStore.ma, ten_ch: selectedStore.ten,
     mien: selectedStore.mien, tinh: selectedStore.tinh, huyen: selectedStore.huyen,
     qlkv: selectedStore.qlkv, gdv: selectedStore.gdv,
-    trang_thai: 'Không đổi'
+    trang_thai: 'Đã làm',
+    competitors: changelogs,
+    action: 'nochange'
   };
 
   isSubmitting = true;
@@ -857,13 +875,13 @@ function confirmNoChange(){
   };
 
   if(GAS_URL){
-    fetch(GAS_URL + '?action=tracklog', { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(track) })
+    fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(batch) })
       .then(() => saveAndShow())
       .catch(() => { toast('⚠️ Lỗi ghi log, thử lại'); isSubmitting = false; btnNC.disabled = false; btnNC.textContent = '✅ Không thay đổi'; });
   } else {
-    const key = 'ra-soat-tracklog';
+    const key = 'ra-soat-doi-thu-data';
     const arr = JSON.parse(localStorage.getItem(key)||'[]');
-    arr.push(track);
+    batch.competitors.forEach(c => { arr.push({ ...batch, ...c, competitors: undefined }); });
     localStorage.setItem(key, JSON.stringify(arr));
     saveAndShow();
   }
@@ -912,19 +930,11 @@ function resetCompletedBox(){
   selectedStore = null;
   document.getElementById('btnNoChange').disabled = true;
   document.getElementById('btnNoChange').textContent = '✅ Không thay đổi';
-  document.getElementById('storeSearch').value = '';
+  document.getElementById('btnAddNew').disabled = true;
   
   // Reset form fields
-  document.getElementById('nhom').value = '';
-  document.getElementById('tenDoiThu').value = '';
-  document.getElementById('diaChi').value = '';
+  resetCompetitorFields();
   document.getElementById('ngayKhaiTruong').value = '';
-  document.getElementById('locInput').value = '';
-  document.getElementById('dsTB').value = '';
-  document.getElementById('khachTB').value = '';
-  document.getElementById('mtInput').value = '';
-  document.getElementById('giaThue').value = '';
-  document.getElementById('dienTich').value = '';
   
   // Reset competitor list
   competitorList = [];
@@ -934,16 +944,19 @@ function resetCompletedBox(){
   
   // Ẩn form thêm/sửa nếu đang mở
   document.getElementById('addCard').style.display = 'none';
+  document.getElementById('formTitle').textContent = 'Thêm đối thủ';
+  document.getElementById('btnSaveForm').textContent = '➕ Thêm vào danh sách';
+  document.getElementById('btnCancelEdit').style.display = 'none';
   
   // Reset dropdown
-  document.getElementById('mienSelect').value = '';
-  document.getElementById('gdvSelect').innerHTML = '<option value="">-- Chọn GĐV --</option>';
-  document.getElementById('qlkvSelect').innerHTML = '<option value="">-- Chọn QLKV --</option>';
-  document.getElementById('storeSelect').innerHTML = '<option value="">-- Chọn CH --</option>';
+  document.getElementById('selMien').value = '';
+  document.getElementById('selGdv').innerHTML = '<option value="">— GĐV —</option>';
+  document.getElementById('selQlkv').innerHTML = '<option value="">— QLKV —</option>';
+  document.getElementById('selCh').innerHTML = '<option value="">— Chọn Cửa hàng —</option>';
+  clearStoreInfo();
   
   // Scroll lên đầu trang
   window.scrollTo({top: 0, behavior: 'smooth'});
-  document.getElementById('storeSearch').focus();
 }
 
 // ===== LƯU TẤT CẢ =====
