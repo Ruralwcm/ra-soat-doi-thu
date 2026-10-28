@@ -793,8 +793,19 @@ let emCurLat = null, emCurLng = null;
 let emDistanceWarn = false, emDistanceBlock = false, emNgayWarn = false, emRangeWarn = false;
 let emIsSubmitting = false;
 
-function toISO(d){ const s=String(d||'').trim(); let m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/); if(m) return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`; m=s.match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? s : ''; }
-function toVN(d){ const s=String(d||'').trim(); let m=s.match(/^(\d{4})-(\d{2})-(\d{2})$/); if(m) return `${m[3]}/${m[2]}/${m[1]}`; m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/); return m ? `${m[1].padStart(2,'0')}/${m[2].padStart(2,'0')}/${m[3]}` : s; }
+function toISO(d){ const s=String(d||'').trim(); // dd/mm/yyyy → yyyy-mm-dd for date input
+  let m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/); if(m) return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+  m=s.match(/^(\d{4})-(\d{2})-(\d{2})$/); if(m) return s; // already ISO
+  // Excel serial number → Date
+  if(/^\d{4,5}$/.test(s)){ const dt=new Date((+s-25569)*86400000); return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0'); }
+  // Date object
+  if(d instanceof Date && !isNaN(d)) return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  return '';
+}
+function toVN(d){ const s=String(d||'').trim(); // yyyy-mm-dd → dd/mm/yyyy
+  let m=s.match(/^(\d{4})-(\d{2})-(\d{2})$/); if(m) return `${m[3]}/${m[2]}/${m[1]}`;
+  m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/); return m ? `${m[1].padStart(2,'0')}/${m[2].padStart(2,'0')}/${m[3]}` : s;
+}
 
 function editCompetitor(i){
   const c = competitorList[i];
