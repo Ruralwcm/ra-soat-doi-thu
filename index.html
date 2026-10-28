@@ -475,10 +475,9 @@ function getISOWeekNumber(d){
 }
 
 async function loadTracklogs(){
-  // Đọc trực tiếp sheet Tracklogs; tránh gọi GAS action=data vốn trả cả
-  // dữ liệu đối thủ đầy đủ dù trang này chỉ cần mã CH đã khảo sát trong tuần.
+  // Chỉ đọc sheet Tracklogs, không gọi GAS action=data để tải cả sheet hiện trạng.
   try{
-    const res = await fetch(TRACKLOG_CSV);
+    const res = await fetch(TRACKLOG_CSV, { cache:'no-store' });
     if(!res.ok) throw new Error('HTTP ' + res.status);
     const rows = parseCSV(await res.text());
     const curWeek = getISOWeekNumber(new Date());
