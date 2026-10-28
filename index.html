@@ -793,8 +793,8 @@ let emCurLat = null, emCurLng = null;
 let emDistanceWarn = false, emDistanceBlock = false, emNgayWarn = false, emRangeWarn = false;
 let emIsSubmitting = false;
 
-function toISO(d){ const m=String(d||'').match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/); return m ? `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}` : d; }
-function toVN(d){ const m=String(d||'').match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? `${m[3]}/${m[2]}/${m[1]}` : d; }
+function toISO(d){ const s=String(d||'').trim(); let m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/); if(m) return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`; m=s.match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? s : ''; }
+function toVN(d){ const s=String(d||'').trim(); let m=s.match(/^(\d{4})-(\d{2})-(\d{2})$/); if(m) return `${m[3]}/${m[2]}/${m[1]}`; m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/); return m ? `${m[1].padStart(2,'0')}/${m[2].padStart(2,'0')}/${m[3]}` : s; }
 
 function editCompetitor(i){
   const c = competitorList[i];
