@@ -383,6 +383,12 @@ function render() {
   const doneSaps = new Set();
   ROWS.forEach(r => { if (scopeSaps.has(r.sap)) doneSaps.add(r.sap); });
 
+  // Bổ sung từ localStorage submissions (cùng domain)
+  try{
+    const subs = JSON.parse(localStorage.getItem('rsdt_submissions')||'[]');
+    subs.forEach(s => { if(scopeSaps.has(s.ma_ch)) doneSaps.add(s.ma_ch); });
+  }catch(e){}
+
   const total = scopeSaps.size;
   const done = doneSaps.size;
   const missing = total - done;
@@ -439,6 +445,11 @@ function computeGdvData() {
       }
     }
   });
+  // Bổ sung từ localStorage submissions
+  try{
+    const subs = JSON.parse(localStorage.getItem('rsdt_submissions')||'[]');
+    subs.forEach(s => { if(scopeSaps.has(s.ma_ch) && !doneSaps.has(s.ma_ch)) doneSaps.add(s.ma_ch); });
+  }catch(e){}
 
   // --- Cumulative total competitors (all time) ---
   const totalDoiBySap = {};
@@ -764,7 +775,13 @@ function exportMissing() {
   const sInScope = scopeStores();
   const doneSaps = new Set();
   ROWS.forEach(r => { if (sInScope.some(s => s.sap === r.sap)) doneSaps.add(r.sap); });
+  // Bổ sung từ localStorage submissions
+  try{
+    const subs = JSON.parse(localStorage.getItem('rsdt_submissions')||'[]');
+    subs.forEach(s => { if(sInScope.some(s2 => s2.sap === s.ma_ch)) doneSaps.add(s.ma_ch); });
+  }catch(e){}
   const missing = sInScope.filter(s => !doneSaps.has(s.sap));
+  // (dùng cho exportMissing)
 
   if (!missing.length) { alert('✅ Tất cả CH đã được khảo sát trong tuần này!'); return; }
 
