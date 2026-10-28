@@ -120,9 +120,11 @@
       <span>📋</span>
       <button class="tab-btn active" id="tabGdv" onclick="switchTab('gdv')">Theo GĐV</button>
       <button class="tab-btn" id="tabTopQlkv" onclick="switchTab('topQlkv')">Top 20 QLKV</button>
+      <button class="tab-btn" id="tabLoaiDT" onclick="switchTab('loaiDT')">Loại ĐT</button>
     </h2>
     <div id="gdvSection">Đang tải...</div>
     <div id="topQlkvSection" style="display:none">Đang tải...</div>
+    <div id="loaiDTSection" style="display:none">Đang tải...</div>
   </div>
   <div class="card">
     <h2>🎯 Lọc địa bàn</h2>
@@ -445,7 +447,7 @@ function render() {
 }
 
 // --- Sort state ---
-let SORT_G = {col: 'pct', asc: true}, SORT_T = {col: 'pct', asc: true};
+let SORT_G = {col: 'pct', asc: true}, SORT_T = {col: 'pct', asc: true}, SORT_L = {col: 'cnt', asc: false};
 
 function sortArrow(col, st) {
   if (st.col !== col) return '';
@@ -454,7 +456,7 @@ function sortArrow(col, st) {
 
 function thSort(col, st, label) {
   const arrow = sortArrow(col, st);
-  return '<th class="sortable col-' + col + '" onclick="sortBy(\'' + col + '\',\'' + (st === SORT_G ? 'G' : 'T') + '\')">' + label + '<span class="sort-arrow' + (arrow ? ' on' : '') + '">' + (arrow || ' ↕') + '</span></th>';
+  return '<th class="sortable col-' + col + '" onclick="sortBy(\'' + col + '\',\'' + (st === SORT_G ? 'G' : st === SORT_T ? 'T' : 'L') + '\')">' + label + '<span class="sort-arrow' + (arrow ? ' on' : '') + '">' + (arrow || ' ↕') + '</span></th>';
 }
 
 function computeGdvData() {
@@ -551,15 +553,19 @@ const SORT_FNS = {
   doi: (a, b) => a.doi - b.doi,
   delta: (a, b) => a.delta - b.delta,
   missKT: (a, b) => a.missKT - b.missKT,
-  missInfo: (a, b) => a.missInfo - b.missInfo
+  missInfo: (a, b) => a.missInfo - b.missInfo,
+  cnt: (a, b) => a.cnt - b.cnt,
+  ch: (a, b) => a.ch - b.ch,
+  name: (a, b) => String(a.name).localeCompare(String(b.name), 'vi')
 };
 
 function sortBy(col, which) {
-  const st = which === 'G' ? SORT_G : SORT_T;
+  const st = which === 'G' ? SORT_G : which === 'T' ? SORT_T : SORT_L;
   if (st.col === col) st.asc = !st.asc;
   else { st.col = col; st.asc = (col === 'pct'); }
   if (which === 'G') buildGdvSection();
-  else buildTopQlkv();
+  else if (which === 'T') buildTopQlkv();
+  else buildLoaiDT();
 }
 
 function buildGdvSection() {
@@ -668,12 +674,62 @@ function buildTopQlkv() {
   $('topQlkvSection').innerHTML = html;
 }
 
+function buildLoaiDT() {
+  const sInScope = scopeStores();
+  const scopeSaps = new Set(sInScope.map(s => s.sap));
+  const totalCH = scopeSaps.size;
+  const dtList = ALL_ROWS.filter(r => scopeSaps.has(r.sap) && r.nhomDT);
+
+  const nhomMap = {};
+  dtList.forEach(r => {
+    const nhom = r.nhomDT;
+    if (!nhomMap[nhom]) nhomMap[nhom] = { name: nhom, cnt: 0, chSet: new Set() };
+    nhomMap[nhom].cnt++;
+    nhomMap[nhom].chSet.add(r.sap);
+  });
+
+  const arr = Object.values(nhomMap).map(g => ({
+    name: g.name, cnt: g.cnt, ch: g.chSet.size,
+    pct: totalCH ? Math.round(g.chSet.size / totalCH * 100) : 0
+  }));
+
+  if (!arr.length) { $('loaiDTSection').innerHTML = '<div class="empty">Chưa có dữ liệu</div>'; return; }
+
+  const sf = SORT_FNS[SORT_L.col] || SORT_FNS.cnt;
+  arr.sort((a, b) => { const v = sf(a, b); return SORT_L.asc ? v : -v; });
+
+  const cols = '<colgroup><col style="width:22%"><col style="width:15%"><col style="width:15%"><col style="width:16%"><col style="width:10%"></colgroup>';
+  let html = '<table class="gdv-table">' + cols + '<thead><tr>';
+  html += thSort('name', SORT_L, 'Nhóm ĐT')
+    + thSort('cnt', SORT_L, 'Số ĐT')
+    + thSort('ch', SORT_L, 'Số CH')
+    + '<th class="bar-cell col-bar">Tỷ lệ CH</th>'
+    + thSort('pct', SORT_L, '%');
+  html += '</tr></thead><tbody>';
+
+  arr.forEach(g => {
+    html += '<tr><td class="col-gdv" style="font-weight:700">' + esc(g.name) + '</td>';
+    html += '<td class="col-num">' + g.cnt + '</td>';
+    html += '<td class="col-num">' + g.ch + '</td>';
+    html += '<td class="bar-cell col-bar"><i style="width:' + g.pct + '%"></i></td>';
+    html += '<td class="col-pct">' + g.pct + '%</td></tr>';
+  });
+
+  html += '<tr><td colspan="5" style="text-align:center;font-size:11px;color:var(--mut);padding:8px">'
+    + arr.length + ' nhóm · ' + totalCH + ' CH trong scope</td></tr>';
+  html += '</tbody></table>';
+  $('loaiDTSection').innerHTML = html;
+}
+
 function switchTab(tab) {
   $('tabGdv').classList.toggle('active', tab === 'gdv');
   $('tabTopQlkv').classList.toggle('active', tab === 'topQlkv');
+  $('tabLoaiDT').classList.toggle('active', tab === 'loaiDT');
   $('gdvSection').style.display = tab === 'gdv' ? '' : 'none';
   $('topQlkvSection').style.display = tab === 'topQlkv' ? '' : 'none';
+  $('loaiDTSection').style.display = tab === 'loaiDT' ? '' : 'none';
   if (tab === 'topQlkv') buildTopQlkv();
+  else if (tab === 'loaiDT') buildLoaiDT();
   else buildGdvSection();
 }
 
