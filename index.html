@@ -1155,8 +1155,21 @@ function confirmNoChange(){
   };
 
   fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(batch) })
-    .then(()=>{ isSubmitting = false; showSuccess(selectedStore.ma, selectedStore.ten, action==='none'?'không có':'không đổi'); })
-    .catch(()=>{ document.getElementById('statusOverlay').style.display = 'none'; isSubmitting = false; toast('⚠️ Lỗi, thử lại'); });
+    .then(async res => {
+      let result;
+      try { result = await res.json(); }
+      catch (_) { throw new Error('Máy chủ trả phản hồi không hợp lệ'); }
+      if(!res.ok || !result || result.ok !== true) {
+        throw new Error((result && result.error) || 'Máy chủ chưa xác nhận lưu thành công');
+      }
+      isSubmitting = false;
+      showSuccess(selectedStore.ma, selectedStore.ten, action==='none'?'không có':'không đổi');
+    })
+    .catch(err=>{
+      document.getElementById('statusOverlay').style.display = 'none';
+      isSubmitting = false;
+      toast('⚠️ ' + (err && err.message ? err.message : 'Lỗi, thử lại'));
+    });
 }
 function markSaved(){
   competitorList.forEach(c => { c._existing = true; c._edited = false; });
@@ -1225,8 +1238,22 @@ function submitAll(){
   };
 
   fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(batch) })
-    .then(()=>{ markSaved(); isSubmitting = false; showSuccess(selectedStore.ma, selectedStore.ten, 'đã cập nhật'); })
-    .catch(()=>{ document.getElementById('statusOverlay').style.display = 'none'; isSubmitting = false; toast('⚠️ Lưu thất bại, thử lại nhé'); });
+    .then(async res => {
+      let result;
+      try { result = await res.json(); }
+      catch (_) { throw new Error('Máy chủ trả phản hồi không hợp lệ'); }
+      if(!res.ok || !result || result.ok !== true) {
+        throw new Error((result && result.error) || 'Máy chủ chưa xác nhận lưu thành công');
+      }
+      markSaved();
+      isSubmitting = false;
+      showSuccess(selectedStore.ma, selectedStore.ten, 'đã cập nhật');
+    })
+    .catch(err=>{
+      document.getElementById('statusOverlay').style.display = 'none';
+      isSubmitting = false;
+      toast('⚠️ ' + (err && err.message ? err.message : 'Lưu thất bại, thử lại nhé'));
+    });
 }
 function updateSubmitButton(){
   isSubmitting = false;
