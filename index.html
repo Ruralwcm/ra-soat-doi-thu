@@ -63,13 +63,10 @@ input.invalid{border-color:var(--red)}
 .warn-hint{font-size:10px;color:#b71c1c;margin-top:2px;font-weight:600}
 input.range-warn{border-color:var(--red);background:#fff5f5}
 
-/* Store info grid */
-.store-info{
-  display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;
-}
-.store-info .it{background:#f6f8fc;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
-.store-info .it .k{font-size:11px;color:var(--mut);margin-bottom:2px}
-.store-info .it .v{font-size:13px;font-weight:600}
+/* Store info - 2 dòng text */
+.store-info{margin-top:12px;display:none}
+.store-info .s-line{font-size:13px;font-weight:600;color:var(--txt);line-height:1.6}
+.store-info .s-line .lbl{color:var(--mut);font-weight:500}
 
 /* Competitor list items (survey .sec style) */
 .comp-empty{text-align:center;color:var(--mut);font-size:13px;padding:16px 10px}
@@ -202,7 +199,7 @@ input.range-warn{border-color:var(--red);background:#fff5f5}
       <div>
         <h1>🔍 Rà Soát Đối Thủ</h1>
         <p>Khai báo & cập nhật đối thủ quanh cửa hàng WinMart+ Rural</p>
-        <span class="vbadge">📍 v2.10</span>
+        <span class="vbadge">📍 v2.11</span>
       </div>
       <a href="dashboard.html" class="dash-link">📊 Dashboard</a>
     </div>
@@ -231,11 +228,9 @@ input.range-warn{border-color:var(--red);background:#fff5f5}
         <select id="selCh"><option value="">— Chọn Cửa hàng —</option></select>
       </div>
     </div>
-    <div class="store-info" id="chInfo" style="display:none">
-      <div class="it"><div class="k">Tỉnh/TP</div><div class="v" id="pTinh">-</div></div>
-      <div class="it"><div class="k">Quận/Huyện</div><div class="v" id="pHuyen">-</div></div>
-      <div class="it"><div class="k">QLKV</div><div class="v" id="pQlkv">-</div></div>
-      <div class="it"><div class="k">GĐV</div><div class="v" id="pGdv">-</div></div>
+    <div class="store-info" id="chInfo">
+      <div class="s-line"><span class="lbl">📍</span> <span id="pLine1">—</span></div>
+      <div class="s-line"><span class="lbl">👤</span> <span id="pLine2">—</span></div>
     </div>
   </div>
 
@@ -518,11 +513,9 @@ selCh.addEventListener('change', ()=>{
   const ma = selCh.value;
   selectedStore = stores.find(s=>s.ma===ma) || null;
   if(selectedStore){
-    document.getElementById('pTinh').textContent = selectedStore.tinh||'-';
-    document.getElementById('pHuyen').textContent = selectedStore.huyen||'-';
-    document.getElementById('pQlkv').textContent = selectedStore.qlkv||'-';
-    document.getElementById('pGdv').textContent = selectedStore.gdv||'-';
-    document.getElementById('chInfo').style.display='grid';
+    document.getElementById('pLine1').textContent = `${selectedStore.tinh||'-'} · ${selectedStore.huyen||'-'} · ${selectedStore.ma} · ${selectedStore.ten}`;
+    document.getElementById('pLine2').textContent = `GĐV: ${selectedStore.gdv||'-'} · QLKV: ${selectedStore.qlkv||'-'}`;
+    document.getElementById('chInfo').style.display='block';
     document.getElementById('btnAddNew').disabled = false;
     document.getElementById('btnNoChange').disabled = false;
   }
