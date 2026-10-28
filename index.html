@@ -199,7 +199,7 @@ input.range-warn{border-color:var(--red);background:#fff5f5}
       <div>
         <h1>🔍 Rà Soát Đối Thủ</h1>
         <p>Khai báo & cập nhật đối thủ quanh cửa hàng WinMart+ Rural</p>
-        <span class="vbadge">📍 v2.11</span>
+        <span class="vbadge">📍 v3.0</span>
       </div>
     </div>
   </div>
@@ -293,6 +293,13 @@ input.range-warn{border-color:var(--red);background:#fff5f5}
     </div>
   </div>
 
+  <!-- ④ Nhắc đồng đội -->
+  <div class="card" id="unsurveyedCard" style="display:none">
+    <h2>🤝 Cùng nhắc đồng đội làm khảo sát bạn nhé!</h2>
+    <p id="unsurveyedMeta" style="font-size:13px;color:var(--mut);margin-bottom:10px"></p>
+    <div id="unsurveyedList" style="max-height:360px;overflow-y:auto;font-size:13px;line-height:1.7"></div>
+  </div>
+
   <div class="foot">Rà Soát Đối Thủ · WinMart+ Rural · <a href="dashboard.html">📊 Dashboard</a></div>
 </div>
 
@@ -370,6 +377,7 @@ input.range-warn{border-color:var(--red);background:#fff5f5}
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbwhPoI7RroB-c0HJZGw3mgcO5J55rO8pLl9vL6pSJJKevg-O6QLFtj5xj9cqMSui2Cm/exec';
 const STORELIST_CSV = 'https://docs.google.com/spreadsheets/d/1fMmEm1GC9aei_3oeu2vcadPVsUM9ms9eVhm99d7pF8A/gviz/tq?tqx=out:csv&gid=900581387';
 const DATA_CSV = 'https://docs.google.com/spreadsheets/d/1UMtB9MOxGOaZvxN5VAUGAS1bPaAL2tVVFEViGANd4Tk/gviz/tq?tqx=out:csv&gid=320821145';
+const TRACKLOG_CSV = 'https://docs.google.com/spreadsheets/d/1UMtB9MOxGOaZvxN5VAUGAS1bPaAL2tVVFEViGANd4Tk/gviz/tq?tqx=out:csv&gid=545054306';
 const WARN_NEAR_M = 10;   // cảnh báo quá gần
 const WARN_FAR_KM = 3;    // cảnh báo khá xa
 const BLOCK_FAR_KM = 10;  // chặn không cho lưu
@@ -380,6 +388,7 @@ let competitorList = []; // danh sách đối thủ hiện tại của CH (đã 
 let selectedStore = null;
 let editingIdx = null;   // index đang sửa trong competitorList
 let curLat = null, curLng = null;
+let trackWeekCHs = new Set();  // Mã CH đã khảo sát tuần này (từ Tracklogs)
 let distanceWarn = false; // khoảng cách bất thường (quá gần/quá xa) — cần confirm
 let distanceBlock = false;// khoảng cách KHÔNG hợp lệ (>10km) — chặn cứng
 let ngayWarn = false;     // ngày KT bất thường (tương lai hoặc quá 12 tháng)
@@ -445,7 +454,7 @@ async function loadExistingData(){
       lng: r['Kinh độ'] || '',
       kc: r['KC (km)'] || '',
       ngay: r['Ngày khai trương'] || '',
-      sua: r['Ngày sửa'] || '',
+      sua: r['Ngày update'] || r['Ngày sửa'] || '',
       doanhSo: r['Doanh số TB/ngày (trđ)'] || '',
       luongKhach: r['Khách TB/ngày'] || '',
       mt: r['MT (m)'] || '',
@@ -454,6 +463,30 @@ async function loadExistingData(){
     }));
     renderList();
   }catch(e){ console.warn('Không load được data đối thủ:', e); }
+}
+
+// ===== LOAD TRACKLOGS (để cảnh báo 1 lần/tuần + nhắc đồng đội) =====
+function getISOWeekNumber(d){
+  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const dayNum = date.getUTCDay() || 7;
+  date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(date.getUTCFullYear(),0,1));
+  return Math.ceil((((date - yearStart) / 86400000) + 1)/7);
+}
+
+async function loadTracklogs(){
+  try{
+    const res = await fetch(TRACKLOG_CSV, {cache:'no-store'});
+    const text = await res.text();
+    const rows = parseCSV(text);
+    const curWeek = getISOWeekNumber(new Date());
+    trackWeekCHs = new Set();
+    rows.forEach(r => {
+      const tuan = parseInt((r['Tuần']||'').trim(), 10);
+      const ma = (r['Mã CH']||'').trim();
+      if(tuan === curWeek && ma) trackWeekCHs.add(ma);
+    });
+  }catch(e){ console.warn('Không load được tracklogs:', e); }
 }
 
 function parseCSV(text){
@@ -517,6 +550,10 @@ selCh.addEventListener('change', ()=>{
     document.getElementById('chInfo').style.display='block';
     document.getElementById('btnAddNew').disabled = false;
     document.getElementById('btnNoChange').disabled = false;
+    // Cảnh báo nếu CH đã được khảo sát tuần này
+    if(trackWeekCHs.has(selectedStore.ma)){
+      toast('⚠️ CH này đã được khảo sát tuần này rồi — chỉ nên làm nếu cần cập nhật lại.');
+    }
   }
   // Load danh sách đối thủ đã có của CH này
   editingIdx = null;
@@ -542,6 +579,7 @@ function clearStoreInfo(){
   document.getElementById('chInfo').style.display='none';
   document.getElementById('btnAddNew').disabled = true;
   document.getElementById('btnNoChange').disabled = true;
+  document.getElementById('unsurveyedCard').style.display='none';
   validateDistance();
 }
 
@@ -1070,17 +1108,24 @@ function showLoading(msg){
 }
 function showSuccess(ma, ten, trangThai){
   const isNoChange = trangThai === 'không đổi';
+  const msg = trangThai === 'không có' ? 'Không có đối thủ' : (isNoChange ? 'Không thay đổi (giữ nguyên)' : 'Đã cập nhật');
   document.getElementById('statusPopup').innerHTML = `
     <div class="s-icon">✅</div>
     <div class="s-title">Đã hoàn thành!</div>
-    <div class="s-sub">${ma} — ${ten}<br>${isNoChange ? 'Không thay đổi (giữ nguyên)' : 'Đã cập nhật'}</div>
+    <div class="s-sub">${ma} — ${ten}<br>${msg}</div>
     <button class="s-btn" onclick="closeStatusAndReset()">✕ Đóng</button>
   `;
   document.getElementById('statusOverlay').style.display = 'flex';
 }
 function closeStatusAndReset(){
+  // Ghi nhận CH vừa hoàn thành trước khi reset
+  if(selectedStore){
+    lastQlkv = selectedStore.qlkv || '';
+    trackWeekCHs.add(selectedStore.ma);
+  }
   document.getElementById('statusOverlay').style.display = 'none';
   resetCompletedBox();
+  showUnsurveyed();
 }
 
 // ===== XÁC NHẬN KHÔNG ĐỔI =====
@@ -1091,7 +1136,7 @@ function confirmNoChange(){
   isSubmitting = true;
   showLoading('Đang lưu...');
 
-  // Gửi toàn bộ đối thủ hiện có với đầy đủ field + hanh_dong: 'Giữ nguyên'
+  // Gửi toàn bộ đối thủ hiện có
   const competitors = competitorList.map(c => ({
     nhom: c.nhom || '',
     ten: c.ten || '',
@@ -1101,30 +1146,21 @@ function confirmNoChange(){
     kc: c.kc || '',
     doanhSo: c.doanhSo || '', luongKhach: c.luongKhach || '',
     mt: c.mt || '', giaThue: c.giaThue || '', dienTich: c.dienTich || '',
-    ma_dt: c.ma_dt || '',
-    hanh_dong: 'Giữ nguyên'
+    ma_dt: c.ma_dt || ''
   }));
 
+  const action = competitorList.length === 0 ? 'none' : 'nochange';
   const batch = {
-    timestamp: new Date().toISOString(),
+    action: action,
     ma_ch: selectedStore.ma, ten_ch: selectedStore.ten,
     mien: selectedStore.mien, tinh: selectedStore.tinh, huyen: selectedStore.huyen,
     qlkv: selectedStore.qlkv, gdv: selectedStore.gdv,
-    trang_thai: 'Đã làm',
     competitors: competitors
   };
 
-  if(GAS_URL){
-    fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(batch) })
-      .then(() => { isSubmitting = false; showSuccess(selectedStore.ma, selectedStore.ten, 'không đổi'); })
-      .catch(() => { document.getElementById('statusOverlay').style.display = 'none'; isSubmitting = false; toast('⚠️ Lỗi, thử lại'); });
-  } else {
-    const key = 'ra-soat-doi-thu-data';
-    const arr = JSON.parse(localStorage.getItem(key)||'[]');
-    competitors.forEach(c => { arr.push({ ...batch, ...c, competitors: undefined }); });
-    localStorage.setItem(key, JSON.stringify(arr));
-    setTimeout(()=>{ isSubmitting = false; showSuccess(selectedStore.ma, selectedStore.ten, 'không đổi'); }, 600);
-  }
+  fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(batch) })
+    .then(()=>{ isSubmitting = false; showSuccess(selectedStore.ma, selectedStore.ten, action==='none'?'không có':'không đổi'); })
+    .catch(()=>{ document.getElementById('statusOverlay').style.display = 'none'; isSubmitting = false; toast('⚠️ Lỗi, thử lại'); });
 }
 function markSaved(){
   competitorList.forEach(c => { c._existing = true; c._edited = false; });
@@ -1184,26 +1220,16 @@ function submitAll(){
   showLoading('Đang cập nhật...');
 
   const batch = {
-    timestamp: new Date().toISOString(),
+    action: 'save',
     ma_ch: selectedStore.ma, ten_ch: selectedStore.ten,
     mien: selectedStore.mien, tinh: selectedStore.tinh, huyen: selectedStore.huyen,
     qlkv: selectedStore.qlkv, gdv: selectedStore.gdv,
-    trang_thai: 'Đã làm',
     competitors: toSave.map(c => ({ ...c, _existing: undefined, _edited: undefined }))
   };
 
-  if(GAS_URL){
-    fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(batch) })
-      .then(()=>{ markSaved(); isSubmitting = false; showSuccess(selectedStore.ma, selectedStore.ten, 'đã cập nhật'); })
-      .catch(()=>{ document.getElementById('statusOverlay').style.display = 'none'; isSubmitting = false; toast('⚠️ Lưu thất bại, thử lại nhé'); });
-  } else {
-    const key = 'ra-soat-doi-thu-data';
-    const arr = JSON.parse(localStorage.getItem(key)||'[]');
-    batch.competitors.forEach(c=>{ arr.push({ ...batch, ...c, competitors: undefined }); });
-    localStorage.setItem(key, JSON.stringify(arr));
-    markSaved();
-    setTimeout(()=>{ isSubmitting = false; showSuccess(selectedStore.ma, selectedStore.ten, 'đã cập nhật'); }, 600);
-  }
+  fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(batch) })
+    .then(()=>{ markSaved(); isSubmitting = false; showSuccess(selectedStore.ma, selectedStore.ten, 'đã cập nhật'); })
+    .catch(()=>{ document.getElementById('statusOverlay').style.display = 'none'; isSubmitting = false; toast('⚠️ Lưu thất bại, thử lại nhé'); });
 }
 function updateSubmitButton(){
   isSubmitting = false;
@@ -1215,10 +1241,38 @@ function markSaved(){
   renderList();
 }
 
+// ===== SUBMISSION LOG (shared via localStorage) =====
+let lastQlkv = '';
+
+function showUnsurveyed(){
+  const qlkv = lastQlkv;
+  if(!qlkv){ document.getElementById('unsurveyedCard').style.display='none'; return; }
+  const qStores = stores.filter(s => s.qlkv === qlkv);
+  const undone = qStores.filter(s => !trackWeekCHs.has(s.ma));
+  const meta = document.getElementById('unsurveyedMeta');
+  const list = document.getElementById('unsurveyedList');
+  if(!undone.length){
+    meta.textContent = qlkv + ' — đã hoàn thành hết!';
+    list.innerHTML = '<div style="color:var(--green);font-weight:600">✅ Tất cả đồng đội đã hoàn thành khảo sát! 🎉</div>';
+  } else {
+    meta.textContent = qlkv + ' — ' + undone.length + '/' + qStores.length + ' CH chưa làm';
+    let html = '';
+    const gdvs = [...new Set(undone.map(s=>s.gdv).filter(Boolean))].sort();
+    gdvs.forEach(g => {
+      const gStores = undone.filter(s=>s.gdv===g);
+      html += '<div style="font-weight:700;color:var(--navy);margin-top:6px">' + g + ' · ' + gStores.length + ' CH</div>';
+      gStores.forEach(s => { html += '<div style="padding-left:8px;font-size:12px">' + s.ma + ' · ' + s.ten + ' · ' + (s.tinh||'') + '</div>'; });
+    });
+    list.innerHTML = html;
+  }
+  document.getElementById('unsurveyedCard').style.display = 'block';
+}
+
 // ===== INIT =====
 (function init(){
   loadStorelist();
   loadExistingData();
+  loadTracklogs();
 })();
 </script>
 <!-- Status overlay (loading/success) -->
