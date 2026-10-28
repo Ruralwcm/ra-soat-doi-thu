@@ -292,7 +292,9 @@ async function loadAll() {
         mt: (r['MT (m)'] || '').trim(),
         giaThue: (r['Giá thuê (tr/th)'] || '').trim(),
         dienTich: (r['Diện tích (m²)'] || '').trim(),
-        maDT: (r['Mã ĐT'] || '').trim()
+        maDT: (r['Mã ĐT'] || '').trim(),
+        ngayKhaiBao: (r['Ngày khai báo'] || '').trim(),
+        ngayUpdate: (r['Ngày update'] || '').trim()
       };
     });
 
@@ -373,8 +375,8 @@ function onWeekChange() {
 }
 
 function getFilteredRows() {
-  if (CURRENT_WEEK === 0) return ALL_ROWS;
-  return ALL_ROWS.filter(r => r.tuan === CURRENT_WEEK);
+  // Main sheet là hiện trạng (không có Tuần) → trả toàn bộ
+  return ALL_ROWS;
 }
 
 function buildFilters() {
@@ -768,31 +770,44 @@ function exportDetail() {
   const scopeSaps = new Set(sInScope.map(s => s.sap));
   const storeMap = {};
   sInScope.forEach(s => { storeMap[s.sap] = s; });
-  let list = ROWS.filter(r => scopeSaps.has(r.sap));
+
+  // Lấy TOÀN BỘ đối thủ trong scope (theo filter hiện tại)
+  let list = ALL_ROWS.filter(r => scopeSaps.has(r.sap));
+
   const q = ($('fSearch').value || '').trim().toLowerCase();
-  if (q) list = list.filter(r => (r.sap||'').toLowerCase().includes(q) || (r.tenCH||'').toLowerCase().includes(q));
+  if (q) list = list.filter(r =>
+    (r.sap||'').toLowerCase().includes(q) ||
+    (r.tenCH||'').toLowerCase().includes(q) ||
+    (r.tenDT||'').toLowerCase().includes(q) ||
+    (r.nhomDT||'').toLowerCase().includes(q)
+  );
 
   if (!list.length) { alert('Không có dữ liệu để xuất'); return; }
 
-  const hdr = ['Tuần','Ngày sửa','Mã CH','Tên CH','Tỉnh','GĐV','QLKV','Nhóm ĐT','Tên ĐT','Địa chỉ','KC (km)','Mã ĐT'];
+  // Export toàn bộ field đối thủ (theo schema mới)
+  const hdr = ['Mã ĐT','Mã CH','Tên CH','Miền','GĐV','QLKV','Tỉnh/TP','Quận/Huyện','Nhóm ĐT','Tên ĐT','Địa chỉ','Vĩ độ','Kinh độ','KC (km)','Ngày KT','Doanh số','Khách','MT (m)','Giá thuê','Diện tích (m²)','Ngày khai báo','Ngày update'];
   const rows = list.map(r => {
     const s = storeMap[r.sap] || {};
-    return [r.tuan, r.ngaySua, r.sap, s.ten||r.tenCH, s.tinh||r.tinh, s.gdv||r.gdv, s.qlkv||r.qlkv, r.nhomDT, r.tenDT, r.diaChi, r.kc, r.maDT];
+    return [
+      r.maDT, r.sap, s.ten||r.tenCH, s.mien||r.mien, s.gdv||r.gdv, s.qlkv||r.qlkv,
+      s.tinh||r.tinh, s.huyen||r.huyen,
+      r.nhomDT, r.tenDT, r.diaChi,
+      r.lat, r.lng, r.kc, r.ngayKT,
+      r.doanhSo, r.luongKhach, r.mt, r.giaThue, r.dienTich,
+      r.ngayKhaiBao || '', r.ngayUpdate || ''
+    ];
   });
-  downloadCSV('RaSoatDoiThu_' + (CURRENT_WEEK ? 'Tuan' + CURRENT_WEEK : 'TatCa') + '_' + new Date().toISOString().slice(0,10), hdr, rows);
+
+  const m = $('selMien').value || 'AllMien';
+  const v = $('selVung').value || 'AllGDV';
+  downloadCSV('RaSoatDoiThu_' + m + '_' + v + '_' + new Date().toISOString().slice(0,10), hdr, rows);
 }
 
 function exportMissing() {
   const sInScope = scopeStores();
-  const doneSaps = new Set();
-  ROWS.forEach(r => { if (sInScope.some(s => s.sap === r.sap)) doneSaps.add(r.sap); });
-  // Bổ sung từ localStorage submissions
-  try{
-    const subs = JSON.parse(localStorage.getItem('rsdt_submissions')||'[]');
-    subs.forEach(s => { if(sInScope.some(s2 => s2.sap === s.ma_ch)) doneSaps.add(s.ma_ch); });
-  }catch(e){}
+  const doneSaps = getDoneSapsForWeek(CURRENT_WEEK);
+  [...doneSaps].forEach(sap => { if (!sInScope.some(s => s.sap === sap)) doneSaps.delete(sap); });
   const missing = sInScope.filter(s => !doneSaps.has(s.sap));
-  // (dùng cho exportMissing)
 
   if (!missing.length) { alert('✅ Tất cả CH đã được khảo sát trong tuần này!'); return; }
 
