@@ -475,26 +475,50 @@ function getISOWeekNumber(d){
 }
 
 async function loadTracklogs(){
+  const curWeek = getISOWeekNumber(new Date());
+
+  // Prefer the small Tracklogs CSV to avoid downloading the full main sheet.
+  // Fall back to the existing GAS endpoint if this tab is not publicly readable.
   try{
-    const res = await fetch(GAS_URL + '?action=data', {cache:'no-store'});
+    const res = await fetch(TRACKLOG_CSV, { cache:'no-store' });
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const rows = parseCSV(await res.text());
+    if(!rows.length || !('Tuần' in rows[0]) || !('Mã CH' in rows[0])) {
+      throw new Error('CSV Tracklogs thiếu header cần thiết');
+    }
+    trackWeekCHs = new Set();
+    rows.forEach(r => {
+      const tuan = parseInt(String(r['Tuần'] || '').trim(), 10);
+      const ma = String(r['Mã CH'] || '').trim();
+      if(tuan === curWeek && ma) trackWeekCHs.add(ma);
+    });
+    return;
+  }catch(csvErr){
+    console.warn('Không đọc được CSV Tracklogs, chuyển sang GAS:', csvErr);
+  }
+
+  try{
+    const res = await fetch(GAS_URL + '?action=data', { cache:'no-store' });
+    if(!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
-    const log = (data && data.log) || [];
-    if(!log.length){ console.warn('Tracklogs rỗng'); return; }
-    const header = log[0].map(h => String(h||'').trim());
-    const iTuan = header.indexOf('Tuần');
-    const iMaCH = header.indexOf('Mã CH');
-    if(iTuan < 0 || iMaCH < 0){ console.warn('Thiếu cột Tuần/Mã CH'); return; }
-    const curWeek = getISOWeekNumber(new Date());
+    if(!data || data.ok === false) throw new Error((data && data.error) || 'Phản hồi GAS không hợp lệ');
+    const log = data.log || [];
+    if(!log.length) { trackWeekCHs = new Set(); return; }
+    const header = log[0].map(h => String(h || '').trim());
+    const iTuan = header.indexOf('Tuần'), iMaCH = header.indexOf('Mã CH');
+    if(iTuan < 0 || iMaCH < 0) throw new Error('Thiếu cột Tuần/Mã CH trong Tracklogs');
     trackWeekCHs = new Set();
     for(let i=1; i<log.length; i++){
       const r = log[i] || [];
-      const tuan = parseInt(String(r[iTuan]||'').trim(), 10);
-      const ma = String(r[iMaCH]||'').trim();
+      const tuan = parseInt(String(r[iTuan] || '').trim(), 10);
+      const ma = String(r[iMaCH] || '').trim();
       if(tuan === curWeek && ma) trackWeekCHs.add(ma);
     }
-  }catch(e){ console.warn('Không load được tracklogs:', e); }
+  }catch(err){
+    console.warn('Không load được Tracklogs qua CSV hoặc GAS:', err);
+    toast('⚠️ Chưa tải được lịch sử khảo sát');
+  }
 }
-
 function parseCSV(text){
   const rows = []; let row=[], cur='', inQ=false;
   for(let i=0;i<text.length;i++){
@@ -1161,8 +1185,21 @@ function confirmNoChange(){
   };
 
   fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(batch) })
-    .then(()=>{ isSubmitting = false; showSuccess(selectedStore.ma, selectedStore.ten, action==='none'?'không có':'không đổi'); })
-    .catch(()=>{ document.getElementById('statusOverlay').style.display = 'none'; isSubmitting = false; toast('⚠️ Lỗi, thử lại'); });
+    .then(async res => {
+      let result;
+      try { result = await res.json(); }
+      catch (_) { throw new Error('Máy chủ trả phản hồi không hợp lệ'); }
+      if(!res.ok || !result || result.ok !== true) {
+        throw new Error((result && result.error) || 'Máy chủ chưa xác nhận lưu thành công');
+      }
+      isSubmitting = false;
+      showSuccess(selectedStore.ma, selectedStore.ten, action==='none'?'không có':'không đổi');
+    })
+    .catch(err=>{
+      document.getElementById('statusOverlay').style.display = 'none';
+      isSubmitting = false;
+      toast('⚠️ ' + (err && err.message ? err.message : 'Lỗi, thử lại'));
+    });
 }
 function markSaved(){
   competitorList.forEach(c => { c._existing = true; c._edited = false; });
@@ -1231,8 +1268,22 @@ function submitAll(){
   };
 
   fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(batch) })
-    .then(()=>{ markSaved(); isSubmitting = false; showSuccess(selectedStore.ma, selectedStore.ten, 'đã cập nhật'); })
-    .catch(()=>{ document.getElementById('statusOverlay').style.display = 'none'; isSubmitting = false; toast('⚠️ Lưu thất bại, thử lại nhé'); });
+    .then(async res => {
+      let result;
+      try { result = await res.json(); }
+      catch (_) { throw new Error('Máy chủ trả phản hồi không hợp lệ'); }
+      if(!res.ok || !result || result.ok !== true) {
+        throw new Error((result && result.error) || 'Máy chủ chưa xác nhận lưu thành công');
+      }
+      markSaved();
+      isSubmitting = false;
+      showSuccess(selectedStore.ma, selectedStore.ten, 'đã cập nhật');
+    })
+    .catch(err=>{
+      document.getElementById('statusOverlay').style.display = 'none';
+      isSubmitting = false;
+      toast('⚠️ ' + (err && err.message ? err.message : 'Lưu thất bại, thử lại nhé'));
+    });
 }
 function updateSubmitButton(){
   isSubmitting = false;
