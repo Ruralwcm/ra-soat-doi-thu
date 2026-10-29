@@ -55,14 +55,10 @@
   th.sortable:hover{color:var(--navy)}
   .gdv-row{display:flex; align-items:center; padding:8px 0; border-bottom:1px solid var(--line)}
   .gdv-table{width:100%;table-layout:fixed;border-collapse:collapse;margin-top:4px;font-size:11px}
-  /* Widths total 100% so each GĐV row and its QLKV subrows share one grid. */
-  .gdv-table col.col-gdv{width:24%}
-  .gdv-table col.col-num{width:8%}
-  .gdv-table col.col-bar{width:11%}
-  .gdv-table col.col-pct{width:6%}
-  .gdv-table col.col-doi{width:9%}
-  .gdv-table col.col-delta{width:10%}
-  .gdv-table col.col-miss{width:12%}
+  .gdv-table col.col-gdv{width:17%}.gdv-table col.col-num{width:6%}
+  .gdv-table col.col-bar{width:11%}.gdv-table col.col-pct{width:5%}
+  .gdv-table col.col-doi{width:7%}.gdv-table col.col-delta{width:7%}
+  .gdv-table col.col-miss{width:7%}
   .delta-pos{color:var(--green);font-weight:700}
   .delta-neg{color:var(--red);font-weight:700}
   .delta-zero{color:var(--mut)}
@@ -125,9 +121,11 @@
       <span>📋</span>
       <button class="tab-btn active" id="tabGdv" onclick="switchTab('gdv')">Theo GĐV</button>
       <button class="tab-btn" id="tabTopQlkv" onclick="switchTab('topQlkv')">Top 20 QLKV</button>
+      <button class="tab-btn" id="tabLoaiDT" onclick="switchTab('loaiDT')">Loại ĐT</button>
     </h2>
     <div id="gdvSection">Đang tải...</div>
     <div id="topQlkvSection" style="display:none">Đang tải...</div>
+    <div id="loaiDTSection" style="display:none">Đang tải...</div>
   </div>
   <div class="card">
     <h2>🎯 Lọc địa bàn</h2>
@@ -135,10 +133,9 @@
       <div><label>Miền</label><select id="selMien" onchange="onFilterChange('mien')"><option value="">— Tất cả Miền —</option></select></div>
       <div><label>Vùng (GĐV)</label><select id="selVung" onchange="onFilterChange('vung')"><option value="">— Tất cả GĐV —</option></select></div>
       <div><label>QLKV</label><select id="selQlkv" onchange="onFilterChange('qlkv')"><option value="">— Tất cả QLKV —</option></select></div>
-      <div><label>Loại đối thủ</label><select id="selLoaiDT" onchange="onFilterChange('loaiDT')"><option value="">— Tất cả đối thủ —</option></select></div>
     </div>
     <div class="filters">
-      <input id="fSearch" placeholder="Tìm mã SAP / tên CH..." oninput="showAllDetail=false;renderTable()">
+      <input id="fSearch" placeholder="Tìm mã SAP / tên CH..." oninput="debounceSearch()">
     </div>
   </div>
   <div class="card">
@@ -160,6 +157,8 @@ let STORES = [], ROWS = [], ALL_ROWS = [], TRACK_DATA = [];
 let CURRENT_WEEK = null;
 let WEEKS = [];
 let showAllDetail = false;
+let searchTimer = null;
+function debounceSearch() { clearTimeout(searchTimer); showAllDetail = false; searchTimer = setTimeout(renderTable, 250); }
 
 const $ = id => document.getElementById(id);
 const esc = s => (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -181,24 +180,9 @@ function parseDate(s) {
   return new Date(s);
 }
 
-// Gviz CSV exposes sheet dates as locale-formatted text (e.g. DD/MM/YYYY),
-// so normalize the sort-only value to ISO to keep "newest first" semantics.
-function dateSortKey(value) {
-  const s = String(value || '').trim();
-  if (!s) return '';
-  const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
-  if (m) {
-    return m[3] + '-' + m[2].padStart(2, '0') + '-' + m[1].padStart(2, '0') +
-      'T' + String(m[4] || '00').padStart(2, '0') + ':' + (m[5] || '00') + ':' + (m[6] || '00');
-  }
-  const d = new Date(s);
-  return isNaN(d.getTime()) ? s : d.toISOString();
-}
-
 async function fetchCSV(gid) {
   const url = GV + '&gid=' + gid;
-  const resp = await fetch(url, { cache:'no-store' });
-  if (!resp.ok) throw new Error('Không tải được sheet ' + gid + ' (HTTP ' + resp.status + ')');
+  const resp = await fetch(url);
   const text = await resp.text();
   return parseCSV(text);
 }
@@ -220,31 +204,8 @@ function rowsToObjects(rows) {
 
 async function fetchGASData() {
   const resp = await fetch(GAS_URL + '?action=data', {cache: 'no-store'});
-  if (!resp.ok) throw new Error('GAS trả HTTP ' + resp.status);
   const j = await resp.json();
-  if (!j || j.ok === false) throw new Error((j && j.error) || 'GAS trả phản hồi không hợp lệ');
   return j;
-}
-
-// CSV first for smaller/faster responses; keep the prior GAS path as a safe fallback
-// for tabs that Google does not expose through the CSV endpoint.
-let gasFallbackPromise = null;
-async function fetchGasDataset(key) {
-  if (!gasFallbackPromise) gasFallbackPromise = fetchGASData();
-  const data = await gasFallbackPromise;
-  return rowsToObjects(data[key] || []);
-}
-async function fetchSheetCSVOrGas(gid, requiredHeaders, gasKey) {
-  try {
-    const rows = await fetchCSV(gid);
-    if (rows.length && requiredHeaders.every(h => Object.prototype.hasOwnProperty.call(rows[0], h))) {
-      return rows;
-    }
-    throw new Error('CSV thiếu dữ liệu hoặc header: ' + requiredHeaders.join(', '));
-  } catch (csvErr) {
-    console.warn('Không đọc được CSV sheet ' + gid + ', chuyển sang GAS:', csvErr);
-    return fetchGasDataset(gasKey);
-  }
 }
 
 function parseCSV(text) {
@@ -284,13 +245,12 @@ function parseCSVLine(line) {
 
 async function loadAll() {
   try {
-    // Đọc trực tiếp 3 sheet CSV song song. Tránh chạy GAS doGet để tuần tự
-    // tải/serialize cả main và log trong mỗi lần mở dashboard.
-    const [storeData, doiThuData, trackData] = await Promise.all([
+    const [storeData, gasData] = await Promise.all([
       fetchCSV(STORE_GID),
-      fetchSheetCSVOrGas(DOI_THU_GID, ['Mã ĐT', 'Mã CH', 'Tên đối thủ'], 'main'),
-      fetchSheetCSVOrGas(TRACKLOG_GID, ['Tuần', 'Mã CH', 'Hành động'], 'log')
+      fetchGASData()
     ]);
+    const doiThuData = rowsToObjects(gasData.main || []);
+    const trackData = rowsToObjects(gasData.log || []);
 
     // Process stores
     STORES = storeData.filter(r => {
@@ -340,8 +300,7 @@ async function loadAll() {
         dienTich: (r['Diện tích (m²)'] || '').trim(),
         maDT: (r['Mã ĐT'] || '').trim(),
         ngayKhaiBao: (r['Ngày khai báo'] || '').trim(),
-        ngayUpdate: (r['Ngày update'] || '').trim(),
-        ngayUpdateSort: dateSortKey(r['Ngày update'])
+        ngayUpdate: (r['Ngày update'] || '').trim()
       };
     });
 
@@ -429,9 +388,6 @@ function getFilteredRows() {
 function buildFilters() {
   const miens = distinct(STORES.map(s => s.mien).filter(Boolean));
   $('selMien').innerHTML = '<option value="">— Tất cả Miền —</option>' + miens.map(m => '<option value="' + esc(m) + '">' + esc(m) + '</option>').join('');
-  const loaiSel = $('selLoaiDT');
-  const loaiList = distinct(ALL_ROWS.map(r => r.nhomDT).filter(Boolean));
-  loaiSel.innerHTML = '<option value="">— Tất cả đối thủ —</option>' + loaiList.map(v => '<option value="' + esc(v) + '">' + esc(v) + '</option>').join('');
   buildGdvFilter();
 }
 
@@ -459,11 +415,6 @@ function scopeStores() {
   return STORES.filter(s => (!m || s.mien === m) && (!v || s.gdv === v) && (!q || s.qlkv === q));
 }
 
-function getCompetitorRowsInScope(scopeSaps) {
-  const type = $('selLoaiDT') ? $('selLoaiDT').value : '';
-  return ALL_ROWS.filter(r => scopeSaps.has(r.sap) && (!type || r.nhomDT === type));
-}
-
 function getDoneSapsForWeek(week) {
   const s = new Set();
   TRACK_DATA.forEach(r => { if (r.tuan === week) s.add(r.ma_ch); });
@@ -484,8 +435,8 @@ function render() {
   const done = doneSaps.size;
   const missing = total - done;
   const pct = total ? Math.round(done / total * 100) : 0;
-  // Cumulative count respects the selected competitor-type filter.
-  const doiThuTotal = getCompetitorRowsInScope(scopeSaps).length;
+  // Cumulative: count all competitor rows (all time) for stores in scope
+  const doiThuTotal = ALL_ROWS.filter(r => scopeSaps.has(r.sap)).length;
 
   $('kTotal').textContent = total || '—';
   $('kDone').textContent = done;
@@ -494,37 +445,23 @@ function render() {
   $('kDoiThu').textContent = doiThuTotal;
   $('barFill').style.width = Math.min(100, pct) + '%';
 
-  const gdvData = computeGdvData();
-  buildGdvSection(gdvData);
-  buildTopQlkv(gdvData);
+  buildGdvSection();
+  buildTopQlkv();
   showAllDetail = false;
   renderTable();
 }
 
 // --- Sort state ---
-let SORT_G = {col: 'pct', asc: true}, SORT_T = {col: 'pct', asc: true};
+let SORT_G = {col: 'pct', asc: true}, SORT_T = {col: 'pct', asc: true}, SORT_L = {col: 'cnt', asc: false};
 
 function sortArrow(col, st) {
   if (st.col !== col) return '';
   return st.asc ? ' ▲' : ' ▼';
 }
 
-const GDV_COLUMN_WIDTHS = [24, 8, 8, 11, 6, 9, 10, 12, 12];
-const GDV_COLUMN_CLASSES = [
-  'col-gdv', 'col-num', 'col-num', 'col-bar',
-  'col-pct', 'col-doi', 'col-delta', 'col-miss', 'col-miss'
-];
-
 function thSort(col, st, label) {
   const arrow = sortArrow(col, st);
-  const colMap = {
-    gdv:0, t:1, d:2, pct:4, doi:5, delta:6, missKT:7, missInfo:8
-  };
-  const colIndex = colMap[col];
-  const colClass = colIndex == null ? '' : GDV_COLUMN_CLASSES[colIndex];
-  const width = colIndex == null ? '' : GDV_COLUMN_WIDTHS[colIndex] + '%';
-  const which = st === SORT_G ? 'G' : 'T';
-  return `<th class="sortable ${colClass}" style="width:${width}" onclick="sortBy('${col}','${which}')">${label}<span class="sort-arrow${arrow ? ' on' : ''}">${arrow || ' ↕'}</span></th>`;
+  return '<th class="sortable col-' + col + '" onclick="sortBy(\'' + col + '\',\'' + (st === SORT_G ? 'G' : st === SORT_T ? 'T' : 'L') + '\')">' + label + '<span class="sort-arrow' + (arrow ? ' on' : '') + '">' + (arrow || ' ↕') + '</span></th>';
 }
 
 function computeGdvData() {
@@ -546,10 +483,12 @@ function computeGdvData() {
   // --- Thiếu thông tin (từ sheet hiện trạng) ---
   const missKTBySap = {};
   const missInfoBySap = {};
-  getCompetitorRowsInScope(scopeSaps).forEach(r => {
-    if (!r.ngayKT) missKTBySap[r.sap] = true;
-    if (!r.doanhSo || !r.luongKhach || !r.mt || !r.giaThue || !r.dienTich) {
-      missInfoBySap[r.sap] = true;
+  ALL_ROWS.forEach(r => {
+    if (scopeSaps.has(r.sap)) {
+      if (!r.ngayKT) missKTBySap[r.sap] = true;
+      if (!r.doanhSo || !r.luongKhach || !r.mt || !r.giaThue || !r.dienTich) {
+        missInfoBySap[r.sap] = true;
+      }
     }
   });
 
@@ -619,20 +558,23 @@ const SORT_FNS = {
   doi: (a, b) => a.doi - b.doi,
   delta: (a, b) => a.delta - b.delta,
   missKT: (a, b) => a.missKT - b.missKT,
-  missInfo: (a, b) => a.missInfo - b.missInfo
+  missInfo: (a, b) => a.missInfo - b.missInfo,
+  cnt: (a, b) => a.cnt - b.cnt,
+  ch: (a, b) => a.ch - b.ch,
+  name: (a, b) => String(a.name).localeCompare(String(b.name), 'vi')
 };
 
 function sortBy(col, which) {
-  const st = which === 'G' ? SORT_G : SORT_T;
+  const st = which === 'G' ? SORT_G : which === 'T' ? SORT_T : SORT_L;
   if (st.col === col) st.asc = !st.asc;
   else { st.col = col; st.asc = (col === 'pct'); }
-  const gdvData = computeGdvData();
-  if (which === 'G') buildGdvSection(gdvData);
-  else buildTopQlkv(gdvData);
+  if (which === 'G') buildGdvSection();
+  else if (which === 'T') buildTopQlkv();
+  else buildLoaiDT();
 }
 
-function buildGdvSection(gdvs) {
-  gdvs = gdvs || computeGdvData();
+function buildGdvSection() {
+  const gdvs = computeGdvData();
   if (!gdvs.length) { $('gdvSection').innerHTML = '<div class="empty">Chưa có dữ liệu</div>'; return; }
   const sf = SORT_FNS[SORT_G.col] || SORT_FNS.pct;
 
@@ -657,8 +599,7 @@ function buildGdvSection(gdvs) {
     return '<span class="miss-ok">0</span>';
   }
 
-  // Lock the same explicit widths for parent GĐV rows and expanded QLKV rows.
-  const cols = '<colgroup>' + GDV_COLUMN_WIDTHS.map(w => '<col style="width:' + w + '%">').join('') + '</colgroup>';
+  const cols = '<colgroup><col class="col-gdv"><col class="col-num"><col class="col-num"><col class="col-bar"><col class="col-pct"><col class="col-doi"><col class="col-delta"><col class="col-miss"><col class="col-miss"></colgroup>';
 
   // Single shared table with header — all miền inside, columns aligned
   let html = '<table class="gdv-table">' + cols;
@@ -666,7 +607,7 @@ function buildGdvSection(gdvs) {
   html += thSort('gdv', SORT_G, 'GĐV')
     + thSort('t', SORT_G, 'CH KS')
     + thSort('d', SORT_G, 'Đã làm')
-    + '<th class="bar-cell col-bar" style="width:11%" style="width:11%">Tỷ lệ</th>'
+    + '<th class="bar-cell col-bar">Tỷ lệ</th>'
     + thSort('pct', SORT_G, '%')
     + thSort('doi', SORT_G, 'Đối thủ')
     + thSort('delta', SORT_G, '+/- W-1')
@@ -685,26 +626,26 @@ function buildGdvSection(gdvs) {
     arr.forEach(g => {
       const cls = 'sub-' + g.gdv.replace(/[^a-zA-Z0-9]/g, '_');
       out += '<tr class="grow" onclick="toggleGdv(this,\'' + cls + '\')" style="cursor:pointer">';
-      out += '<td class="col-gdv" style="width:24%"><span class="ar">▶</span> ' + esc(g.gdv) + '</td>';
-      out += '<td class="col-num" style="width:8%">' + g.t + '</td>';
-      out += '<td class="col-num" style="width:8%">' + g.d + '</td>';
-      out += '<td class="bar-cell col-bar" style="width:11%"><i style="width:' + g.pct + '%"></i></td>';
-      out += '<td class="col-pct" style="width:6%">' + g.pct + '%</td>';
-      out += '<td class="col-doi" style="width:9%">' + (g.doi || '—') + '</td>';
-      out += '<td class="col-delta" style="width:10%">' + deltaHtml(g.delta) + '</td>';
-      out += '<td class="col-miss" style="width:12%">' + missHtml(g.missKT) + '</td>';
-      out += '<td class="col-miss" style="width:12%">' + missHtml(g.missInfo) + '</td></tr>';
+      out += '<td class="col-gdv"><span class="ar">▶</span> ' + esc(g.gdv) + '</td>';
+      out += '<td class="col-num">' + g.t + '</td>';
+      out += '<td class="col-num">' + g.d + '</td>';
+      out += '<td class="bar-cell col-bar"><i style="width:' + g.pct + '%"></i></td>';
+      out += '<td class="col-pct">' + g.pct + '%</td>';
+      out += '<td class="col-doi">' + (g.doi || '—') + '</td>';
+      out += '<td class="col-delta">' + deltaHtml(g.delta) + '</td>';
+      out += '<td class="col-miss">' + missHtml(g.missKT) + '</td>';
+      out += '<td class="col-miss">' + missHtml(g.missInfo) + '</td></tr>';
       g.qlkvs.forEach(q => {
         out += '<tr class="gdv-sub ' + cls + '" style="display:none">';
-        out += '<td class="col-gdv qlkv-name" style="width:24%">' + esc(q.qlkv) + '</td>';
-        out += '<td class="col-num" style="width:8%">' + q.t + '</td>';
-        out += '<td class="col-num" style="width:8%">' + q.d + '</td>';
-        out += '<td class="bar-cell col-bar" style="width:11%"><i style="width:' + q.pct + '%"></i></td>';
-        out += '<td class="col-pct" style="width:6%">' + q.pct + '%</td>';
-        out += '<td class="col-doi" style="width:9%">' + (q.doi || '—') + '</td>';
-        out += '<td class="col-delta" style="width:10%">' + deltaHtml(q.delta) + '</td>';
-        out += '<td class="col-miss" style="width:12%">' + missHtml(q.missKT) + '</td>';
-        out += '<td class="col-miss" style="width:12%">' + missHtml(q.missInfo) + '</td></tr>';
+        out += '<td class="col-gdv qlkv-name">' + esc(q.qlkv) + '</td>';
+        out += '<td class="col-num">' + q.t + '</td>';
+        out += '<td class="col-num">' + q.d + '</td>';
+        out += '<td class="bar-cell col-bar"><i style="width:' + q.pct + '%"></i></td>';
+        out += '<td class="col-pct">' + q.pct + '%</td>';
+        out += '<td class="col-doi">' + (q.doi || '—') + '</td>';
+        out += '<td class="col-delta">' + deltaHtml(q.delta) + '</td>';
+        out += '<td class="col-miss">' + missHtml(q.missKT) + '</td>';
+        out += '<td class="col-miss">' + missHtml(q.missInfo) + '</td></tr>';
       });
     });
     return out;
@@ -723,8 +664,8 @@ function buildGdvSection(gdvs) {
   $('gdvSection').innerHTML = html || '<div class="empty">Chưa có dữ liệu</div>';
 }
 
-function buildTopQlkv(gdvs) {
-  gdvs = gdvs || computeGdvData();
+function buildTopQlkv() {
+  const gdvs = computeGdvData();
   const all = [];
   gdvs.forEach(g => { g.qlkvs.forEach(q => { all.push({ ...q, gdv: g.gdv }); }); });
   if (!all.length) { $('topQlkvSection').innerHTML = '<div class="empty">Chưa có dữ liệu</div>'; return; }
@@ -742,7 +683,7 @@ function buildTopQlkv(gdvs) {
     return '<span class="miss-ok">0</span>';
   }
 
-  const cols = '<colgroup><col style="width:12%"><col style="width:14%"><col style="width:8%"><col style="width:8%"><col style="width:11%"><col style="width:6%"><col style="width:9%"><col style="width:10%"><col style="width:11%"><col style="width:11%"></colgroup>';
+  const cols = '<colgroup><col style="width:14%"><col style="width:14%"><col style="width:6%"><col style="width:6%"><col style="width:11%"><col style="width:5%"><col style="width:7%"><col style="width:7%"><col style="width:7%"><col style="width:7%"></colgroup>';
   let html = '<table class="gdv-table">' + cols + '<thead><tr>';
   html += thSort('gdv', SORT_T, 'GĐV')
     + '<th class="sortable col-gdv">QLKV</th>'
@@ -772,12 +713,63 @@ function buildTopQlkv(gdvs) {
   $('topQlkvSection').innerHTML = html;
 }
 
+function buildLoaiDT() {
+  const sInScope = scopeStores();
+  const scopeSaps = new Set(sInScope.map(s => s.sap));
+  const totalCH = scopeSaps.size;
+  const dtList = ALL_ROWS.filter(r => scopeSaps.has(r.sap) && r.nhomDT);
+
+  const nhomMap = {};
+  dtList.forEach(r => {
+    const nhom = r.nhomDT;
+    if (!nhomMap[nhom]) nhomMap[nhom] = { name: nhom, cnt: 0, chSet: new Set() };
+    nhomMap[nhom].cnt++;
+    nhomMap[nhom].chSet.add(r.sap);
+  });
+
+  const arr = Object.values(nhomMap).map(g => ({
+    name: g.name, cnt: g.cnt, ch: g.chSet.size,
+    pct: totalCH ? Math.round(g.chSet.size / totalCH * 100) : 0
+  }));
+
+  if (!arr.length) { $('loaiDTSection').innerHTML = '<div class="empty">Chưa có dữ liệu</div>'; return; }
+
+  const sf = SORT_FNS[SORT_L.col] || SORT_FNS.cnt;
+  arr.sort((a, b) => { const v = sf(a, b); return SORT_L.asc ? v : -v; });
+
+  const cols = '<colgroup><col style="width:22%"><col style="width:15%"><col style="width:15%"><col style="width:16%"><col style="width:10%"></colgroup>';
+  let html = '<table class="gdv-table">' + cols + '<thead><tr>';
+  html += thSort('name', SORT_L, 'Nhóm ĐT')
+    + thSort('cnt', SORT_L, 'Số ĐT')
+    + thSort('ch', SORT_L, 'Số CH')
+    + '<th class="bar-cell col-bar">Tỷ lệ CH</th>'
+    + thSort('pct', SORT_L, '%');
+  html += '</tr></thead><tbody>';
+
+  arr.forEach(g => {
+    html += '<tr><td class="col-gdv" style="font-weight:700">' + esc(g.name) + '</td>';
+    html += '<td class="col-num">' + g.cnt + '</td>';
+    html += '<td class="col-num">' + g.ch + '</td>';
+    html += '<td class="bar-cell col-bar"><i style="width:' + g.pct + '%"></i></td>';
+    html += '<td class="col-pct">' + g.pct + '%</td></tr>';
+  });
+
+  html += '<tr><td colspan="5" style="text-align:center;font-size:11px;color:var(--mut);padding:8px">'
+    + arr.length + ' nhóm · ' + totalCH + ' CH trong scope</td></tr>';
+  html += '</tbody></table>';
+  $('loaiDTSection').innerHTML = html;
+}
+
 function switchTab(tab) {
-  const showGdv = tab === 'gdv';
-  $('tabGdv').classList.toggle('active', showGdv);
-  $('tabTopQlkv').classList.toggle('active', !showGdv);
-  $('gdvSection').style.display = showGdv ? '' : 'none';
-  $('topQlkvSection').style.display = showGdv ? 'none' : '';
+  $('tabGdv').classList.toggle('active', tab === 'gdv');
+  $('tabTopQlkv').classList.toggle('active', tab === 'topQlkv');
+  $('tabLoaiDT').classList.toggle('active', tab === 'loaiDT');
+  $('gdvSection').style.display = tab === 'gdv' ? '' : 'none';
+  $('topQlkvSection').style.display = tab === 'topQlkv' ? '' : 'none';
+  $('loaiDTSection').style.display = tab === 'loaiDT' ? '' : 'none';
+  if (tab === 'topQlkv') buildTopQlkv();
+  else if (tab === 'loaiDT') buildLoaiDT();
+  else buildGdvSection();
 }
 
 let gdvOpen = {};
@@ -804,8 +796,6 @@ function renderTable() {
 
   // Filter rows in scope
   let list = ROWS.filter(r => scopeSaps.has(r.sap));
-  const selectedType = $('selLoaiDT') ? $('selLoaiDT').value : '';
-  if (selectedType) list = list.filter(r => r.nhomDT === selectedType);
   const q = ($('fSearch').value || '').trim().toLowerCase();
   if (q) {
     list = list.filter(r =>
@@ -820,7 +810,7 @@ function renderTable() {
   $('rowCount').textContent = '· ' + list.length + ' đối thủ được khai';
 
   // Sort by ngày update mới nhất, limit 30
-  list.sort((a, b) => (b.ngayUpdateSort || b.ngayUpdate || '').localeCompare(a.ngayUpdateSort || a.ngayUpdate || ''));
+  list.sort((a, b) => (b.ngayUpdate || '').localeCompare(a.ngayUpdate || ''));
   const totalCount = list.length;
   let truncated = false;
   if (!showAllDetail && totalCount > 30) {
@@ -894,8 +884,6 @@ function exportDetail() {
 
   // Lấy TOÀN BỘ đối thủ trong scope (theo filter hiện tại)
   let list = ALL_ROWS.filter(r => scopeSaps.has(r.sap));
-  const selectedType = $('selLoaiDT') ? $('selLoaiDT').value : '';
-  if (selectedType) list = list.filter(r => r.nhomDT === selectedType);
 
   const q = ($('fSearch').value || '').trim().toLowerCase();
   if (q) list = list.filter(r =>
