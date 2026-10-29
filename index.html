@@ -389,11 +389,12 @@ let selectedStore = null;
 let editingIdx = null;   // index đang sửa trong competitorList
 let curLat = null, curLng = null;
 let trackWeekCHs = new Set();  // Mã CH đã khảo sát tuần này (từ Tracklogs)
-let distanceWarn = false; // khoảng cách bất thường (quá gần/quá xa) — cần confirm
-let distanceBlock = false;// khoảng cách KHÔNG hợp lệ (>10km) — chặn cứng
-let ngayWarn = false;     // ngày KT bất thường (tương lai hoặc quá 12 tháng)
+let distanceWarn = false; // khoảng cách bất thường
+let distanceBlock = false;// khoảng cách không hợp lệ
+let ngayWarn = false;     // ngày KT bất thường
 let rangeWarn = false;    // số liệu ngoài khoảng hợp lý
 let isSubmitting = false; // chống double submit
+let storeMap = {};        // cache quick lookup: ma → store object
 
 // ===== TOAST =====
 let toastTimer;
@@ -416,7 +417,7 @@ document.getElementById('confirmOk').addEventListener('click', ()=>{
   if(cb) cb();
 });
 
-// ===== LOAD STORELIST =====
+// ===== LOAD STORELIST (từ gviz CSV — cache tự nhiên) =====
 async function loadStorelist(){
   try{
     const res = await fetch(STORELIST_CSV);
@@ -434,12 +435,72 @@ async function loadStorelist(){
         lat: parseFloat((r['Vĩ độ']||'').replace(',','.')),
         lng: parseFloat((r['Kinh độ']||'').replace(',','.'))
       }));
+    // Build quick lookup map
+    storeMap = {};
+    stores.forEach(s => { storeMap[s.ma] = s; });
     buildMienDropdown();
   }catch(e){ console.warn('Không load được Storelist:', e); toast('⚠️ Chưa tải được dữ liệu cửa hàng'); }
 }
 
-// ===== LOAD DATA ĐỐI THỦ ĐÃ LƯU =====
-async function loadExistingData(){
+// ===== LOAD DATA + TRACKLOGS (dùng GAS formdata — nhẹ hơn) =====
+async function loadFormData(){
+  try{
+    const res = await fetch(GAS_URL + '?action=formdata', {cache:'no-store'});
+    const data = await res.json();
+    if(!data || !data.ok){ throw new Error('GAS error'); }
+
+    // Parse main data (slim format: 12 cột)
+    const mainArr = data.main || [];
+    if(mainArr.length < 2){ existingData = []; }
+    else {
+      const hdr = mainArr[0].map(h => String(h||'').trim());
+      const iMaCH = hdr.indexOf('Mã CH');
+      const iMaDT = hdr.indexOf('Mã ĐT');
+      const iNhom = hdr.indexOf('Nhóm đối thủ');
+      const iTen = hdr.indexOf('Tên đối thủ');
+      const iDiaChi = hdr.indexOf('Địa chỉ');
+      const iLat = hdr.indexOf('Vĩ độ');
+      const iLng = hdr.indexOf('Kinh độ');
+      const iKC = hdr.indexOf('KC (km)');
+      const iNgay = hdr.indexOf('Ngày khai trương');
+      const iDS = hdr.indexOf('Doanh số TB/ngày (trđ)');
+      const iKhach = hdr.indexOf('Khách TB/ngày');
+      const iUpdate = hdr.indexOf('Ngày update');
+      existingData = mainArr.slice(1).filter(r => (r[iMaCH]||'').trim() !== '').map(r => ({
+        ma_ch: (r[iMaCH]||'').trim(),
+        ma_dt: r[iMaDT] || '',
+        nhom: r[iNhom] || '',
+        ten: r[iTen] || '',
+        diaChi: r[iDiaChi] || '',
+        lat: r[iLat] || '',
+        lng: r[iLng] || '',
+        kc: r[iKC] || '',
+        ngay: r[iNgay] || '',
+        sua: r[iUpdate] || '',
+        doanhSo: r[iDS] || '',
+        luongKhach: r[iKhach] || '',
+        mt: '', giaThue: '', dienTich: ''  // not in slim format
+      }));
+    }
+
+    // Parse tracklog data
+    const logArr = data.log || [];
+    if(logArr.length < 2) return;
+    const logHdr = logArr[0].map(h => String(h||'').trim());
+    const iTu = logHdr.indexOf('Tuần');
+    const iMa = logHdr.indexOf('Mã CH');
+    if(iTu < 0 || iMa < 0) return;
+    trackWeekCHs = new Set();
+    for(let i=1; i<logArr.length; i++){
+      const r = logArr[i] || [];
+      const ma = String(r[iMa]||'').trim();
+      if(ma) trackWeekCHs.add(ma);
+    }
+  }catch(e){ console.warn('Không load được form data:', e); }
+}
+
+// Load cũ để fallback nếu GAS lỗi (gviz CSV)
+async function loadExistingDataFallback(){
   try{
     const res = await fetch(DATA_CSV);
     const text = await res.text();
@@ -461,64 +522,9 @@ async function loadExistingData(){
       giaThue: r['Giá thuê (tr/th)'] || '',
       dienTich: r['Diện tích (m²)'] || ''
     }));
-    renderList();
   }catch(e){ console.warn('Không load được data đối thủ:', e); }
 }
 
-// ===== LOAD TRACKLOGS (để cảnh báo 1 lần/tuần + nhắc đồng đội) =====
-function getISOWeekNumber(d){
-  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-  const dayNum = date.getUTCDay() || 7;
-  date.setUTCDate(date.getUTCDate() + 4 - dayNum);
-  const yearStart = new Date(Date.UTC(date.getUTCFullYear(),0,1));
-  return Math.ceil((((date - yearStart) / 86400000) + 1)/7);
-}
-
-async function loadTracklogs(){
-  const curWeek = getISOWeekNumber(new Date());
-
-  // Prefer the small Tracklogs CSV to avoid downloading the full main sheet.
-  // Fall back to the existing GAS endpoint if this tab is not publicly readable.
-  try{
-    const res = await fetch(TRACKLOG_CSV, { cache:'no-store' });
-    if(!res.ok) throw new Error('HTTP ' + res.status);
-    const rows = parseCSV(await res.text());
-    if(!rows.length || !('Tuần' in rows[0]) || !('Mã CH' in rows[0])) {
-      throw new Error('CSV Tracklogs thiếu header cần thiết');
-    }
-    trackWeekCHs = new Set();
-    rows.forEach(r => {
-      const tuan = parseInt(String(r['Tuần'] || '').trim(), 10);
-      const ma = String(r['Mã CH'] || '').trim();
-      if(tuan === curWeek && ma) trackWeekCHs.add(ma);
-    });
-    return;
-  }catch(csvErr){
-    console.warn('Không đọc được CSV Tracklogs, chuyển sang GAS:', csvErr);
-  }
-
-  try{
-    const res = await fetch(GAS_URL + '?action=data', { cache:'no-store' });
-    if(!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-    if(!data || data.ok === false) throw new Error((data && data.error) || 'Phản hồi GAS không hợp lệ');
-    const log = data.log || [];
-    if(!log.length) { trackWeekCHs = new Set(); return; }
-    const header = log[0].map(h => String(h || '').trim());
-    const iTuan = header.indexOf('Tuần'), iMaCH = header.indexOf('Mã CH');
-    if(iTuan < 0 || iMaCH < 0) throw new Error('Thiếu cột Tuần/Mã CH trong Tracklogs');
-    trackWeekCHs = new Set();
-    for(let i=1; i<log.length; i++){
-      const r = log[i] || [];
-      const tuan = parseInt(String(r[iTuan] || '').trim(), 10);
-      const ma = String(r[iMaCH] || '').trim();
-      if(tuan === curWeek && ma) trackWeekCHs.add(ma);
-    }
-  }catch(err){
-    console.warn('Không load được Tracklogs qua CSV hoặc GAS:', err);
-    toast('⚠️ Chưa tải được lịch sử khảo sát');
-  }
-}
 function parseCSV(text){
   const rows = []; let row=[], cur='', inQ=false;
   for(let i=0;i<text.length;i++){
@@ -1185,21 +1191,8 @@ function confirmNoChange(){
   };
 
   fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(batch) })
-    .then(async res => {
-      let result;
-      try { result = await res.json(); }
-      catch (_) { throw new Error('Máy chủ trả phản hồi không hợp lệ'); }
-      if(!res.ok || !result || result.ok !== true) {
-        throw new Error((result && result.error) || 'Máy chủ chưa xác nhận lưu thành công');
-      }
-      isSubmitting = false;
-      showSuccess(selectedStore.ma, selectedStore.ten, action==='none'?'không có':'không đổi');
-    })
-    .catch(err=>{
-      document.getElementById('statusOverlay').style.display = 'none';
-      isSubmitting = false;
-      toast('⚠️ ' + (err && err.message ? err.message : 'Lỗi, thử lại'));
-    });
+    .then(()=>{ isSubmitting = false; showSuccess(selectedStore.ma, selectedStore.ten, action==='none'?'không có':'không đổi'); })
+    .catch(()=>{ document.getElementById('statusOverlay').style.display = 'none'; isSubmitting = false; toast('⚠️ Lỗi, thử lại'); });
 }
 function markSaved(){
   competitorList.forEach(c => { c._existing = true; c._edited = false; });
@@ -1268,22 +1261,8 @@ function submitAll(){
   };
 
   fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(batch) })
-    .then(async res => {
-      let result;
-      try { result = await res.json(); }
-      catch (_) { throw new Error('Máy chủ trả phản hồi không hợp lệ'); }
-      if(!res.ok || !result || result.ok !== true) {
-        throw new Error((result && result.error) || 'Máy chủ chưa xác nhận lưu thành công');
-      }
-      markSaved();
-      isSubmitting = false;
-      showSuccess(selectedStore.ma, selectedStore.ten, 'đã cập nhật');
-    })
-    .catch(err=>{
-      document.getElementById('statusOverlay').style.display = 'none';
-      isSubmitting = false;
-      toast('⚠️ ' + (err && err.message ? err.message : 'Lưu thất bại, thử lại nhé'));
-    });
+    .then(()=>{ markSaved(); isSubmitting = false; showSuccess(selectedStore.ma, selectedStore.ten, 'đã cập nhật'); })
+    .catch(()=>{ document.getElementById('statusOverlay').style.display = 'none'; isSubmitting = false; toast('⚠️ Lưu thất bại, thử lại nhé'); });
 }
 function updateSubmitButton(){
   isSubmitting = false;
@@ -1322,11 +1301,16 @@ function showUnsurveyed(){
   document.getElementById('unsurveyedCard').style.display = 'block';
 }
 
-// ===== INIT =====
+// ===== INIT (parallel load, GAS formdata ưu tiên) =====
 (function init(){
-  loadStorelist();
-  loadExistingData();
-  loadTracklogs();
+  Promise.all([loadStorelist(), loadFormData()]).then(() => {
+    // Fallback: nếu GAS không trả data, dùng gviz CSV
+    if(!existingData.length){
+      loadExistingDataFallback().then(() => renderList());
+    } else {
+      renderList();
+    }
+  });
 })();
 </script>
 <!-- Status overlay (loading/success) -->
