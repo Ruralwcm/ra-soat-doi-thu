@@ -180,7 +180,26 @@ function parseDate(s) {
   return new Date(s);
 }
 
+const BASE_STATIC = 'https://ruralwcm.github.io/ra-soat-doi-thu/';
+const DATA_VER = '20261104a';
+const STATIC_BY_GID = {
+  [STORE_GID]: 'storelist.csv',
+  [DOI_THU_GID]: 'doithu.csv',
+  [TRACKLOG_GID]: 'tracklog.csv'
+};
+
 async function fetchCSV(gid) {
+  // Uu tien CSV tinh (tranh gviz cache cu / cot Ma SAP null), fallback gviz
+  const fname = STATIC_BY_GID[gid];
+  if (fname) {
+    try {
+      const r = await fetch(BASE_STATIC + fname + '?v=' + DATA_VER, {cache:'no-store'});
+      if (r.ok) {
+        const t = await r.text();
+        if (t && t.length > 500) return parseCSV(t);
+      }
+    } catch (e) { console.warn('static csv loi, fallback gviz', e); }
+  }
   const url = GV + '&gid=' + gid;
   const resp = await fetch(url);
   const text = await resp.text();
@@ -190,7 +209,7 @@ async function fetchCSV(gid) {
 function rowsToObjects(rows) {
   // rows = 2D array [header, ...data] → array of {col: value}
   if (!rows || rows.length < 2) return [];
-  const headers = (rows[0] || []).map(h => String(h == null ? '' : h).trim());
+  const headers = (rows[0] || []).map(h => String(h == null ? '' : h).normalize('NFC').trim());
   const out = [];
   for (let i = 1; i < rows.length; i++) {
     const r = rows[i] || [];
@@ -212,7 +231,7 @@ function parseCSV(text) {
   const rows = [];
   const lines = text.split('\n');
   if (lines.length < 2) return rows;
-  const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g, '').trim());
+  const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g, '').normalize('NFC').trim());
   for (let i = 1; i < lines.length; i++) {
     const vals = parseCSVLine(lines[i]);
     if (!vals.length || vals.every(v => !v)) continue;
@@ -257,7 +276,7 @@ async function loadAll() {
       const tt = (r['Tình Trạng'] || '').trim().toLowerCase();
       return tt === 'đang hoạt động';
     }).map(r => ({
-      sap: String(r['Mã SAP'] || '').trim(),
+            sap: String(r['Mã SAP'] || '').trim(),
       ten: (r['Tên cửa hàng'] || '').trim(),
       mien: (r['Miền'] || '').trim(),
       tinh: (r['Tỉnh/TP'] || '').trim(),
