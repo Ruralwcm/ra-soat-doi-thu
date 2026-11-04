@@ -199,7 +199,7 @@ input.range-warn{border-color:var(--red);background:#fff5f5}
       <div>
         <h1>🔍 Rà Soát Đối Thủ</h1>
         <p>Khai báo & cập nhật đối thủ quanh cửa hàng WinMart+ Rural</p>
-        <span class="vbadge">📍 v2.11</span>
+        <span class="vbadge">📍 v2.12</span>
       </div>
     </div>
   </div>
@@ -375,6 +375,10 @@ input.range-warn{border-color:var(--red);background:#fff5f5}
 </div><script>
 // ===== CẤU HÌNH =====
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbwhPoI7RroB-c0HJZGw3mgcO5J55rO8pLl9vL6pSJJKevg-O6QLFtj5xj9cqMSui2Cm/exec';
+const BASE_STATIC = 'https://ruralwcm.github.io/ra-soat-doi-thu/';
+const DATA_VER = '20261104a';   // tang khi refresh storelist.csv / doithu.csv
+const STORELIST_STATIC = BASE_STATIC + 'storelist.csv?v=' + DATA_VER;
+const DATA_STATIC = BASE_STATIC + 'doithu.csv?v=' + DATA_VER;
 const STORELIST_CSV = 'https://docs.google.com/spreadsheets/d/1UMtB9MOxGOaZvxN5VAUGAS1bPaAL2tVVFEViGANd4Tk/gviz/tq?tqx=out:csv&gid=164583655';
 const DATA_CSV = 'https://docs.google.com/spreadsheets/d/1UMtB9MOxGOaZvxN5VAUGAS1bPaAL2tVVFEViGANd4Tk/gviz/tq?tqx=out:csv&gid=320821145';
 const TRACKLOG_CSV = 'https://docs.google.com/spreadsheets/d/1UMtB9MOxGOaZvxN5VAUGAS1bPaAL2tVVFEViGANd4Tk/gviz/tq?tqx=out:csv&gid=545054306';
@@ -418,14 +422,27 @@ document.getElementById('confirmOk').addEventListener('click', ()=>{
 });
 
 // ===== LOAD STORELIST (từ gviz CSV — cache tự nhiên) =====
+async function fetchCsvSmart(urlStatic, urlFallback){
+  // Uu tien file CSV tinh (GitHub Pages) — gviz hay bi cache cu & tra null cot Ma SAP
+  try{
+    const r1 = await fetch(urlStatic, {cache:'no-store'});
+    if(r1.ok){
+      const t = await r1.text();
+      if(t && t.length > 500 && t.indexOf(',') > 0) return t;
+    }
+  }catch(e){ console.warn('static data loi, fallback gviz', e); }
+  const r2 = await fetch(urlFallback);
+  return await r2.text();
+}
+
 async function loadStorelist(){
   try{
-    const res = await fetch(STORELIST_CSV);
-    const text = await res.text();
+    const text = await fetchCsvSmart(STORELIST_STATIC, STORELIST_CSV);
     stores = parseCSV(text)
       .filter(r => (r['Tình Trạng']||'').trim() === 'Đang hoạt động')
-      .map(r => ({
-        ma: r['Mã SAP'] || r['Mã SAP'] || '',
+      .map((r, i) => ({
+        key: (r['Mã SAP']||'').trim() || ('ROW' + i),
+        ma: (r['Mã SAP'] || '').trim(),
         ten: r['Tên cửa hàng'] || '',
         mien: r['Miền'] || '',
         tinh: r['Tỉnh/TP'] || '',
@@ -437,7 +454,7 @@ async function loadStorelist(){
       }));
     // Build quick lookup map
     storeMap = {};
-    stores.forEach(s => { storeMap[s.ma] = s; });
+    stores.forEach(s => { if(s.ma) storeMap[s.ma] = s; });
     buildMienDropdown();
   }catch(e){ console.warn('Không load được Storelist:', e); toast('⚠️ Chưa tải được dữ liệu cửa hàng'); }
 }
@@ -502,8 +519,7 @@ async function loadFormData(){
 // Load cũ để fallback nếu GAS lỗi (gviz CSV)
 async function loadExistingDataFallback(){
   try{
-    const res = await fetch(DATA_CSV);
-    const text = await res.text();
+    const text = await fetchCsvSmart(DATA_STATIC, DATA_CSV);
     const rows = parseCSV(text);
     existingData = rows.filter(r => (r['Mã CH']||'').trim() !== '').map(r => ({
       ma_ch: (r['Mã CH']||'').trim(),
@@ -537,7 +553,7 @@ function parseCSV(text){
   }
   row.push(cur); if(row.length>1)rows.push(row);
   if(rows.length<2) return [];
-  const header = rows[0].map(h=>h.trim());
+  const header = rows[0].map(h=>h.normalize('NFC').trim());
   return rows.slice(1).map(r=>{ const o={}; header.forEach((h,i)=>o[h]=r[i]); return o; });
 }
 
@@ -574,12 +590,12 @@ selQlkv.addEventListener('change', ()=>{
   const m = selMien.value, g = selGdv.value, q = selQlkv.value;
   const chs = stores.filter(s=>s.mien===m && s.gdv===g && s.qlkv===q);
   selCh.innerHTML = `<option value="">— Chọn Cửa hàng (${chs.length}) —</option>` +
-    chs.map(s=>`<option value="${s.ma}">${s.ma} — ${s.ten}</option>`).join('');
+    chs.map(s=>`<option value="${s.key}">${s.ma ? s.ma + ' — ' : ''}${s.ten}${s.tinh? ' · '+s.tinh : ''}</option>`).join('');
   clearStoreInfo();
 });
 selCh.addEventListener('change', ()=>{
-  const ma = selCh.value;
-  selectedStore = stores.find(s=>s.ma===ma) || null;
+  const key = selCh.value;
+  selectedStore = stores.find(s=>s.key===key) || null;
   if(selectedStore){
     document.getElementById('pLine1').textContent = `${selectedStore.tinh||'-'} · ${selectedStore.huyen||'-'} · ${selectedStore.ma} · ${selectedStore.ten}`;
     document.getElementById('pLine2').textContent = `GĐV: ${selectedStore.gdv||'-'} · QLKV: ${selectedStore.qlkv||'-'}`;
