@@ -199,7 +199,7 @@ input.range-warn{border-color:var(--red);background:#fff5f5}
       <div>
         <h1>🔍 Rà Soát Đối Thủ</h1>
         <p>Khai báo & cập nhật đối thủ quanh cửa hàng WinMart+ Rural</p>
-        <span class="vbadge">📍 v2.12</span>
+        <span class="vbadge">📍 v2.13</span>
       </div>
     </div>
   </div>
@@ -376,7 +376,7 @@ input.range-warn{border-color:var(--red);background:#fff5f5}
 // ===== CẤU HÌNH =====
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbwhPoI7RroB-c0HJZGw3mgcO5J55rO8pLl9vL6pSJJKevg-O6QLFtj5xj9cqMSui2Cm/exec';
 const BASE_STATIC = 'https://ruralwcm.github.io/ra-soat-doi-thu/';
-const DATA_VER = '20261104a';   // tang khi refresh storelist.csv / doithu.csv
+const DATA_VER = '202611040656';   // tang khi refresh storelist.csv / doithu.csv
 const STORELIST_STATIC = BASE_STATIC + 'storelist.csv?v=' + DATA_VER;
 const DATA_STATIC = BASE_STATIC + 'doithu.csv?v=' + DATA_VER;
 const STORELIST_CSV = 'https://docs.google.com/spreadsheets/d/1UMtB9MOxGOaZvxN5VAUGAS1bPaAL2tVVFEViGANd4Tk/gviz/tq?tqx=out:csv&gid=164583655';
@@ -425,7 +425,7 @@ document.getElementById('confirmOk').addEventListener('click', ()=>{
 async function fetchCsvSmart(urlStatic, urlFallback){
   // Uu tien file CSV tinh (GitHub Pages) — gviz hay bi cache cu & tra null cot Ma SAP
   try{
-    const r1 = await fetch(urlStatic, {cache:'no-store'});
+    const r1 = await fetch(urlStatic + (urlStatic.indexOf('?')>0?'&':'?') + 't=' + Date.now(), {cache:'no-store'});
     if(r1.ok){
       const t = await r1.text();
       if(t && t.length > 500 && t.indexOf(',') > 0) return t;
@@ -456,6 +456,10 @@ async function loadStorelist(){
     storeMap = {};
     stores.forEach(s => { if(s.ma) storeMap[s.ma] = s; });
     buildMienDropdown();
+    try{
+      const vb = document.querySelector('.vbadge');
+      if(vb) vb.textContent = '📍 v2.13 · ' + stores.length + ' CH';
+    }catch(e){}
   }catch(e){ console.warn('Không load được Storelist:', e); toast('⚠️ Chưa tải được dữ liệu cửa hàng'); }
 }
 
@@ -600,8 +604,16 @@ selCh.addEventListener('change', ()=>{
     document.getElementById('pLine1').textContent = `${selectedStore.tinh||'-'} · ${selectedStore.huyen||'-'} · ${selectedStore.ma} · ${selectedStore.ten}`;
     document.getElementById('pLine2').textContent = `GĐV: ${selectedStore.gdv||'-'} · QLKV: ${selectedStore.qlkv||'-'}`;
     document.getElementById('chInfo').style.display='block';
-    document.getElementById('btnAddNew').disabled = false;
-    document.getElementById('btnNoChange').disabled = false;
+    if(!selectedStore.ma){
+      // CH thieu ma trong Storelist -> khong cho ghi de (tranh ghi nham CH khac)
+      document.getElementById('pLine1').textContent = `⚠️ CH này thiếu mã CH trong Storelist — báo admin cập nhật`;
+      document.getElementById('btnAddNew').disabled = true;
+      document.getElementById('btnNoChange').disabled = true;
+      toast('⚠️ CH thiếu mã CH — chưa thể khảo sát');
+    } else {
+      document.getElementById('btnAddNew').disabled = false;
+      document.getElementById('btnNoChange').disabled = false;
+    }
     // Cảnh báo nếu CH đã được khảo sát tuần này
     if(trackWeekCHs.has(selectedStore.ma)){
       toast('⚠️ CH này đã được khảo sát tuần này rồi — chỉ nên làm nếu cần cập nhật lại.');
@@ -610,7 +622,7 @@ selCh.addEventListener('change', ()=>{
   // Load danh sách đối thủ đã có của CH này
   editingIdx = null;
   if(selectedStore){
-    competitorList = existingData.filter(c => c.ma_ch === selectedStore.ma)
+    competitorList = (selectedStore.ma ? existingData.filter(c => c.ma_ch === selectedStore.ma) : [])
       .map(c => ({ ...c, _existing: true, _edited: false }));
   } else {
     competitorList = [];
